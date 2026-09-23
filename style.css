@@ -1,12 +1,6 @@
 /* =========================================================
    PSABE-PPG MANAGEMENT SYSTEM
    LOGIN PAGE
-   DARK GREEN / EMERALD / TEAL / GOLD
-========================================================= */
-
-
-/* =========================================================
-   RESET
 ========================================================= */
 
 * {
@@ -16,12 +10,15 @@
 }
 
 
-html {
+html,
+body {
+    width: 100%;
     min-height: 100%;
 }
 
 
 body {
+
     min-height: 100vh;
 
     font-family:
@@ -30,121 +27,46 @@ body {
 
     color: #ffffff;
 
-    background:
-        radial-gradient(
-            ellipse at center top,
-            rgba(0, 106, 78, 0.20),
-            transparent 42%
-        ),
-
-        linear-gradient(
-            145deg,
-            #001b14 0%,
-            #00291f 40%,
-            #001e17 70%,
-            #00140f 100%
-        );
+    background: #001b13;
 
     overflow-x: hidden;
 }
 
 
 /* =========================================================
-   BACKGROUND LOGO
+   BACKGROUND IMAGE
 ========================================================= */
 
-.background-effects {
+.background {
+
     position: fixed;
 
     inset: 0;
 
-    overflow: hidden;
-
-    pointer-events: none;
-
-    z-index: 0;
-}
-
-
-/*
-   THIS USES THE ACTUAL PSABE-PPG LOGO
-   AS THE BACKGROUND.
-
-   It is intentionally very transparent so
-   the logo blends into the dark green background.
-*/
-
-.background-effects::before {
-    content: "";
-
-    position: absolute;
-
-    width: min(1050px, 115vw);
-    height: min(1050px, 115vw);
-
-    left: 50%;
-    top: 49%;
-
-    transform:
-        translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
 
     background-image:
-        url("assets/psabe-ppg-logo.png");
+        url("assets/management-background.png");
+
+    background-size: cover;
+
+    background-position: center center;
 
     background-repeat: no-repeat;
 
-    background-position: center;
-
-    background-size: contain;
-
-    opacity: 0.075;
-
-    filter:
-        brightness(0.75)
-        saturate(0.85);
-
-    mix-blend-mode: screen;
-
     z-index: 0;
-}
-
-
-/*
-   Soft green atmospheric glow.
-   This does NOT create circles.
-*/
-
-.background-effects::after {
-    content: "";
-
-    position: absolute;
-
-    inset: 0;
-
-    background:
-        radial-gradient(
-            ellipse at center 35%,
-            rgba(0, 139, 103, 0.15),
-            transparent 48%
-        ),
-
-        linear-gradient(
-            180deg,
-            transparent 55%,
-            rgba(0, 17, 12, 0.25)
-        );
 
     pointer-events: none;
-
-    z-index: 1;
 }
 
 
 /* =========================================================
-   MAIN PAGE
+   PAGE
 ========================================================= */
 
 .page {
+
     position: relative;
 
     z-index: 2;
@@ -160,7 +82,7 @@ body {
     align-items: center;
 
     padding:
-        48px
+        45px
         20px
         55px;
 }
@@ -171,6 +93,7 @@ body {
 ========================================================= */
 
 .branding {
+
     width: 100%;
 
     max-width: 850px;
@@ -180,33 +103,26 @@ body {
 
 
 /* =========================================================
-   MAIN LOGO
+   LOGO
 ========================================================= */
 
-.logo-wrapper {
-    display: flex;
+.logo {
 
-    justify-content: center;
+    width: 150px;
 
-    align-items: center;
-
-    margin-bottom: 10px;
-}
-
-
-.main-logo {
-    width: 155px;
-
-    height: 155px;
+    height: 150px;
 
     object-fit: contain;
 
     display: block;
 
+    margin:
+        0 auto 8px;
+
     filter:
         drop-shadow(
-            0 10px 20px
-            rgba(0, 0, 0, 0.45)
+            0 10px 24px
+            rgba(0, 0, 0, 0.55)
         );
 }
 
@@ -215,12 +131,13 @@ body {
    PSABE-PPG
 ========================================================= */
 
-.organization-name {
+.branding h1 {
+
     font-size:
         clamp(
             38px,
             5vw,
-            62px
+            60px
         );
 
     line-height: 0.95;
@@ -229,86 +146,92 @@ body {
 
     letter-spacing: 5px;
 
-    color: #f7f0dc;
+    color: #f5efdc;
 
     text-shadow:
-        0 3px 12px
-        rgba(0, 0, 0, 0.40);
+        0 4px 15px
+        rgba(0, 0, 0, 0.5);
 }
 
 
 /* =========================================================
-   MANAGEMENT SYSTEM
+   CSU CHAPTER
 ========================================================= */
 
-.system-name {
+.chapter {
+
     margin-top: 12px;
 
     font-size:
         clamp(
             20px,
-            2.7vw,
-            32px
+            3vw,
+            30px
         );
 
     line-height: 1;
 
     font-weight: 700;
 
-    letter-spacing: 7px;
+    letter-spacing: 8px;
 
-    color: #d9ad4d;
-
-    text-shadow:
-        0 0 15px
-        rgba(0, 202, 151, 0.15);
+    color: #f2ead7;
 }
 
 
 /* =========================================================
-   GREEN DIVIDER
+   DIVIDER
 ========================================================= */
 
 .title-line {
-    width: 650px;
 
-    max-width: 90%;
+    width: 570px;
+
+    max-width: 85%;
 
     height: 1px;
 
     margin:
-        18px
-        auto
-        14px;
+        16px auto
+        13px;
 
     background:
-        linear-gradient(
-            90deg,
-            transparent,
-            #00d6a0,
-            transparent
+        rgba(
+            0,
+            205,
+            157,
+            0.45
         );
-
-    box-shadow:
-        0 0 8px
-        rgba(0, 214, 160, 0.65);
 }
 
 
 /* =========================================================
-   ORGANIZATION DESCRIPTION
+   SYSTEM TITLE
 ========================================================= */
 
-.organization-description {
-    color: #9ed7c8;
+.system-title {
 
-    font-size: 16px;
+    font-size:
+        clamp(
+            20px,
+            2.8vw,
+            30px
+        );
 
-    line-height: 1.45;
+    font-weight: 700;
 
-    font-weight: 400;
+    letter-spacing: 7px;
 
-    letter-spacing: 0.2px;
+    color: #00dcb0;
+
+    text-shadow:
+        0 2px 12px
+        rgba(
+            0,
+            210,
+            160,
+            0.20
+        );
 }
 
 
@@ -317,107 +240,62 @@ body {
 ========================================================= */
 
 .login-card {
+
     position: relative;
 
     width: 100%;
 
     max-width: 735px;
 
-    margin-top: 28px;
+    margin-top: 30px;
 
     padding:
-        48px
+        45px
         62px
-        42px;
+        40px;
 
     border-radius: 24px;
 
     background:
-        linear-gradient(
-            145deg,
-            rgba(0, 54, 41, 0.78),
-            rgba(0, 27, 21, 0.84)
+        rgba(
+            0,
+            34,
+            26,
+            0.82
         );
 
     border:
         1px solid
-        rgba(0, 224, 165, 0.75);
-
-    backdrop-filter:
-        blur(16px);
-
-    -webkit-backdrop-filter:
-        blur(16px);
-
-    box-shadow:
-
-        0 0 30px
-        rgba(0, 214, 160, 0.09),
-
-        0 25px 80px
-        rgba(0, 0, 0, 0.45),
-
-        inset 0 0 35px
-        rgba(0, 190, 140, 0.025);
-
-    overflow: hidden;
-}
-
-
-/* =========================================================
-   TOP CARD GLOW
-========================================================= */
-
-.login-card::before {
-    content: "";
-
-    position: absolute;
-
-    top: 0;
-
-    left: 15%;
-
-    width: 70%;
-
-    height: 2px;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            #00e3ab,
-            transparent
+        rgba(
+            0,
+            213,
+            164,
+            0.70
         );
 
-    box-shadow:
-        0 0 12px
-        rgba(0, 227, 171, 0.85);
-}
+    backdrop-filter:
+        blur(12px);
 
-
-/* =========================================================
-   LEFT CARD GLOW
-========================================================= */
-
-.login-card::after {
-    content: "";
-
-    position: absolute;
-
-    left: -2px;
-
-    top: 24%;
-
-    width: 3px;
-
-    height: 80px;
-
-    background:
-        #00e5ad;
+    -webkit-backdrop-filter:
+        blur(12px);
 
     box-shadow:
-        0 0 18px
-        #00e5ad;
+
+        0 25px 70px
+        rgba(
+            0,
+            0,
+            0,
+            0.45
+        ),
+
+        inset 0 1px 0
+        rgba(
+            255,
+            255,
+            255,
+            0.035
+        );
 }
 
 
@@ -426,6 +304,7 @@ body {
 ========================================================= */
 
 .login-header {
+
     text-align: center;
 
     margin-bottom: 32px;
@@ -433,52 +312,35 @@ body {
 
 
 .login-header h2 {
+
     font-size: 40px;
 
     line-height: 1;
 
     font-weight: 700;
 
-    color: #f7f1df;
-
-    letter-spacing: 0.5px;
+    color: #f5efdc;
 }
 
 
 .login-header p {
+
     margin-top: 13px;
 
     font-size: 18px;
 
     line-height: 1.45;
 
-    color: #a8d9cd;
+    color: #a7d5c9;
 }
 
 
 /* =========================================================
-   FORM
-========================================================= */
-
-#loginForm {
-    width: 100%;
-}
-
-
-/* =========================================================
-   FIELD
-========================================================= */
-
-.field {
-    margin-bottom: 20px;
-}
-
-
-/* =========================================================
-   INPUT BOX
+   INPUT
 ========================================================= */
 
 .input-box {
+
     position: relative;
 
     width: 100%;
@@ -489,38 +351,65 @@ body {
 
     align-items: center;
 
+    margin-bottom: 20px;
+
     border:
         1px solid
-        rgba(0, 217, 163, 0.75);
+        rgba(
+            0,
+            214,
+            165,
+            0.68
+        );
 
     border-radius: 15px;
 
     background:
-        rgba(0, 29, 23, 0.52);
+        rgba(
+            0,
+            27,
+            21,
+            0.60
+        );
 
     transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
+        0.2s ease;
 }
 
 
 .input-box:hover {
-    border-color:
-        #00e4aa;
 
-    box-shadow:
-        0 0 16px
-        rgba(0, 224, 166, 0.08);
+    border-color:
+        rgba(
+            0,
+            235,
+            180,
+            0.85
+        );
 }
 
 
 .input-box:focus-within {
+
     border-color:
-        #00f0b5;
+        #00e4af;
+
+    background:
+        rgba(
+            0,
+            40,
+            30,
+            0.70
+        );
 
     box-shadow:
-        0 0 20px
-        rgba(0, 231, 171, 0.13);
+        0 0 18px
+        rgba(
+            0,
+            220,
+            165,
+            0.08
+        );
 }
 
 
@@ -529,32 +418,36 @@ body {
 ========================================================= */
 
 .input-icon {
+
     width: 82px;
 
     min-width: 82px;
 
     display: flex;
 
-    justify-content: center;
-
     align-items: center;
 
-    color: #00e9b0;
+    justify-content: center;
+
+    color: #00e5b0;
 }
 
 
 .input-icon svg {
+
     width: 34px;
 
     height: 34px;
 
-    display: block;
+    fill: none;
 
-    filter:
-        drop-shadow(
-            0 0 5px
-            rgba(0, 236, 177, 0.30)
-        );
+    stroke: currentColor;
+
+    stroke-width: 1.8;
+
+    stroke-linecap: round;
+
+    stroke-linejoin: round;
 }
 
 
@@ -563,6 +456,7 @@ body {
 ========================================================= */
 
 .input-box input {
+
     width: 100%;
 
     height: 100%;
@@ -581,16 +475,13 @@ body {
 
     font-size: 18px;
 
-    padding:
-        0
-        18px
-        0
-        0;
+    padding-right: 18px;
 }
 
 
 .input-box input::placeholder {
-    color: #9aaea9;
+
+    color: #9aafaa;
 
     opacity: 1;
 }
@@ -601,9 +492,12 @@ body {
 ========================================================= */
 
 .eye-button {
+
     width: 65px;
 
     height: 100%;
+
+    flex-shrink: 0;
 
     display: flex;
 
@@ -615,50 +509,39 @@ body {
 
     background: transparent;
 
-    color: #00e9b0;
+    color: #00e5b0;
 
     cursor: pointer;
-
-    flex-shrink: 0;
 }
 
 
 .eye-button svg {
+
     width: 31px;
 
     height: 31px;
-}
 
+    fill: none;
 
-.eye-button:hover {
-    color: #64ffd5;
-}
+    stroke: currentColor;
 
+    stroke-width: 1.8;
 
-.eye-button.active {
-    color: #ffffff;
+    stroke-linecap: round;
+
+    stroke-linejoin: round;
 }
 
 
 /* =========================================================
-   POSITION SELECT
+   SELECT
 ========================================================= */
 
-.position-box {
-    padding-right: 12px;
-}
+.input-box select {
 
-
-.position-box select {
     width: 100%;
 
     height: 100%;
-
-    padding:
-        0
-        50px
-        0
-        0;
 
     border: none;
 
@@ -670,7 +553,7 @@ body {
 
     background: transparent;
 
-    color: #9aaea9;
+    color: #9aafaa;
 
     font-family:
         "Roboto Condensed",
@@ -678,23 +561,28 @@ body {
 
     font-size: 18px;
 
+    padding-right: 50px;
+
     cursor: pointer;
 }
 
 
-.position-box select:valid {
+.input-box select:valid {
+
     color: #ffffff;
 }
 
 
-.position-box select option {
-    background: #06382d;
+.input-box select option {
+
+    background: #06382c;
 
     color: #ffffff;
 }
 
 
 .select-arrow {
+
     position: absolute;
 
     right: 20px;
@@ -704,34 +592,29 @@ body {
     transform:
         translateY(-50%);
 
-    color: #00e9b0;
+    color: #00e5b0;
+
+    font-size: 25px;
 
     pointer-events: none;
 }
 
 
-.select-arrow svg {
-    width: 25px;
-
-    height: 25px;
-}
-
-
 /* =========================================================
-   LOGIN OPTIONS
+   OPTIONS
 ========================================================= */
 
 .login-options {
-    display: flex;
 
-    justify-content: space-between;
+    display: flex;
 
     align-items: center;
 
+    justify-content: space-between;
+
     margin:
-        28px
-        3px
-        28px;
+        27px
+        3px;
 }
 
 
@@ -740,6 +623,7 @@ body {
 ========================================================= */
 
 .remember {
+
     display: flex;
 
     align-items: center;
@@ -757,6 +641,7 @@ body {
 
 
 .remember input {
+
     position: absolute;
 
     opacity: 0;
@@ -766,13 +651,14 @@ body {
 
 
 .custom-checkbox {
+
     width: 31px;
 
     height: 31px;
 
     border:
         2px solid
-        #00e7ad;
+        #00dfad;
 
     border-radius: 6px;
 
@@ -781,40 +667,27 @@ body {
     align-items: center;
 
     justify-content: center;
-
-    transition: 0.2s ease;
-
-    box-shadow:
-        0 0 8px
-        rgba(0, 231, 173, 0.06);
 }
 
 
 .remember input:checked
 + .custom-checkbox {
-    background:
-        #00c995;
 
-    box-shadow:
-        0 0 14px
-        rgba(0, 225, 170, 0.25);
+    background:
+        #00c996;
 }
 
 
 .remember input:checked
 + .custom-checkbox::after {
+
     content: "✓";
 
-    color: #002c21;
+    color: #002d21;
 
     font-size: 20px;
 
     font-weight: 800;
-}
-
-
-.remember-text {
-    white-space: nowrap;
 }
 
 
@@ -823,11 +696,12 @@ body {
 ========================================================= */
 
 .forgot-password {
+
     border: none;
 
     background: transparent;
 
-    color: #00e9b0;
+    color: #00e5b0;
 
     font-family:
         "Roboto Condensed",
@@ -840,41 +714,48 @@ body {
 
 
 .forgot-password:hover {
-    color: #76ffdb;
+
+    color: #6dffdc;
 
     text-decoration: underline;
 }
 
 
 /* =========================================================
-   SIGN IN BUTTON
+   SIGN IN
 ========================================================= */
 
 .signin-button {
+
     width: 100%;
 
     height: 76px;
 
     display: flex;
 
-    justify-content: center;
-
     align-items: center;
+
+    justify-content: center;
 
     gap: 22px;
 
     border:
         1px solid
-        rgba(100, 255, 214, 0.55);
+        rgba(
+            110,
+            255,
+            216,
+            0.35
+        );
 
     border-radius: 17px;
 
     background:
         linear-gradient(
             135deg,
-            #00a979,
-            #00c995,
-            #00a979
+            #00a978,
+            #00c894,
+            #00a978
         );
 
     color: #ffffff;
@@ -887,94 +768,90 @@ body {
 
     font-weight: 700;
 
-    letter-spacing: 0.3px;
-
     cursor: pointer;
 
     box-shadow:
-
-        0 8px 30px
-        rgba(0, 194, 143, 0.20),
-
-        inset 0 1px 0
-        rgba(255, 255, 255, 0.16);
+        0 10px 30px
+        rgba(
+            0,
+            180,
+            130,
+            0.18
+        );
 
     transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        filter 0.2s ease;
+        0.2s ease;
 }
 
 
 .signin-button:hover {
+
     transform:
         translateY(-2px);
 
     filter:
-        brightness(1.08);
+        brightness(1.06);
 
     box-shadow:
-
-        0 12px 35px
-        rgba(0, 224, 164, 0.30),
-
-        0 0 20px
-        rgba(0, 224, 164, 0.15);
+        0 14px 35px
+        rgba(
+            0,
+            195,
+            143,
+            0.25
+        );
 }
 
 
 .signin-button:active {
+
     transform:
         translateY(0);
 }
 
 
-.signin-button .arrow {
+.arrow {
+
     font-size: 34px;
 
     font-weight: 300;
-
-    line-height: 1;
 }
 
 
 /* =========================================================
-   LOGIN MESSAGE
+   MESSAGE
 ========================================================= */
 
 .login-message {
-    min-height: 22px;
 
-    margin-top: 12px;
+    min-height: 20px;
+
+    margin-top: 10px;
 
     text-align: center;
 
     font-size: 13px;
-
-    line-height: 1.4;
 }
 
 
 .login-message.error {
+
     color: #ffaaa0;
 }
 
 
 .login-message.success {
+
     color: #6dffd7;
 }
 
 
-.login-message.information {
-    color: #d8b15a;
-}
-
-
 /* =========================================================
-   AUTHORIZED MEMBERS
+   AUTHORIZED
 ========================================================= */
 
 .authorized {
+
     display: flex;
 
     align-items: center;
@@ -983,9 +860,9 @@ body {
 
     gap: 20px;
 
-    margin-top: 27px;
+    margin-top: 25px;
 
-    color: #b5c9c4;
+    color: #b4c9c3;
 
     font-size: 15px;
 
@@ -993,7 +870,8 @@ body {
 }
 
 
-.authorized-line {
+.authorized .line {
+
     height: 1px;
 
     flex: 1;
@@ -1001,72 +879,12 @@ body {
     max-width: 130px;
 
     background:
-        linear-gradient(
-            90deg,
-            transparent,
-            rgba(0, 216, 162, 0.65)
+        rgba(
+            0,
+            207,
+            155,
+            0.38
         );
-}
-
-
-.authorized-line:last-child {
-    background:
-        linear-gradient(
-            90deg,
-            rgba(0, 216, 162, 0.65),
-            transparent
-        );
-}
-
-
-/* =========================================================
-   TABLET
-========================================================= */
-
-@media (max-width: 800px) {
-
-    .page {
-        padding-top: 35px;
-    }
-
-
-    .main-logo {
-        width: 130px;
-
-        height: 130px;
-    }
-
-
-    .organization-name {
-        font-size: 43px;
-
-        letter-spacing: 4px;
-    }
-
-
-    .system-name {
-        font-size: 22px;
-
-        letter-spacing: 4px;
-    }
-
-
-    .login-card {
-        max-width: 680px;
-
-        padding:
-            40px
-            35px
-            35px;
-    }
-
-
-    .background-effects::before {
-        width: 850px;
-
-        height: 850px;
-    }
-
 }
 
 
@@ -1077,6 +895,7 @@ body {
 @media (max-width: 560px) {
 
     .page {
+
         padding:
             25px
             15px
@@ -1084,22 +903,31 @@ body {
     }
 
 
-    .main-logo {
+    .logo {
+
         width: 105px;
 
         height: 105px;
     }
 
 
-    .organization-name {
+    .branding h1 {
+
         font-size: 31px;
 
         letter-spacing: 3px;
     }
 
 
-    .system-name {
-        margin-top: 9px;
+    .chapter {
+
+        font-size: 17px;
+
+        letter-spacing: 4px;
+    }
+
+
+    .system-title {
 
         font-size: 17px;
 
@@ -1107,12 +935,8 @@ body {
     }
 
 
-    .organization-description {
-        font-size: 12px;
-    }
-
-
     .login-card {
+
         margin-top: 25px;
 
         padding:
@@ -1124,22 +948,20 @@ body {
     }
 
 
-    .login-header {
-        margin-bottom: 25px;
-    }
-
-
     .login-header h2 {
+
         font-size: 31px;
     }
 
 
     .login-header p {
+
         font-size: 14px;
     }
 
 
     .input-box {
+
         height: 60px;
 
         border-radius: 12px;
@@ -1147,6 +969,7 @@ body {
 
 
     .input-icon {
+
         width: 65px;
 
         min-width: 65px;
@@ -1154,6 +977,7 @@ body {
 
 
     .input-icon svg {
+
         width: 29px;
 
         height: 29px;
@@ -1161,19 +985,23 @@ body {
 
 
     .input-box input,
-    .position-box select {
+    .input-box select {
+
         font-size: 15px;
     }
 
 
     .login-options {
-        margin-top: 21px;
 
-        margin-bottom: 22px;
+        margin:
+            21px
+            0
+            22px;
     }
 
 
     .remember {
+
         font-size: 14px;
 
         gap: 8px;
@@ -1181,6 +1009,7 @@ body {
 
 
     .custom-checkbox {
+
         width: 25px;
 
         height: 25px;
@@ -1188,90 +1017,36 @@ body {
 
 
     .forgot-password {
+
         font-size: 14px;
     }
 
 
     .signin-button {
+
         height: 64px;
 
         font-size: 21px;
     }
 
 
-    .signin-button .arrow {
+    .arrow {
+
         font-size: 28px;
     }
 
 
     .authorized {
+
         gap: 10px;
 
         font-size: 11px;
     }
 
 
-    .authorized-line {
+    .authorized .line {
+
         max-width: 60px;
-    }
-
-
-    /*
-       Smaller transparent logo
-       on mobile screens.
-    */
-
-    .background-effects::before {
-        width: 700px;
-
-        height: 700px;
-
-        top: 45%;
-
-        opacity: 0.065;
-    }
-
-}
-
-
-/* =========================================================
-   VERY SMALL PHONES
-========================================================= */
-
-@media (max-width: 380px) {
-
-    .login-card {
-        padding:
-            28px
-            15px
-            25px;
-    }
-
-
-    .organization-name {
-        font-size: 27px;
-    }
-
-
-    .system-name {
-        font-size: 15px;
-    }
-
-
-    .login-header h2 {
-        font-size: 27px;
-    }
-
-
-    .authorized {
-        font-size: 9px;
-    }
-
-
-    .background-effects::before {
-        width: 600px;
-
-        height: 600px;
     }
 
 }
