@@ -1,67 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>PSABE-PPG Management System</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <meta
+        name="theme-color"
+        content="#001c14"
+    >
+
+    <title>
+        PSABE-PPG Management System
+    </title>
+
+    <!-- =====================================================
+         GOOGLE FONTS
+    ====================================================== -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
 
     <link
         href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet"
     >
 
-    <link rel="stylesheet" href="style.css">
+    <!-- =====================================================
+         STYLESHEET
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
 </head>
+
 
 <body>
 
-    <!-- BACKGROUND IMAGE -->
-    <div class="background"></div>
+
+    <!-- =====================================================
+         LOADING SCREEN
+
+         This is the ONLY place where the PSABE-PPG
+         logo and organization title are displayed.
+    ====================================================== -->
+
+    <div
+        id="loadingScreen"
+        class="loading-screen"
+    >
+
+        <div class="loading-content">
 
 
-    <!-- PAGE CONTENT -->
-    <main class="page">
-
-        <!-- ==============================
-             BRANDING
-        =============================== -->
-
-        <section class="branding">
+            <!-- LOGO -->
 
             <img
                 src="assets/psabe-ppg-logo.png"
                 alt="PSABE-PPG Logo"
-                class="logo"
+                class="loading-logo"
             >
 
-            <h1>PSABE-PPG</h1>
 
-            <div class="chapter">
+            <!-- ORGANIZATION -->
+
+            <div class="loading-name">
+                PSABE-PPG
+            </div>
+
+
+            <!-- CHAPTER -->
+
+            <div class="loading-chapter">
                 CSU CHAPTER
             </div>
 
-            <div class="title-line"></div>
 
-            <div class="system-title">
+            <!-- DIVIDER -->
+
+            <div class="loading-divider"></div>
+
+
+            <!-- SYSTEM -->
+
+            <div class="loading-system">
                 MANAGEMENT SYSTEM
             </div>
 
-        </section>
+
+        </div>
+
+    </div>
 
 
-        <!-- ==============================
-             LOGIN CARD
-        =============================== -->
+
+    <!-- =====================================================
+         BACKGROUND
+    ====================================================== -->
+
+    <div class="background"></div>
+
+
+
+    <!-- =====================================================
+         LOGIN PAGE
+         
+         IMPORTANT:
+         There is NO PSABE logo or organization heading here.
+         The branding exists only in the loading screen.
+    ====================================================== -->
+
+    <main class="page">
+
 
         <section class="login-card">
 
+
+            <!-- =================================================
+                 LOGIN HEADER
+            ================================================== -->
+
             <div class="login-header">
 
-                <h2>Welcome back!</h2>
+                <h1>
+                    Welcome back!
+                </h1>
 
                 <p>
                     Sign in to your account to continue
@@ -72,7 +151,15 @@
             </div>
 
 
-            <form id="loginForm">
+
+            <!-- =================================================
+                 LOGIN FORM
+            ================================================== -->
+
+            <form
+                id="loginForm"
+                autocomplete="on"
+            >
 
 
                 <!-- USERNAME -->
@@ -81,25 +168,30 @@
 
                     <div class="input-icon">
 
-                        <svg viewBox="0 0 24 24">
+                        <svg
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
 
                             <circle
                                 cx="12"
-                                cy="7"
+                                cy="8"
                                 r="4"
                             ></circle>
 
                             <path
-                                d="M4.5 21c.8-4 3.3-6 7.5-6s6.7 2 7.5 6"
+                                d="M4 21c0-4 3.2-7 8-7s8 3 8 7"
                             ></path>
 
                         </svg>
 
                     </div>
 
+
                     <input
                         type="text"
                         id="username"
+                        name="username"
                         placeholder="Username or Email"
                         autocomplete="username"
                         required
@@ -108,13 +200,17 @@
                 </div>
 
 
+
                 <!-- PASSWORD -->
 
                 <div class="input-box">
 
                     <div class="input-icon">
 
-                        <svg viewBox="0 0 24 24">
+                        <svg
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
 
                             <rect
                                 x="5"
@@ -142,23 +238,30 @@
                     <input
                         type="password"
                         id="password"
+                        name="password"
                         placeholder="Password"
                         autocomplete="current-password"
                         required
                     >
 
 
+                    <!-- PASSWORD VISIBILITY -->
+
                     <button
                         type="button"
-                        id="togglePassword"
                         class="eye-button"
+                        id="togglePassword"
                         aria-label="Show password"
                     >
 
-                        <svg viewBox="0 0 24 24">
+                        <svg
+                            id="eyeIcon"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
 
                             <path
-                                d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z"
+                                d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"
                             ></path>
 
                             <circle
@@ -174,13 +277,18 @@
                 </div>
 
 
+
                 <!-- POSITION -->
 
                 <div class="input-box">
 
+
                     <div class="input-icon">
 
-                        <svg viewBox="0 0 24 24">
+                        <svg
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
 
                             <circle
                                 cx="9"
@@ -189,7 +297,7 @@
                             ></circle>
 
                             <path
-                                d="M3.5 20c.5-3.5 2.5-5.5 5.5-5.5s5 2 5.5 5.5"
+                                d="M3 20c0-3.5 2.5-6 6-6s6 2.5 6 6"
                             ></path>
 
                             <circle
@@ -199,7 +307,7 @@
                             ></circle>
 
                             <path
-                                d="M15 14.5c3.5-.2 5.2 1.7 5.5 4.5"
+                                d="M16 14c2.8 0 5 2.2 5 5"
                             ></path>
 
                         </svg>
@@ -209,6 +317,7 @@
 
                     <select
                         id="position"
+                        name="position"
                         required
                     >
 
@@ -220,31 +329,39 @@
                             Select your position
                         </option>
 
-                        <option>President</option>
+                        <option value="President">
+                            President
+                        </option>
 
-                        <option>
+                        <option value="Vice President">
                             Vice President
                         </option>
 
-                        <option>Secretary</option>
+                        <option value="Secretary">
+                            Secretary
+                        </option>
 
-                        <option>Treasurer</option>
+                        <option value="Treasurer">
+                            Treasurer
+                        </option>
 
-                        <option>Auditor</option>
+                        <option value="Auditor">
+                            Auditor
+                        </option>
 
-                        <option>
+                        <option value="PIO">
                             Public Information Officer
                         </option>
 
-                        <option>
+                        <option value="Events Head">
                             Events Head
                         </option>
 
-                        <option>
+                        <option value="Membership Head">
                             Membership Head
                         </option>
 
-                        <option>
+                        <option value="Academic Affairs Head">
                             Academic Affairs Head
                         </option>
 
@@ -252,21 +369,27 @@
 
 
                     <span class="select-arrow">
-                        ▾
+                        ⌄
                     </span>
 
                 </div>
 
 
-                <!-- OPTIONS -->
+
+                <!-- =================================================
+                     OPTIONS
+                ================================================== -->
 
                 <div class="login-options">
+
+
+                    <!-- REMEMBER ME -->
 
                     <label class="remember">
 
                         <input
                             type="checkbox"
-                            id="remember"
+                            id="rememberMe"
                         >
 
                         <span class="custom-checkbox"></span>
@@ -278,21 +401,30 @@
                     </label>
 
 
+
+                    <!-- FORGOT PASSWORD -->
+
                     <button
                         type="button"
                         class="forgot-password"
+                        id="forgotPassword"
                     >
                         Forgot password?
                     </button>
 
+
                 </div>
 
 
-                <!-- SIGN IN -->
+
+                <!-- =================================================
+                     SIGN IN
+                ================================================== -->
 
                 <button
                     type="submit"
                     class="signin-button"
+                    id="signinButton"
                 >
 
                     <span>
@@ -306,12 +438,15 @@
                 </button>
 
 
+
                 <!-- LOGIN MESSAGE -->
 
                 <div
                     id="loginMessage"
                     class="login-message"
+                    aria-live="polite"
                 ></div>
+
 
 
                 <!-- AUTHORIZED -->
@@ -328,39 +463,99 @@
 
                 </div>
 
+
             </form>
 
+
         </section>
+
 
     </main>
 
 
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
     <script>
 
-        /* ==========================================
-           SHOW / HIDE PASSWORD
-        ========================================== */
 
-        const password =
-            document.getElementById("password");
+        /* =================================================
+           LOADING SCREEN
+        ================================================= */
+
+        window.addEventListener(
+            "load",
+            function () {
+
+                const loadingScreen =
+                    document.getElementById(
+                        "loadingScreen"
+                    );
+
+
+                /*
+                 * Allow the complete branding animation
+                 * to be seen before fading away.
+                 */
+
+                setTimeout(
+                    function () {
+
+                        loadingScreen.classList.add(
+                            "loaded"
+                        );
+
+                    },
+                    2800
+                );
+
+            }
+        );
+
+
+
+        /* =================================================
+           PASSWORD VISIBILITY
+        ================================================= */
+
+        const passwordInput =
+            document.getElementById(
+                "password"
+            );
 
         const togglePassword =
-            document.getElementById("togglePassword");
+            document.getElementById(
+                "togglePassword"
+            );
 
 
         togglePassword.addEventListener(
             "click",
             function () {
 
-                if (
-                    password.type === "password"
-                ) {
+                const isPassword =
+                    passwordInput.type === "password";
 
-                    password.type = "text";
+
+                if (isPassword) {
+
+                    passwordInput.type = "text";
+
+                    togglePassword.setAttribute(
+                        "aria-label",
+                        "Hide password"
+                    );
 
                 } else {
 
-                    password.type = "password";
+                    passwordInput.type = "password";
+
+                    togglePassword.setAttribute(
+                        "aria-label",
+                        "Show password"
+                    );
 
                 }
 
@@ -368,15 +563,94 @@
         );
 
 
-        /* ==========================================
-           TEMPORARY LOGIN
-        ========================================== */
 
-        const loginForm =
-            document.getElementById("loginForm");
+        /* =================================================
+           REMEMBER ME
+        ================================================= */
+
+        const usernameInput =
+            document.getElementById(
+                "username"
+            );
+
+        const rememberMe =
+            document.getElementById(
+                "rememberMe"
+            );
+
+
+        /*
+         * Load remembered username.
+         */
+
+        const savedUsername =
+            localStorage.getItem(
+                "psabeRememberedUsername"
+            );
+
+
+        if (savedUsername) {
+
+            usernameInput.value =
+                savedUsername;
+
+            rememberMe.checked = true;
+
+        }
+
+
+
+        /* =================================================
+           FORGOT PASSWORD
+        ================================================= */
+
+        const forgotPassword =
+            document.getElementById(
+                "forgotPassword"
+            );
 
         const loginMessage =
-            document.getElementById("loginMessage");
+            document.getElementById(
+                "loginMessage"
+            );
+
+
+        forgotPassword.addEventListener(
+            "click",
+            function () {
+
+                loginMessage.className =
+                    "login-message";
+
+                loginMessage.textContent =
+                    "Please contact the PSABE-PPG administrator to reset your password.";
+
+            }
+        );
+
+
+
+        /* =================================================
+           TEMPORARY LOGIN
+           
+           THIS IS ONLY FOR FRONTEND TESTING.
+
+           Username:
+           admin
+
+           Password:
+           admin123
+        ================================================== */
+
+        const loginForm =
+            document.getElementById(
+                "loginForm"
+            );
+
+        const signinButton =
+            document.getElementById(
+                "signinButton"
+            );
 
 
         loginForm.addEventListener(
@@ -387,89 +661,181 @@
 
 
                 const username =
-                    document
-                        .getElementById("username")
-                        .value
-                        .trim();
+                    usernameInput.value.trim();
 
-
-                const passwordValue =
-                    document
-                        .getElementById("password")
-                        .value
-                        .trim();
-
+                const password =
+                    passwordInput.value;
 
                 const position =
-                    document
-                        .getElementById("position")
-                        .value;
+                    document.getElementById(
+                        "position"
+                    ).value;
 
+
+
+                /* CLEAR MESSAGE */
+
+                loginMessage.textContent = "";
+
+                loginMessage.className =
+                    "login-message";
+
+
+
+                /* VALIDATION */
 
                 if (
-                    !username ||
-                    !passwordValue ||
-                    !position
+                    username === "" ||
+                    password === "" ||
+                    position === ""
                 ) {
-
-                    loginMessage.textContent =
-                        "Please complete all fields.";
 
                     loginMessage.className =
                         "login-message error";
+
+                    loginMessage.textContent =
+                        "Please complete all required fields.";
 
                     return;
 
                 }
 
 
+
+                /* BUTTON STATE */
+
+                signinButton.disabled = true;
+
+                signinButton.innerHTML =
+                    `
+                    <span>
+                        Signing in...
+                    </span>
+
+                    <span class="loading-spinner"></span>
+                    `;
+
+
+
                 /*
-                 * TEMPORARY TEST RESPONSE
-                 *
-                 * Authentication will later be
-                 * connected to Google Apps Script
-                 * and Google Sheets.
+                 * TEMPORARY FRONTEND LOGIN
                  */
 
-                loginMessage.textContent =
-                    "Login successful.";
+                setTimeout(
+                    function () {
 
-                loginMessage.className =
-                    "login-message success";
+
+                        if (
+                            username === "admin" &&
+                            password === "admin123"
+                        ) {
+
+
+                            /* REMEMBER USERNAME */
+
+                            if (
+                                rememberMe.checked
+                            ) {
+
+                                localStorage.setItem(
+                                    "psabeRememberedUsername",
+                                    username
+                                );
+
+                            } else {
+
+                                localStorage.removeItem(
+                                    "psabeRememberedUsername"
+                                );
+
+                            }
+
+
+
+                            /* SAVE CURRENT USER */
+
+                            localStorage.setItem(
+                                "psabeCurrentUser",
+                                JSON.stringify({
+                                    username:
+                                        username,
+
+                                    position:
+                                        position
+                                })
+                            );
+
+
+
+                            /*
+                             * SUCCESS
+                             */
+
+                            loginMessage.className =
+                                "login-message success";
+
+                            loginMessage.textContent =
+                                "Login successful. Loading management system...";
+
+
+
+                            /*
+                             * TEMPORARY REDIRECT
+                             *
+                             * Change this later to:
+                             * dashboard.html
+                             */
+
+                            setTimeout(
+                                function () {
+
+                                    window.location.href =
+                                        "dashboard.html";
+
+                                },
+                                800
+                            );
+
+
+                        } else {
+
+
+                            /* LOGIN FAILED */
+
+                            loginMessage.className =
+                                "login-message error";
+
+                            loginMessage.textContent =
+                                "Invalid username or password.";
+
+
+                            signinButton.disabled =
+                                false;
+
+                            signinButton.innerHTML =
+                                `
+                                <span>
+                                    Sign In
+                                </span>
+
+                                <span class="arrow">
+                                    →
+                                </span>
+                                `;
+
+                        }
+
+                    },
+                    700
+                );
 
             }
         );
 
 
-        /* ==========================================
-           REMEMBER ME
-        ========================================== */
-
-        document
-            .getElementById("remember")
-            .addEventListener(
-                "change",
-                function () {
-
-                    if (this.checked) {
-
-                        localStorage.setItem(
-                            "rememberPSABE",
-                            "true"
-                        );
-
-                    } else {
-
-                        localStorage.removeItem(
-                            "rememberPSABE"
-                        );
-
-                    }
-
-                }
-            );
-
     </script>
 
+
 </body>
+
 </html>
