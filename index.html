@@ -10,7 +10,7 @@
 
     <title>PSABE-PPG Management System</title>
 
-    <!-- ROBOTO CONDENSED -->
+    <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
@@ -19,47 +19,33 @@
         rel="stylesheet"
     >
 
+    <!-- Main CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <!-- =========================================
-         DECORATIVE BACKGROUND
-    ========================================== -->
+    <!-- =====================================================
+         BACKGROUND
+    ====================================================== -->
 
-    <div class="background-effects">
-
-        <div class="large-circle circle-one"></div>
-        <div class="large-circle circle-two"></div>
-        <div class="large-circle circle-three"></div>
-
-        <div class="glow glow-one"></div>
-        <div class="glow glow-two"></div>
-
-        <div class="leaf leaf-left leaf-one"></div>
-        <div class="leaf leaf-left leaf-two"></div>
-        <div class="leaf leaf-left leaf-three"></div>
-
-        <div class="leaf leaf-right leaf-four"></div>
-        <div class="leaf leaf-right leaf-five"></div>
-        <div class="leaf leaf-right leaf-six"></div>
-
-    </div>
+    <div class="background-effects"></div>
 
 
-    <!-- =========================================
+    <!-- =====================================================
          MAIN PAGE
-    ========================================== -->
+    ====================================================== -->
 
     <main class="page">
 
 
-        <!-- =====================================
+        <!-- =================================================
              BRANDING
-        ====================================== -->
+        ================================================== -->
 
         <section class="branding">
+
+            <!-- Main Logo -->
 
             <div class="logo-wrapper">
 
@@ -72,41 +58,53 @@
             </div>
 
 
+            <!-- Organization -->
+
             <h1 class="organization-name">
                 PSABE-PPG
             </h1>
 
+
+            <!-- System -->
 
             <h2 class="system-name">
                 MANAGEMENT SYSTEM
             </h2>
 
 
-            <div class="title-line">
-                <span></span>
-            </div>
+            <!-- Green divider -->
 
+            <div class="title-line"></div>
+
+
+            <!-- Organization description -->
 
             <p class="organization-description">
+
                 Philippine Society of Agricultural and Biosystems Engineers
                 <br>
+
                 Pre-Professional Group
                 <br>
+
                 Caraga State University Chapter
+
             </p>
 
         </section>
 
 
 
-        <!-- =====================================
+        <!-- =================================================
              LOGIN CARD
-        ====================================== -->
+        ================================================== -->
 
         <section class="login-card">
 
 
-            <!-- CARD HEADER -->
+            <!-- =================================================
+                 LOGIN HEADER
+            ================================================== -->
 
             <div class="login-header">
 
@@ -124,9 +122,9 @@
 
 
 
-            <!-- =================================
+            <!-- =================================================
                  LOGIN FORM
-            ================================== -->
+            ================================================== -->
 
             <form
                 id="loginForm"
@@ -134,11 +132,16 @@
             >
 
 
-                <!-- USERNAME -->
+                <!-- =================================================
+                     USERNAME
+                ================================================== -->
 
                 <div class="field">
 
                     <div class="input-box">
+
+
+                        <!-- User icon -->
 
                         <div class="input-icon">
 
@@ -148,6 +151,7 @@
                                 stroke="currentColor"
                                 stroke-width="1.8"
                             >
+
                                 <circle
                                     cx="12"
                                     cy="7"
@@ -157,10 +161,13 @@
                                 <path
                                     d="M4.5 21c.8-4 3.3-6 7.5-6s6.7 2 7.5 6"
                                 />
+
                             </svg>
 
                         </div>
 
+
+                        <!-- Username -->
 
                         <input
                             type="text"
@@ -177,11 +184,16 @@
 
 
 
-                <!-- PASSWORD -->
+                <!-- =================================================
+                     PASSWORD
+                ================================================== -->
 
                 <div class="field">
 
                     <div class="input-box">
+
+
+                        <!-- Lock icon -->
 
                         <div class="input-icon">
 
@@ -215,6 +227,8 @@
                         </div>
 
 
+                        <!-- Password -->
+
                         <input
                             type="password"
                             id="password"
@@ -224,6 +238,8 @@
                             required
                         >
 
+
+                        <!-- Show password -->
 
                         <button
                             type="button"
@@ -260,11 +276,16 @@
 
 
 
-                <!-- POSITION -->
+                <!-- =================================================
+                     POSITION
+                ================================================== -->
 
                 <div class="field">
 
                     <div class="input-box position-box">
+
+
+                        <!-- Officer icon -->
 
                         <div class="input-icon">
 
@@ -299,6 +320,8 @@
 
                         </div>
 
+
+                        <!-- Position -->
 
                         <select
                             id="position"
@@ -353,6 +376,8 @@
                         </select>
 
 
+                        <!-- Dropdown arrow -->
+
                         <div class="select-arrow">
 
                             <svg
@@ -376,12 +401,14 @@
 
 
 
-                <!-- =================================
-                     OPTIONS
-                ================================== -->
+                <!-- =================================================
+                     REMEMBER / FORGOT
+                ================================================== -->
 
                 <div class="login-options">
 
+
+                    <!-- Remember -->
 
                     <label class="remember">
 
@@ -399,6 +426,8 @@
                     </label>
 
 
+                    <!-- Forgot password -->
+
                     <button
                         type="button"
                         id="forgotPassword"
@@ -411,9 +440,9 @@
 
 
 
-                <!-- =================================
-                     LOGIN BUTTON
-                ================================== -->
+                <!-- =================================================
+                     SIGN IN
+                ================================================== -->
 
                 <button
                     type="submit"
@@ -432,9 +461,9 @@
 
 
 
-                <!-- =================================
-                     MESSAGE
-                ================================== -->
+                <!-- =================================================
+                     LOGIN MESSAGE
+                ================================================== -->
 
                 <div
                     id="loginMessage"
@@ -443,9 +472,9 @@
 
 
 
-                <!-- =================================
-                     AUTHORIZED MEMBERS
-                ================================== -->
+                <!-- =================================================
+                     AUTHORIZED
+                ================================================== -->
 
                 <div class="authorized">
 
@@ -463,47 +492,19 @@
 
         </section>
 
-
-
-        <!-- =====================================
-             FOOTER TAGLINE
-        ====================================== -->
-
-        <section class="tagline">
-
-            <p>
-                Mula sa Bayaw Para sa Lupang Sinisilbihan
-            </p>
-
-
-            <div class="tagline-decoration">
-
-                <span></span>
-
-                <div class="tiny-leaf">
-                    ♧
-                </div>
-
-                <span></span>
-
-            </div>
-
-        </section>
-
     </main>
 
 
 
-    <!-- =========================================
+    <!-- =====================================================
          JAVASCRIPT
-    ========================================== -->
+    ====================================================== -->
 
     <script>
 
-
-        /* =========================================
+        /* =====================================================
            PASSWORD VISIBILITY
-        ========================================== */
+        ====================================================== */
 
         const password =
             document.getElementById("password");
@@ -516,22 +517,26 @@
             "click",
             function () {
 
-                if (
-                    password.type === "password"
-                ) {
+                if (password.type === "password") {
 
                     password.type = "text";
 
-                    togglePassword.classList.add(
-                        "active"
+                    togglePassword.classList.add("active");
+
+                    togglePassword.setAttribute(
+                        "aria-label",
+                        "Hide password"
                     );
 
                 } else {
 
                     password.type = "password";
 
-                    togglePassword.classList.remove(
-                        "active"
+                    togglePassword.classList.remove("active");
+
+                    togglePassword.setAttribute(
+                        "aria-label",
+                        "Show password"
                     );
 
                 }
@@ -541,9 +546,9 @@
 
 
 
-        /* =========================================
+        /* =====================================================
            LOGIN FORM
-        ========================================== */
+        ====================================================== */
 
         const loginForm =
             document.getElementById("loginForm");
@@ -596,11 +601,10 @@
 
 
                 /*
-                 * TEMPORARY FRONT-END RESPONSE
+                 * TEMPORARY LOGIN RESPONSE
                  *
-                 * The actual authentication will later
-                 * be connected to Google Apps Script
-                 * and the OFFICERS Google Sheet.
+                 * This will later be replaced by the
+                 * Google Apps Script authentication.
                  */
 
                 showMessage(
@@ -613,9 +617,9 @@
 
 
 
-        /* =========================================
+        /* =====================================================
            FORGOT PASSWORD
-        ========================================== */
+        ====================================================== */
 
         document
             .getElementById("forgotPassword")
@@ -633,9 +637,9 @@
 
 
 
-        /* =========================================
+        /* =====================================================
            MESSAGE FUNCTION
-        ========================================== */
+        ====================================================== */
 
         function showMessage(
             message,
@@ -652,9 +656,9 @@
 
 
 
-        /* =========================================
+        /* =====================================================
            REMEMBER ME
-        ========================================== */
+        ====================================================== */
 
         const rememberMe =
             document.getElementById("rememberMe");
