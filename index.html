@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>PSABE-PPG Management System</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Roboto Condensed -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <main class="login-page">
+
+        <section class="login-container">
+
+            <!-- LOGO -->
+            <div class="logo-container">
+                <img
+                    src="assets/psabe-ppg-logo.png"
+                    alt="PSABE-PPG CSU Chapter Logo"
+                    class="psabe-logo"
+                >
+            </div>
+
+            <!-- TITLE -->
+            <div class="system-title">
+                <h1>PSABE-PPG</h1>
+                <h2>MANAGEMENT SYSTEM</h2>
+
+                <p>
+                    Philippine Society of Agricultural and Biosystems Engineers
+                    <br>
+                    Pre-Professional Group
+                    <br>
+                    Caraga State University Chapter
+                </p>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="loginForm" class="login-form">
+
+                <div class="input-group">
+                    <label for="username">USERNAME</label>
+
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Enter your username"
+                        autocomplete="username"
+                        required
+                    >
+                </div>
+
+                <div class="input-group">
+                    <label for="password">PASSWORD</label>
+
+                    <div class="password-wrapper">
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            id="togglePassword"
+                            class="password-toggle"
+                            aria-label="Show password"
+                        >
+                            SHOW
+                        </button>
+
+                    </div>
+                </div>
+
+                <div class="login-options">
+
+                    <label class="remember-option">
+                        <input type="checkbox" id="rememberMe">
+                        <span>Remember me</span>
+                    </label>
+
+                    <button
+                        type="button"
+                        id="forgotPassword"
+                        class="forgot-button"
+                    >
+                        Forgot Password?
+                    </button>
+
+                </div>
+
+                <button type="submit" class="login-button">
+                    LOGIN
+                </button>
+
+                <div id="loginMessage" class="login-message"></div>
+
+            </form>
+
+            <div class="login-footer">
+                <p>PSABE-PPG CSU Chapter</p>
+                <span>Management System</span>
+            </div>
+
+        </section>
+
+    </main>
+
+    <script>
+
+        /* =========================================
+           PASSWORD VISIBILITY
+        ========================================= */
+
+        const passwordInput = document.getElementById("password");
+        const togglePassword = document.getElementById("togglePassword");
+
+        togglePassword.addEventListener("click", function () {
+
+            if (passwordInput.type === "password") {
+
+                passwordInput.type = "text";
+                togglePassword.textContent = "HIDE";
+
+            } else {
+
+                passwordInput.type = "password";
+                togglePassword.textContent = "SHOW";
+
+            }
+
+        });
+
+
+        /* =========================================
+           LOGIN FORM
+        ========================================= */
+
+        const loginForm = document.getElementById("loginForm");
+        const loginMessage = document.getElementById("loginMessage");
+
+        loginForm.addEventListener("submit", function(event) {
+
+            event.preventDefault();
+
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+
+            if (!username || !password) {
+
+                loginMessage.textContent =
+                    "Please enter your username and password.";
+
+                loginMessage.className =
+                    "login-message error";
+
+                return;
+            }
+
+            /*
+             * TEMPORARY FRONT-END TEST
+             *
+             * This is NOT the final authentication system.
+             * The actual username/password verification will
+             * later be handled by Google Apps Script and
+             * Google Sheets.
+             */
+
+            loginMessage.textContent =
+                "Login system is being connected to the PSABE-PPG database.";
+
+            loginMessage.className =
+                "login-message information";
+
+        });
+
+
+        /* =========================================
+           FORGOT PASSWORD
+        ========================================= */
+
+        document
+            .getElementById("forgotPassword")
+            .addEventListener("click", function() {
+
+                loginMessage.textContent =
+                    "Please contact the PSABE-PPG administrator for account assistance.";
+
+                loginMessage.className =
+                    "login-message information";
+
+            });
+
+    </script>
+
+</body>
+</html>
