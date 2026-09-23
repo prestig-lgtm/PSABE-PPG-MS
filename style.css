@@ -1,0 +1,480 @@
+/* =========================================
+   PSABE-PPG MANAGEMENT SYSTEM
+   LOGIN PAGE
+========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --deep-green: #063b32;
+    --dark-green: #075447;
+    --green: #0b6b58;
+    --light-green: #159477;
+
+    --gold: #d6a84f;
+    --gold-light: #e8c875;
+
+    --background: #031f1b;
+    --panel: #062c26;
+
+    --text-white: #ffffff;
+    --text-light: #d9e7e3;
+    --text-muted: #9eb8b1;
+
+    --border: rgba(214, 168, 79, 0.35);
+}
+
+
+/* =========================================
+   BODY
+========================================= */
+
+body {
+    min-height: 100vh;
+
+    font-family: "Roboto Condensed", sans-serif;
+
+    color: var(--text-white);
+
+    background:
+        radial-gradient(
+            circle at 20% 20%,
+            rgba(21, 148, 119, 0.18),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 80% 80%,
+            rgba(214, 168, 79, 0.10),
+            transparent 30%
+        ),
+        var(--background);
+}
+
+
+/* =========================================
+   LOGIN PAGE
+========================================= */
+
+.login-page {
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 30px 20px;
+}
+
+
+/* =========================================
+   LOGIN CONTAINER
+========================================= */
+
+.login-container {
+    width: 100%;
+    max-width: 450px;
+
+    padding: 42px 38px 30px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(8, 64, 54, 0.98),
+            rgba(3, 38, 32, 0.98)
+        );
+
+    border: 1px solid var(--border);
+
+    border-radius: 22px;
+
+    box-shadow:
+        0 25px 60px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+
+/* =========================================
+   LOGO
+========================================= */
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin-bottom: 22px;
+}
+
+.psabe-logo {
+    width: 125px;
+    height: 125px;
+
+    object-fit: contain;
+
+    display: block;
+}
+
+
+/* =========================================
+   SYSTEM TITLE
+========================================= */
+
+.system-title {
+    text-align: center;
+
+    margin-bottom: 32px;
+}
+
+.system-title h1 {
+    font-size: 28px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+
+    color: var(--gold-light);
+}
+
+.system-title h2 {
+    margin-top: 3px;
+
+    font-size: 20px;
+
+    font-weight: 700;
+
+    letter-spacing: 1.5px;
+
+    color: var(--text-white);
+}
+
+.system-title p {
+    margin-top: 12px;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+
+    font-weight: 400;
+
+    color: var(--text-light);
+}
+
+
+/* =========================================
+   FORM
+========================================= */
+
+.login-form {
+    width: 100%;
+}
+
+
+/* =========================================
+   INPUT GROUP
+========================================= */
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    letter-spacing: 1.2px;
+
+    color: var(--gold-light);
+}
+
+
+/* =========================================
+   INPUT
+========================================= */
+
+.input-group input {
+    width: 100%;
+
+    height: 50px;
+
+    padding: 0 15px;
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+
+    border-radius: 10px;
+
+    outline: none;
+
+    background: rgba(0, 0, 0, 0.22);
+
+    color: var(--text-white);
+
+    font-family: inherit;
+
+    font-size: 15px;
+
+    transition: 0.2s ease;
+}
+
+.input-group input::placeholder {
+    color: #78958e;
+}
+
+.input-group input:focus {
+    border-color: var(--gold);
+
+    box-shadow:
+        0 0 0 3px rgba(214, 168, 79, 0.10);
+}
+
+
+/* =========================================
+   PASSWORD
+========================================= */
+
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper input {
+    padding-right: 75px;
+}
+
+.password-toggle {
+    position: absolute;
+
+    right: 10px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    border: none;
+
+    background: transparent;
+
+    color: var(--gold-light);
+
+    font-family: inherit;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.8px;
+
+    cursor: pointer;
+}
+
+.password-toggle:hover {
+    color: var(--text-white);
+}
+
+
+/* =========================================
+   OPTIONS
+========================================= */
+
+.login-options {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    margin: 4px 0 22px;
+
+    font-size: 12px;
+}
+
+.remember-option {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    color: var(--text-light);
+
+    cursor: pointer;
+}
+
+.remember-option input {
+    accent-color: var(--gold);
+
+    cursor: pointer;
+}
+
+.forgot-button {
+    border: none;
+
+    background: transparent;
+
+    color: var(--gold-light);
+
+    font-family: inherit;
+
+    font-size: 12px;
+
+    cursor: pointer;
+}
+
+.forgot-button:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================================
+   LOGIN BUTTON
+========================================= */
+
+.login-button {
+    width: 100%;
+
+    height: 52px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--gold),
+            var(--gold-light)
+        );
+
+    color: #17352e;
+
+    font-family: inherit;
+
+    font-size: 15px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.login-button:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 8px 22px rgba(214, 168, 79, 0.20);
+}
+
+.login-button:active {
+    transform: translateY(0);
+}
+
+
+/* =========================================
+   LOGIN MESSAGE
+========================================= */
+
+.login-message {
+    min-height: 20px;
+
+    margin-top: 14px;
+
+    text-align: center;
+
+    font-size: 12px;
+
+    line-height: 1.4;
+}
+
+.login-message.error {
+    color: #ffaaa0;
+}
+
+.login-message.information {
+    color: var(--gold-light);
+}
+
+
+/* =========================================
+   FOOTER
+========================================= */
+
+.login-footer {
+    margin-top: 30px;
+
+    padding-top: 18px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+    text-align: center;
+}
+
+.login-footer p {
+    font-size: 12px;
+
+    font-weight: 700;
+
+    color: var(--text-light);
+}
+
+.login-footer span {
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 11px;
+
+    color: var(--text-muted);
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 480px) {
+
+    .login-page {
+        padding: 18px;
+    }
+
+    .login-container {
+        padding: 32px 23px 25px;
+
+        border-radius: 18px;
+    }
+
+    .psabe-logo {
+        width: 105px;
+        height: 105px;
+    }
+
+    .system-title h1 {
+        font-size: 24px;
+    }
+
+    .system-title h2 {
+        font-size: 17px;
+    }
+
+    .system-title p {
+        font-size: 11px;
+    }
+
+    .login-options {
+        font-size: 11px;
+    }
+
+    .forgot-button {
+        font-size: 11px;
+    }
+}
