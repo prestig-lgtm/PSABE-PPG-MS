@@ -1,561 +1,1628 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     >
 
-    <meta
-        name="theme-color"
-        content="#001c14"
-    >
+    <title>PSABE-PPG CSU Chapter Management System</title>
 
-    <title>
-        PSABE-PPG Management System
-    </title>
-
-    <!-- =====================================================
-         GOOGLE FONTS
-    ====================================================== -->
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <link
-        rel="preconnect"
-        href="https://fonts.googleapis.com"
-    >
-
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin
-    >
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
         rel="stylesheet"
     >
 
-    <!-- =====================================================
-         STYLESHEET
-    ====================================================== -->
+    <style>
 
-    <link
-        rel="stylesheet"
-        href="style.css"
-    >
+        /* =========================================================
+           RESET
+        ========================================================= */
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+        }
+
+        body {
+            font-family: "Montserrat", Arial, sans-serif;
+            background: #00251d;
+            color: #f7f3e7;
+            overflow-x: hidden;
+        }
+
+
+        /* =========================================================
+           LOADING SCREEN
+        ========================================================= */
+
+        #loadingScreen {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #ffffff;
+
+            opacity: 1;
+            visibility: visible;
+
+            transition:
+                opacity 0.6s ease,
+                visibility 0.6s ease;
+        }
+
+        #loadingScreen.hide {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .loading-content {
+            width: min(1000px, 90vw);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            gap: 28px;
+
+            animation: loadingEnter 1s ease forwards;
+        }
+
+        .loading-logo {
+            width: 350px;
+            height: 350px;
+
+            object-fit: contain;
+
+            opacity: 0;
+
+            animation:
+                logoAppear 0.9s ease 0.1s forwards,
+                logoFloat 3s ease-in-out 1s infinite;
+        }
+
+        .loading-divider {
+            width: 4px;
+            height: 330px;
+
+            background: #111111;
+
+            transform: scaleY(0);
+
+            animation: dividerGrow 0.7s ease 0.45s forwards;
+        }
+
+        .loading-text {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            color: #050505;
+
+            overflow: hidden;
+        }
+
+        .loading-title {
+            font-size: clamp(42px, 5vw, 86px);
+            font-weight: 800;
+            letter-spacing: -2px;
+            line-height: 1;
+
+            opacity: 0;
+            transform: translateX(40px);
+
+            animation:
+                textSlide 0.8s ease 0.6s forwards;
+        }
+
+        .loading-chapter {
+            margin-top: 28px;
+
+            font-size: clamp(32px, 4vw, 68px);
+            font-weight: 800;
+            letter-spacing: -2px;
+            line-height: 1;
+
+            opacity: 0;
+            transform: translateX(40px);
+
+            animation:
+                textSlide 0.8s ease 0.8s forwards;
+        }
+
+        .loading-system {
+            margin-top: 32px;
+
+            font-size: clamp(25px, 3vw, 48px);
+            font-weight: 700;
+
+            opacity: 0;
+            transform: translateX(40px);
+
+            animation:
+                textSlide 0.8s ease 1s forwards;
+        }
+
+
+        /* =========================================================
+           LOGIN PAGE
+        ========================================================= */
+
+        #loginPage {
+            position: relative;
+
+            min-height: 100vh;
+            min-height: 100svh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 40px 20px;
+
+            isolation: isolate;
+
+            background:
+                #002a20
+                url("assets/management-background.png")
+                center center / cover
+                no-repeat;
+
+            overflow: hidden;
+        }
+
+        /*
+            Dark overlay.
+
+            The background image remains clearly visible,
+            but the login interface remains readable.
+        */
+
+        #loginPage::before {
+            content: "";
+
+            position: absolute;
+            inset: 0;
+
+            z-index: -1;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(0, 38, 29, 0.40),
+                    rgba(0, 26, 20, 0.25),
+                    rgba(0, 45, 34, 0.42)
+                );
+        }
+
+        /*
+            Very subtle green atmospheric lighting.
+            No circles and no glowing lines.
+        */
+
+        #loginPage::after {
+            content: "";
+
+            position: absolute;
+            inset: 0;
+
+            z-index: -1;
+
+            pointer-events: none;
+
+            background:
+                radial-gradient(
+                    circle at 50% 25%,
+                    rgba(0, 255, 190, 0.08),
+                    transparent 35%
+                );
+        }
+
+
+        /* =========================================================
+           LOGIN CONTAINER
+        ========================================================= */
+
+        .login-wrapper {
+            width: min(560px, 94vw);
+
+            position: relative;
+            z-index: 2;
+
+            animation: loginAppear 0.8s ease forwards;
+        }
+
+        /*
+            TRANSPARENT LOGIN BOX
+        */
+
+        .login-box {
+            width: 100%;
+
+            padding: 42px 44px 38px;
+
+            border: 1.5px solid rgba(0, 235, 180, 0.75);
+
+            border-radius: 28px;
+
+            /*
+                Transparent background instead of solid green.
+            */
+
+            background:
+                rgba(0, 25, 20, 0.18);
+
+            /*
+                Glass effect
+            */
+
+            backdrop-filter: blur(7px);
+            -webkit-backdrop-filter: blur(7px);
+
+            box-shadow:
+                0 20px 70px rgba(0, 0, 0, 0.30),
+                inset 0 0 35px rgba(0, 255, 190, 0.035);
+
+            position: relative;
+        }
+
+
+        /* =========================================================
+           LOGIN HEADING
+        ========================================================= */
+
+        .login-heading {
+            text-align: center;
+
+            margin-bottom: 32px;
+        }
+
+        .login-heading h1 {
+            color: #f7f1df;
+
+            font-size: 38px;
+            font-weight: 800;
+
+            line-height: 1.15;
+
+            margin-bottom: 12px;
+        }
+
+        .login-heading p {
+            color: rgba(218, 245, 236, 0.86);
+
+            font-size: 15px;
+            font-weight: 500;
+
+            line-height: 1.7;
+        }
+
+
+        /* =========================================================
+           FORM
+        ========================================================= */
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .input-wrapper {
+            position: relative;
+
+            width: 100%;
+        }
+
+        .input-icon {
+            position: absolute;
+
+            left: 22px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            width: 25px;
+            height: 25px;
+
+            color: #00efc0;
+
+            pointer-events: none;
+        }
+
+        .input-wrapper input,
+        .position-select {
+            width: 100%;
+
+            height: 70px;
+
+            padding-left: 68px;
+            padding-right: 54px;
+
+            border: 1.5px solid rgba(0, 226, 177, 0.72);
+
+            border-radius: 18px;
+
+            background:
+                rgba(0, 27, 21, 0.28);
+
+            color: #f4f4ed;
+
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 500;
+
+            outline: none;
+
+            transition:
+                border-color 0.25s ease,
+                background 0.25s ease,
+                box-shadow 0.25s ease;
+        }
+
+        .input-wrapper input::placeholder {
+            color: rgba(225, 245, 239, 0.68);
+        }
+
+        .input-wrapper input:focus,
+        .position-select:focus {
+            border-color: #00f0bd;
+
+            background:
+                rgba(0, 42, 32, 0.40);
+
+            box-shadow:
+                0 0 0 3px rgba(0, 240, 189, 0.10);
+        }
+
+
+        /* =========================================================
+           PASSWORD BUTTON
+        ========================================================= */
+
+        .password-toggle {
+            position: absolute;
+
+            right: 20px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            width: 32px;
+            height: 32px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: none;
+            background: transparent;
+
+            color: #00efc0;
+
+            cursor: pointer;
+        }
+
+        .password-toggle svg {
+            width: 25px;
+            height: 25px;
+        }
+
+
+        /* =========================================================
+           POSITION SELECT
+        ========================================================= */
+
+        .position-wrapper {
+            position: relative;
+        }
+
+        .position-icon {
+            position: absolute;
+
+            left: 21px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            width: 28px;
+            height: 28px;
+
+            color: #00efc0;
+
+            pointer-events: none;
+
+            z-index: 2;
+        }
+
+        .position-select {
+            appearance: none;
+            -webkit-appearance: none;
+
+            cursor: pointer;
+
+            padding-left: 68px;
+            padding-right: 58px;
+        }
+
+        .position-select option {
+            background: #00362a;
+            color: #ffffff;
+        }
+
+        /*
+            FIXED DROPDOWN ICON
+
+            It is vertically centered inside the same
+            70px input body.
+        */
+
+        .select-arrow {
+            position: absolute;
+
+            right: 21px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            width: 18px;
+            height: 18px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            pointer-events: none;
+
+            color: #00efc0;
+        }
+
+        .select-arrow svg {
+            width: 18px;
+            height: 18px;
+
+            display: block;
+        }
+
+
+        /* =========================================================
+           OPTIONS
+        ========================================================= */
+
+        .login-options {
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 15px;
+
+            margin: 8px 2px 25px;
+        }
+
+        .remember {
+            display: flex;
+            align-items: center;
+
+            gap: 12px;
+
+            color: #f4f5ee;
+
+            font-size: 14px;
+            font-weight: 500;
+
+            cursor: pointer;
+        }
+
+        .remember input {
+            appearance: none;
+            -webkit-appearance: none;
+
+            width: 23px;
+            height: 23px;
+
+            border: 2px solid #00efc0;
+
+            border-radius: 6px;
+
+            background: transparent;
+
+            cursor: pointer;
+
+            position: relative;
+        }
+
+        .remember input:checked {
+            background: #00cfa4;
+        }
+
+        .remember input:checked::after {
+            content: "✓";
+
+            position: absolute;
+
+            left: 50%;
+            top: 50%;
+
+            transform: translate(-50%, -55%);
+
+            color: white;
+
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .forgot {
+            color: #00efc0;
+
+            font-size: 14px;
+            font-weight: 600;
+
+            text-decoration: none;
+
+            cursor: pointer;
+
+            white-space: nowrap;
+        }
+
+        .forgot:hover {
+            color: #65ffe0;
+        }
+
+
+        /* =========================================================
+           SIGN IN BUTTON
+        ========================================================= */
+
+        .signin-button {
+            width: 100%;
+            height: 66px;
+
+            border: 1px solid rgba(255, 255, 255, 0.16);
+
+            border-radius: 18px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #00b98c,
+                    #00d8a8
+                );
+
+            color: #ffffff;
+
+            font-family: inherit;
+
+            font-size: 20px;
+            font-weight: 800;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 8px 25px rgba(0, 214, 166, 0.20);
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease,
+                filter 0.2s ease;
+        }
+
+        .signin-button:hover {
+            transform: translateY(-2px);
+
+            filter: brightness(1.06);
+
+            box-shadow:
+                0 12px 30px rgba(0, 214, 166, 0.28);
+        }
+
+        .signin-button:active {
+            transform: translateY(0);
+        }
+
+        .signin-button:disabled {
+            cursor: wait;
+            opacity: 0.7;
+        }
+
+
+        /* =========================================================
+           BOTTOM AUTHORIZATION TEXT
+        ========================================================= */
+
+        .authorized {
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            gap: 14px;
+
+            margin-top: 27px;
+
+            color: rgba(213, 238, 231, 0.78);
+
+            font-size: 12px;
+            font-weight: 500;
+
+            text-align: center;
+        }
+
+        .authorized::before,
+        .authorized::after {
+            content: "";
+
+            width: 70px;
+            height: 1px;
+
+            background: rgba(0, 239, 192, 0.45);
+        }
+
+
+        /* =========================================================
+           ERROR / STATUS MESSAGE
+        ========================================================= */
+
+        #loginMessage {
+            min-height: 20px;
+
+            margin-top: 15px;
+
+            text-align: center;
+
+            font-size: 13px;
+            font-weight: 600;
+
+            color: #ffb9b9;
+        }
+
+
+        /* =========================================================
+           ANIMATIONS
+        ========================================================= */
+
+        @keyframes loadingEnter {
+
+            from {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes logoAppear {
+
+            from {
+                opacity: 0;
+                transform: scale(0.85);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes logoFloat {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        @keyframes dividerGrow {
+
+            from {
+                transform: scaleY(0);
+            }
+
+            to {
+                transform: scaleY(1);
+            }
+        }
+
+        @keyframes textSlide {
+
+            from {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes loginAppear {
+
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+
+        /* =========================================================
+           TABLET
+        ========================================================= */
+
+        @media (max-width: 800px) {
+
+            #loginPage {
+                padding: 28px 18px;
+
+                align-items: center;
+            }
+
+            .login-wrapper {
+                width: min(520px, 94vw);
+            }
+
+            .login-box {
+                padding: 35px 30px 32px;
+
+                border-radius: 24px;
+            }
+
+            .login-heading h1 {
+                font-size: 34px;
+            }
+
+            .input-wrapper input,
+            .position-select {
+                height: 64px;
+            }
+
+            .signin-button {
+                height: 62px;
+            }
+
+            .loading-content {
+                width: 90vw;
+
+                gap: 20px;
+            }
+
+            .loading-logo {
+                width: 260px;
+                height: 260px;
+            }
+
+            .loading-divider {
+                height: 250px;
+            }
+        }
+
+
+        /* =========================================================
+           MOBILE
+        ========================================================= */
+
+        @media (max-width: 600px) {
+
+            /*
+                IMPORTANT:
+
+                The background is fixed to the viewport on mobile.
+                It will not scroll with the login content.
+            */
+
+            #loginPage {
+                min-height: 100svh;
+
+                padding:
+                    24px
+                    14px;
+
+                align-items: center;
+
+                background-position: center center;
+                background-size: cover;
+
+                /*
+                    Prevents the page background from behaving
+                    like a scrolling image.
+                */
+                background-attachment: fixed;
+            }
+
+            /*
+                Some mobile browsers handle fixed backgrounds
+                poorly. We use a pseudo-layer instead.
+            */
+
+            #loginPage {
+                background: #002a20;
+            }
+
+            #loginPage::before {
+                background:
+                    linear-gradient(
+                        rgba(0, 37, 28, 0.45),
+                        rgba(0, 37, 28, 0.45)
+                    ),
+                    url("assets/management-background.png")
+                    center center / cover
+                    no-repeat;
+
+                position: fixed;
+
+                inset: 0;
+
+                z-index: -2;
+            }
+
+            #loginPage::after {
+                position: fixed;
+
+                inset: 0;
+
+                z-index: -1;
+            }
+
+            .login-wrapper {
+                width: 100%;
+                max-width: 430px;
+            }
+
+            .login-box {
+                padding: 28px 20px 26px;
+
+                border-radius: 23px;
+
+                background:
+                    rgba(0, 25, 20, 0.17);
+
+                backdrop-filter: blur(5px);
+                -webkit-backdrop-filter: blur(5px);
+            }
+
+            .login-heading {
+                margin-bottom: 23px;
+            }
+
+            .login-heading h1 {
+                font-size: 30px;
+
+                margin-bottom: 9px;
+            }
+
+            .login-heading p {
+                font-size: 12px;
+
+                line-height: 1.65;
+            }
+
+            .form-group {
+                margin-bottom: 13px;
+            }
+
+            .input-wrapper input,
+            .position-select {
+                height: 57px;
+
+                border-radius: 15px;
+
+                font-size: 13px;
+
+                padding-left: 57px;
+                padding-right: 48px;
+            }
+
+            .input-icon {
+                left: 17px;
+
+                width: 22px;
+                height: 22px;
+            }
+
+            .position-icon {
+                left: 17px;
+
+                width: 23px;
+                height: 23px;
+            }
+
+            .password-toggle {
+                right: 15px;
+
+                width: 28px;
+                height: 28px;
+            }
+
+            .password-toggle svg {
+                width: 22px;
+                height: 22px;
+            }
+
+            .select-arrow {
+                right: 17px;
+
+                width: 17px;
+                height: 17px;
+            }
+
+            .select-arrow svg {
+                width: 17px;
+                height: 17px;
+            }
+
+            .login-options {
+                margin:
+                    5px 1px 20px;
+
+                gap: 8px;
+            }
+
+            .remember {
+                gap: 8px;
+
+                font-size: 11px;
+            }
+
+            .remember input {
+                width: 20px;
+                height: 20px;
+            }
+
+            .forgot {
+                font-size: 11px;
+            }
+
+            .signin-button {
+                height: 56px;
+
+                border-radius: 15px;
+
+                font-size: 17px;
+            }
+
+            .authorized {
+                margin-top: 21px;
+
+                gap: 9px;
+
+                font-size: 9px;
+            }
+
+            .authorized::before,
+            .authorized::after {
+                width: 35px;
+            }
+
+
+            /* ===============================
+               MOBILE LOADING SCREEN
+            =============================== */
+
+            .loading-content {
+                width: 90vw;
+
+                display: flex;
+
+                flex-direction: column;
+
+                gap: 18px;
+
+                text-align: center;
+            }
+
+            .loading-logo {
+                width: 145px;
+                height: 145px;
+            }
+
+            .loading-divider {
+                width: 170px;
+                height: 2px;
+
+                transform: scaleX(0);
+
+                animation:
+                    dividerHorizontal 0.7s ease 0.45s forwards;
+            }
+
+            .loading-text {
+                align-items: center;
+            }
+
+            .loading-title {
+                font-size: 34px;
+
+                letter-spacing: -1px;
+            }
+
+            .loading-chapter {
+                margin-top: 12px;
+
+                font-size: 26px;
+
+                letter-spacing: -1px;
+            }
+
+            .loading-system {
+                margin-top: 15px;
+
+                font-size: 21px;
+            }
+        }
+
+        @keyframes dividerHorizontal {
+
+            from {
+                transform: scaleX(0);
+            }
+
+            to {
+                transform: scaleX(1);
+            }
+        }
+
+
+        /* =========================================================
+           VERY SMALL PHONES
+        ========================================================= */
+
+        @media (max-width: 380px) {
+
+            #loginPage {
+                padding: 18px 10px;
+            }
+
+            .login-box {
+                padding:
+                    24px
+                    16px
+                    22px;
+            }
+
+            .login-heading h1 {
+                font-size: 26px;
+            }
+
+            .login-heading p {
+                font-size: 11px;
+            }
+
+            .input-wrapper input,
+            .position-select {
+                height: 53px;
+
+                font-size: 12px;
+            }
+
+            .signin-button {
+                height: 52px;
+
+                font-size: 16px;
+            }
+        }
+
+
+        /* =========================================================
+           REDUCED MOTION
+        ========================================================= */
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+    </style>
 </head>
 
 
 <body>
 
 
-    <!-- =====================================================
+    <!-- =========================================================
          LOADING SCREEN
+    ========================================================= -->
 
-         This is the ONLY place where the PSABE-PPG
-         logo and organization title are displayed.
-    ====================================================== -->
-
-    <div
-        id="loadingScreen"
-        class="loading-screen"
-    >
+    <section id="loadingScreen">
 
         <div class="loading-content">
 
-
-            <!-- LOGO -->
-
             <img
                 src="assets/psabe-ppg-logo.png"
-                alt="PSABE-PPG Logo"
+                alt="PSABE-PPG CSU Chapter"
                 class="loading-logo"
             >
 
-
-            <!-- ORGANIZATION -->
-
-            <div class="loading-name">
-                PSABE-PPG
-            </div>
-
-
-            <!-- CHAPTER -->
-
-            <div class="loading-chapter">
-                CSU CHAPTER
-            </div>
-
-
-            <!-- DIVIDER -->
-
             <div class="loading-divider"></div>
 
+            <div class="loading-text">
 
-            <!-- SYSTEM -->
+                <div class="loading-title">
+                    PSABE-PPG
+                </div>
 
-            <div class="loading-system">
-                MANAGEMENT SYSTEM
+                <div class="loading-chapter">
+                    CSU CHAPTER
+                </div>
+
+                <div class="loading-system">
+                    Management System
+                </div>
+
             </div>
-
 
         </div>
 
-    </div>
+    </section>
 
 
 
-    <!-- =====================================================
-         BACKGROUND
-    ====================================================== -->
-
-    <div class="background"></div>
-
-
-
-    <!-- =====================================================
+    <!-- =========================================================
          LOGIN PAGE
-         
-         IMPORTANT:
-         There is NO PSABE logo or organization heading here.
-         The branding exists only in the loading screen.
-    ====================================================== -->
+    ========================================================= -->
 
-    <main class="page">
+    <main id="loginPage">
 
+        <div class="login-wrapper">
 
-        <section class="login-card">
+            <section class="login-box">
 
 
-            <!-- =================================================
-                 LOGIN HEADER
-            ================================================== -->
+                <!-- LOGIN HEADER -->
 
-            <div class="login-header">
+                <div class="login-heading">
 
-                <h1>
-                    Welcome back!
-                </h1>
+                    <h1>
+                        Welcome back!
+                    </h1>
 
-                <p>
-                    Sign in to your account to continue
-                    <br>
-                    to the management system.
-                </p>
-
-            </div>
-
-
-
-            <!-- =================================================
-                 LOGIN FORM
-            ================================================== -->
-
-            <form
-                id="loginForm"
-                autocomplete="on"
-            >
-
-
-                <!-- USERNAME -->
-
-                <div class="input-box">
-
-                    <div class="input-icon">
-
-                        <svg
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                        >
-
-                            <circle
-                                cx="12"
-                                cy="8"
-                                r="4"
-                            ></circle>
-
-                            <path
-                                d="M4 21c0-4 3.2-7 8-7s8 3 8 7"
-                            ></path>
-
-                        </svg>
-
-                    </div>
-
-
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        placeholder="Username or Email"
-                        autocomplete="username"
-                        required
-                    >
+                    <p>
+                        Sign in to your account to continue
+                        <br>
+                        to the management system.
+                    </p>
 
                 </div>
 
 
 
-                <!-- PASSWORD -->
+                <!-- LOGIN FORM -->
 
-                <div class="input-box">
+                <form id="loginForm">
 
-                    <div class="input-icon">
 
-                        <svg
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                        >
+                    <!-- USERNAME -->
 
-                            <rect
-                                x="5"
-                                y="10"
-                                width="14"
-                                height="11"
-                                rx="2"
-                            ></rect>
+                    <div class="form-group">
 
-                            <path
-                                d="M8 10V7a4 4 0 0 1 8 0v3"
-                            ></path>
+                        <div class="input-wrapper">
 
-                            <circle
-                                cx="12"
-                                cy="15"
-                                r="1"
-                            ></circle>
+                            <svg
+                                class="input-icon"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <circle cx="12" cy="7" r="4"></circle>
+                                <path d="M5 21v-1a7 7 0 0 1 14 0v1"></path>
+                            </svg>
 
-                        </svg>
+                            <input
+                                id="username"
+                                type="text"
+                                placeholder="Username or Email"
+                                autocomplete="username"
+                                required
+                            >
+
+                        </div>
 
                     </div>
 
 
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        placeholder="Password"
-                        autocomplete="current-password"
-                        required
-                    >
+
+                    <!-- PASSWORD -->
+
+                    <div class="form-group">
+
+                        <div class="input-wrapper">
+
+                            <svg
+                                class="input-icon"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <rect
+                                    x="4"
+                                    y="10"
+                                    width="16"
+                                    height="11"
+                                    rx="2"
+                                ></rect>
+
+                                <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+
+                                <circle
+                                    cx="12"
+                                    cy="15.5"
+                                    r="1"
+                                ></circle>
+                            </svg>
 
 
-                    <!-- PASSWORD VISIBILITY -->
+                            <input
+                                id="password"
+                                type="password"
+                                placeholder="Password"
+                                autocomplete="current-password"
+                                required
+                            >
+
+
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                id="passwordToggle"
+                                aria-label="Show password"
+                            >
+
+                                <svg
+                                    id="eyeIcon"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+
+                                    <path
+                                        d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"
+                                    ></path>
+
+                                    <circle
+                                        cx="12"
+                                        cy="12"
+                                        r="2.5"
+                                    ></circle>
+
+                                </svg>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- POSITION -->
+
+                    <div class="form-group">
+
+                        <div class="position-wrapper">
+
+                            <svg
+                                class="position-icon"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+
+                                <circle
+                                    cx="9"
+                                    cy="7"
+                                    r="4"
+                                ></circle>
+
+                                <path
+                                    d="M2 21a7 7 0 0 1 14 0"
+                                ></path>
+
+                                <circle
+                                    cx="17"
+                                    cy="8"
+                                    r="3"
+                                ></circle>
+
+                                <path
+                                    d="M17 14a5 5 0 0 1 5 5"
+                                ></path>
+
+                            </svg>
+
+
+                            <select
+                                id="position"
+                                class="position-select"
+                                required
+                            >
+
+                                <option value="" selected disabled>
+                                    Select your position
+                                </option>
+
+                                <option value="President">
+                                    President
+                                </option>
+
+                                <option value="Vice President">
+                                    Vice President
+                                </option>
+
+                                <option value="Secretary">
+                                    Secretary
+                                </option>
+
+                                <option value="Treasurer">
+                                    Treasurer
+                                </option>
+
+                                <option value="Auditor">
+                                    Auditor
+                                </option>
+
+                                <option value="PIO">
+                                    Public Information Officer
+                                </option>
+
+                                <option value="Events Head">
+                                    Events Head
+                                </option>
+
+                                <option value="Membership Head">
+                                    Membership Head
+                                </option>
+
+                                <option value="Academic Affairs Head">
+                                    Academic Affairs Head
+                                </option>
+
+                            </select>
+
+
+                            <!-- PROPERLY ALIGNED ARROW -->
+
+                            <span class="select-arrow">
+
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2.5"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+
+                                    <polyline
+                                        points="6 9 12 15 18 9"
+                                    ></polyline>
+
+                                </svg>
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- OPTIONS -->
+
+                    <div class="login-options">
+
+                        <label class="remember">
+
+                            <input
+                                type="checkbox"
+                                id="rememberMe"
+                            >
+
+                            <span>
+                                Remember me
+                            </span>
+
+                        </label>
+
+
+                        <a
+                            href="#"
+                            class="forgot"
+                            id="forgotPassword"
+                        >
+                            Forgot password?
+                        </a>
+
+                    </div>
+
+
+
+                    <!-- SIGN IN -->
 
                     <button
-                        type="button"
-                        class="eye-button"
-                        id="togglePassword"
-                        aria-label="Show password"
+                        type="submit"
+                        class="signin-button"
+                        id="signinButton"
                     >
-
-                        <svg
-                            id="eyeIcon"
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                        >
-
-                            <path
-                                d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"
-                            ></path>
-
-                            <circle
-                                cx="12"
-                                cy="12"
-                                r="2.5"
-                            ></circle>
-
-                        </svg>
-
+                        Sign In
                     </button>
 
-                </div>
+
+                    <!-- MESSAGE -->
+
+                    <div id="loginMessage"></div>
 
 
+                    <!-- AUTHORIZATION -->
 
-                <!-- POSITION -->
-
-                <div class="input-box">
-
-
-                    <div class="input-icon">
-
-                        <svg
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                        >
-
-                            <circle
-                                cx="9"
-                                cy="8"
-                                r="3"
-                            ></circle>
-
-                            <path
-                                d="M3 20c0-3.5 2.5-6 6-6s6 2.5 6 6"
-                            ></path>
-
-                            <circle
-                                cx="17"
-                                cy="9"
-                                r="2.5"
-                            ></circle>
-
-                            <path
-                                d="M16 14c2.8 0 5 2.2 5 5"
-                            ></path>
-
-                        </svg>
-
-                    </div>
-
-
-                    <select
-                        id="position"
-                        name="position"
-                        required
-                    >
-
-                        <option
-                            value=""
-                            disabled
-                            selected
-                        >
-                            Select your position
-                        </option>
-
-                        <option value="President">
-                            President
-                        </option>
-
-                        <option value="Vice President">
-                            Vice President
-                        </option>
-
-                        <option value="Secretary">
-                            Secretary
-                        </option>
-
-                        <option value="Treasurer">
-                            Treasurer
-                        </option>
-
-                        <option value="Auditor">
-                            Auditor
-                        </option>
-
-                        <option value="PIO">
-                            Public Information Officer
-                        </option>
-
-                        <option value="Events Head">
-                            Events Head
-                        </option>
-
-                        <option value="Membership Head">
-                            Membership Head
-                        </option>
-
-                        <option value="Academic Affairs Head">
-                            Academic Affairs Head
-                        </option>
-
-                    </select>
-
-
-                    <span class="select-arrow">
-                        ⌄
-                    </span>
-
-                </div>
-
-
-
-                <!-- =================================================
-                     OPTIONS
-                ================================================== -->
-
-                <div class="login-options">
-
-
-                    <!-- REMEMBER ME -->
-
-                    <label class="remember">
-
-                        <input
-                            type="checkbox"
-                            id="rememberMe"
-                        >
-
-                        <span class="custom-checkbox"></span>
+                    <div class="authorized">
 
                         <span>
-                            Remember me
+                            Authorized organization members only
                         </span>
 
-                    </label>
+                    </div>
 
 
+                </form>
 
-                    <!-- FORGOT PASSWORD -->
+            </section>
 
-                    <button
-                        type="button"
-                        class="forgot-password"
-                        id="forgotPassword"
-                    >
-                        Forgot password?
-                    </button>
-
-
-                </div>
-
-
-
-                <!-- =================================================
-                     SIGN IN
-                ================================================== -->
-
-                <button
-                    type="submit"
-                    class="signin-button"
-                    id="signinButton"
-                >
-
-                    <span>
-                        Sign In
-                    </span>
-
-                    <span class="arrow">
-                        →
-                    </span>
-
-                </button>
-
-
-
-                <!-- LOGIN MESSAGE -->
-
-                <div
-                    id="loginMessage"
-                    class="login-message"
-                    aria-live="polite"
-                ></div>
-
-
-
-                <!-- AUTHORIZED -->
-
-                <div class="authorized">
-
-                    <span class="line"></span>
-
-                    <span>
-                        Authorized organization members only
-                    </span>
-
-                    <span class="line"></span>
-
-                </div>
-
-
-            </form>
-
-
-        </section>
-
+        </div>
 
     </main>
 
 
 
-    <!-- =====================================================
+    <!-- =========================================================
          JAVASCRIPT
-    ====================================================== -->
+    ========================================================= -->
 
     <script>
 
-
-        /* =================================================
+        /* =========================================================
            LOADING SCREEN
-        ================================================= */
+        ========================================================= */
 
-        window.addEventListener(
-            "load",
-            function () {
+        window.addEventListener("load", function () {
+
+            setTimeout(function () {
 
                 const loadingScreen =
-                    document.getElementById(
-                        "loadingScreen"
-                    );
+                    document.getElementById("loadingScreen");
 
+                loadingScreen.classList.add("hide");
 
-                /*
-                 * Allow the complete branding animation
-                 * to be seen before fading away.
-                 */
+            }, 2600);
 
-                setTimeout(
-                    function () {
-
-                        loadingScreen.classList.add(
-                            "loaded"
-                        );
-
-                    },
-                    2800
-                );
-
-            }
-        );
+        });
 
 
 
-        /* =================================================
+        /* =========================================================
            PASSWORD VISIBILITY
-        ================================================= */
+        ========================================================= */
 
-        const passwordInput =
-            document.getElementById(
-                "password"
-            );
+        const password =
+            document.getElementById("password");
 
-        const togglePassword =
-            document.getElementById(
-                "togglePassword"
-            );
+        const passwordToggle =
+            document.getElementById("passwordToggle");
+
+        const eyeIcon =
+            document.getElementById("eyeIcon");
 
 
-        togglePassword.addEventListener(
+        passwordToggle.addEventListener(
             "click",
             function () {
 
-                const isPassword =
-                    passwordInput.type === "password";
+                if (password.type === "password") {
 
+                    password.type = "text";
 
-                if (isPassword) {
-
-                    passwordInput.type = "text";
-
-                    togglePassword.setAttribute(
+                    passwordToggle.setAttribute(
                         "aria-label",
                         "Hide password"
                     );
 
+                    eyeIcon.innerHTML = `
+
+                        <path
+                            d="M3 3l18 18"
+                        ></path>
+
+                        <path
+                            d="M10.6 10.6
+                               a2 2 0 0 0 2.8 2.8"
+                        ></path>
+
+                        <path
+                            d="M9.9 5.1
+                               A10.7 10.7 0 0 1 12 5
+                               c6.5 0 10 7 10 7
+                               a18.4 18.4 0 0 1-3.2 3.8"
+                        ></path>
+
+                        <path
+                            d="M6.6 6.6
+                               C3.7 8.5 2 12 2 12
+                               s3.5 7 10 7
+                               c1.5 0 2.8-.3 4-.8"
+                        ></path>
+
+                    `;
+
                 } else {
 
-                    passwordInput.type = "password";
+                    password.type = "password";
 
-                    togglePassword.setAttribute(
+                    passwordToggle.setAttribute(
                         "aria-label",
                         "Show password"
                     );
+
+                    eyeIcon.innerHTML = `
+
+                        <path
+                            d="M2 12
+                               s3.5-6 10-6
+                               10 6 10 6
+                               -3.5 6-10 6
+                               S2 12 2 12Z"
+                        ></path>
+
+                        <circle
+                            cx="12"
+                            cy="12"
+                            r="2.5"
+                        ></circle>
+
+                    `;
 
                 }
 
@@ -564,29 +1631,19 @@
 
 
 
-        /* =================================================
+        /* =========================================================
            REMEMBER ME
-        ================================================= */
+        ========================================================= */
 
         const usernameInput =
-            document.getElementById(
-                "username"
-            );
+            document.getElementById("username");
 
         const rememberMe =
-            document.getElementById(
-                "rememberMe"
-            );
+            document.getElementById("rememberMe");
 
-
-        /*
-         * Load remembered username.
-         */
 
         const savedUsername =
-            localStorage.getItem(
-                "psabeRememberedUsername"
-            );
+            localStorage.getItem("psabeRememberedUsername");
 
 
         if (savedUsername) {
@@ -600,57 +1657,47 @@
 
 
 
-        /* =================================================
+        /* =========================================================
            FORGOT PASSWORD
-        ================================================= */
+        ========================================================= */
 
-        const forgotPassword =
-            document.getElementById(
-                "forgotPassword"
+        document
+            .getElementById("forgotPassword")
+            .addEventListener(
+                "click",
+                function (event) {
+
+                    event.preventDefault();
+
+                    alert(
+                        "Please contact the PSABE-PPG system administrator to reset your password."
+                    );
+
+                }
             );
 
-        const loginMessage =
-            document.getElementById(
-                "loginMessage"
-            );
 
 
-        forgotPassword.addEventListener(
-            "click",
-            function () {
-
-                loginMessage.className =
-                    "login-message";
-
-                loginMessage.textContent =
-                    "Please contact the PSABE-PPG administrator to reset your password.";
-
-            }
-        );
-
-
-
-        /* =================================================
+        /* =========================================================
            TEMPORARY LOGIN
            
-           THIS IS ONLY FOR FRONTEND TESTING.
-
+           This is ONLY for testing the interface.
+           
            Username:
            admin
 
            Password:
            admin123
-        ================================================== */
+        ========================================================= */
 
         const loginForm =
-            document.getElementById(
-                "loginForm"
-            );
+            document.getElementById("loginForm");
+
+        const loginMessage =
+            document.getElementById("loginMessage");
 
         const signinButton =
-            document.getElementById(
-                "signinButton"
-            );
+            document.getElementById("signinButton");
 
 
         loginForm.addEventListener(
@@ -663,179 +1710,85 @@
                 const username =
                     usernameInput.value.trim();
 
-                const password =
-                    passwordInput.value;
+                const userPassword =
+                    password.value;
 
                 const position =
-                    document.getElementById(
-                        "position"
-                    ).value;
+                    document.getElementById("position").value;
 
-
-
-                /* CLEAR MESSAGE */
 
                 loginMessage.textContent = "";
 
-                loginMessage.className =
-                    "login-message";
 
-
-
-                /* VALIDATION */
-
-                if (
-                    username === "" ||
-                    password === "" ||
-                    position === ""
-                ) {
-
-                    loginMessage.className =
-                        "login-message error";
+                if (!position) {
 
                     loginMessage.textContent =
-                        "Please complete all required fields.";
+                        "Please select your position.";
 
                     return;
 
                 }
 
 
-
-                /* BUTTON STATE */
-
-                signinButton.disabled = true;
-
-                signinButton.innerHTML =
-                    `
-                    <span>
-                        Signing in...
-                    </span>
-
-                    <span class="loading-spinner"></span>
-                    `;
-
-
-
                 /*
-                 * TEMPORARY FRONTEND LOGIN
-                 */
+                    TEMPORARY DEMO LOGIN
+                */
 
-                setTimeout(
-                    function () {
+                if (
+                    username === "admin" &&
+                    userPassword === "admin123"
+                ) {
 
+                    signinButton.disabled = true;
 
-                        if (
-                            username === "admin" &&
-                            password === "admin123"
-                        ) {
-
-
-                            /* REMEMBER USERNAME */
-
-                            if (
-                                rememberMe.checked
-                            ) {
-
-                                localStorage.setItem(
-                                    "psabeRememberedUsername",
-                                    username
-                                );
-
-                            } else {
-
-                                localStorage.removeItem(
-                                    "psabeRememberedUsername"
-                                );
-
-                            }
+                    signinButton.textContent =
+                        "Signing in...";
 
 
+                    if (rememberMe.checked) {
 
-                            /* SAVE CURRENT USER */
+                        localStorage.setItem(
+                            "psabeRememberedUsername",
+                            username
+                        );
 
-                            localStorage.setItem(
-                                "psabeCurrentUser",
-                                JSON.stringify({
-                                    username:
-                                        username,
+                    } else {
 
-                                    position:
-                                        position
-                                })
-                            );
+                        localStorage.removeItem(
+                            "psabeRememberedUsername"
+                        );
 
-
-
-                            /*
-                             * SUCCESS
-                             */
-
-                            loginMessage.className =
-                                "login-message success";
-
-                            loginMessage.textContent =
-                                "Login successful. Loading management system...";
+                    }
 
 
+                    setTimeout(function () {
 
-                            /*
-                             * TEMPORARY REDIRECT
-                             *
-                             * Change this later to:
-                             * dashboard.html
-                             */
+                        /*
+                            Temporary dashboard redirect.
 
-                            setTimeout(
-                                function () {
+                            Change this later to:
+                            dashboard.html
 
-                                    window.location.href =
-                                        "dashboard.html";
+                            once we create the actual dashboard.
+                        */
 
-                                },
-                                800
-                            );
+                        window.location.href =
+                            "dashboard.html";
+
+                    }, 700);
 
 
-                        } else {
+                } else {
 
+                    loginMessage.textContent =
+                        "Invalid username or password.";
 
-                            /* LOGIN FAILED */
-
-                            loginMessage.className =
-                                "login-message error";
-
-                            loginMessage.textContent =
-                                "Invalid username or password.";
-
-
-                            signinButton.disabled =
-                                false;
-
-                            signinButton.innerHTML =
-                                `
-                                <span>
-                                    Sign In
-                                </span>
-
-                                <span class="arrow">
-                                    →
-                                </span>
-                                `;
-
-                        }
-
-                    },
-                    700
-                );
+                }
 
             }
         );
 
-
     </script>
 
-
 </body>
-
 </html>
