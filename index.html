@@ -7,7 +7,7 @@
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        content="width=device-width, initial-scale=1.0"
     >
 
     <meta
@@ -15,14 +15,31 @@
         content="#002d24"
     >
 
-    <title>PSABE-PPG CSU Chapter Management System</title>
+    <title>
+        PSABE-PPG Management System
+    </title>
 
-    <!-- Preload background BEFORE the loading screen appears -->
+
+    <!-- Roboto Condensed -->
+
     <link
-        rel="preload"
-        as="image"
-        href="assets/management-background.png"
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
     >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- Existing login styling -->
 
     <link
         rel="stylesheet"
@@ -32,148 +49,136 @@
 </head>
 
 
-<body class="loading-active">
+<body>
 
 
     <!-- =====================================================
-         FIXED BACKGROUND
+         BACKGROUND LOGO
     ====================================================== -->
 
-    <div
-        id="backgroundLayer"
-        class="background-layer"
-    ></div>
+    <div class="bg-logo"></div>
 
 
 
     <!-- =====================================================
-         LOADING SCREEN
+         PAGE WRAPPER
     ====================================================== -->
 
-    <div
-        id="loadingScreen"
-        class="loading-screen"
-    >
-
-        <div
-            id="loadingBrand"
-            class="loading-brand"
-        >
-
-            <!-- LOGO -->
-
-            <div class="loading-logo-container">
-
-                <img
-                    src="assets/psabe-ppg-logo.png"
-                    alt="PSABE-PPG CSU Chapter"
-                    class="loading-logo"
-                >
-
-            </div>
+    <div class="page-wrapper">
 
 
-            <!-- DIVIDER -->
+        <!-- =================================================
+             BRANDING
+        ================================================== -->
 
-            <div class="loading-divider"></div>
+        <header class="branding">
+
+            <img
+                src="assets/psabe-ppg-logo.png"
+                alt="PSABE-PPG Logo"
+                class="header-logo"
+            >
 
 
-            <!-- TEXT -->
+            <h1 class="org-name">
+                PSABE-PPG
+            </h1>
 
-            <div class="loading-text">
 
-                <div class="loading-title">
-                    PSABE-PPG
-                </div>
+            <h2 class="system-name">
+                MANAGEMENT SYSTEM
+            </h2>
 
-                <div class="loading-chapter">
-                    CSU CHAPTER
-                </div>
 
-                <div class="loading-system">
-                    MANAGEMENT SYSTEM
-                </div>
+            <div class="title-line"></div>
 
-            </div>
 
-        </div>
+            <p class="org-description">
 
-    </div>
+                Philippine Society of Agricultural and Biosystems Engineers<br>
+
+                Pre-Professional Group<br>
+
+                Caraga State University Chapter
+
+            </p>
+
+        </header>
 
 
 
-    <!-- =====================================================
-         LOGIN PAGE
-    ====================================================== -->
-
-    <main
-        id="loginPage"
-        class="login-page"
-    >
+        <!-- =================================================
+             LOGIN CARD
+        ================================================== -->
 
         <section class="login-card">
 
 
-            <!-- HEADER -->
-
             <div class="login-header">
 
-                <h1>
+                <h2>
                     Welcome back!
-                </h1>
+                </h2>
 
                 <p>
                     Sign in to your account to continue<br>
-                    to the management system.
+                    to the PSABE-PPG Management System.
                 </p>
 
             </div>
 
 
 
-            <!-- FORM -->
+            <!-- =================================================
+                 LOGIN FORM
+            ================================================== -->
 
             <form
                 id="loginForm"
-                class="login-form"
                 autocomplete="on"
             >
 
 
                 <!-- USERNAME -->
 
-                <div class="input-group">
+                <div class="field">
 
-                    <div class="input-icon">
+                    <div class="input-field">
 
-                        <svg
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
+                        <i class="icon user">
+
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                            >
+
+                                <circle
+                                    cx="12"
+                                    cy="7"
+                                    r="4"
+                                />
+
+                                <path
+                                    d="M4.5 21c.8-4 3.3-6 7.5-6s6.7 2 7.5 6"
+                                />
+
+                            </svg>
+
+                        </i>
+
+
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            placeholder="Username or Email"
+                            autocomplete="username"
+                            required
                         >
 
-                            <circle
-                                cx="12"
-                                cy="7"
-                                r="4"
-                            ></circle>
-
-                            <path
-                                d="M5 21c0-4 3-7 7-7s7 3 7 7"
-                            ></path>
-
-                        </svg>
-
                     </div>
-
-
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        placeholder="Username or Email"
-                        autocomplete="username"
-                        required
-                    >
 
                 </div>
 
@@ -181,74 +186,82 @@
 
                 <!-- PASSWORD -->
 
-                <div class="input-group">
+                <div class="field">
 
-                    <div class="input-icon">
+                    <div class="input-field">
 
-                        <svg
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
+                        <i class="icon lock">
+
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                            >
+
+                                <rect
+                                    x="5"
+                                    y="10"
+                                    width="14"
+                                    height="11"
+                                    rx="2"
+                                />
+
+                                <path
+                                    d="M8 10V7a4 4 0 0 1 8 0v3"
+                                />
+
+                                <circle
+                                    cx="12"
+                                    cy="15.5"
+                                    r="1"
+                                />
+
+                            </svg>
+
+                        </i>
+
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Password"
+                            autocomplete="current-password"
+                            required
                         >
 
-                            <rect
-                                x="5"
-                                y="10"
-                                width="14"
-                                height="11"
-                                rx="2"
-                            ></rect>
 
-                            <path
-                                d="M8 10V7a4 4 0 0 1 8 0v3"
-                            ></path>
+                        <button
+                            type="button"
+                            class="toggle-password"
+                            id="togglePassword"
+                            aria-label="Show password"
+                        >
 
-                            <circle
-                                cx="12"
-                                cy="15.5"
-                                r="1"
-                            ></circle>
+                            <svg
+                                id="eyeIcon"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                            >
 
-                        </svg>
+                                <path
+                                    d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z"
+                                />
+
+                                <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="2.5"
+                                />
+
+                            </svg>
+
+                        </button>
 
                     </div>
-
-
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        placeholder="Password"
-                        autocomplete="current-password"
-                        required
-                    >
-
-
-                    <button
-                        type="button"
-                        id="togglePassword"
-                        class="password-toggle"
-                        aria-label="Show password"
-                    >
-
-                        <svg
-                            id="eyeIcon"
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                        >
-
-                            <path
-                                d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"
-                            ></path>
-
-                            <circle
-                                cx="12"
-                                cy="12"
-                                r="3"
-                            ></circle>
-
-                        </svg>
-
-                    </button>
 
                 </div>
 
@@ -256,104 +269,107 @@
 
                 <!-- POSITION -->
 
-                <div class="input-group position-group">
+                <div class="field">
 
-                    <div class="input-icon">
+                    <div class="input-field position-box">
 
-                        <svg
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
+                        <i class="icon position">
+
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                            >
+
+                                <circle
+                                    cx="9"
+                                    cy="8"
+                                    r="3"
+                                />
+
+                                <path
+                                    d="M3.5 20c.5-3.5 2.5-5.5 5.5-5.5s5 2 5.5 5.5"
+                                />
+
+                                <path
+                                    d="M15 11c2.8 0 5 1.8 5.5 5"
+                                />
+
+                                <circle
+                                    cx="17"
+                                    cy="7"
+                                    r="2"
+                                />
+
+                            </svg>
+
+                        </i>
+
+
+                        <select
+                            id="position"
+                            name="position"
                         >
 
-                            <circle
-                                cx="9"
-                                cy="8"
-                                r="3"
-                            ></circle>
+                            <option
+                                value=""
+                                selected
+                            >
+                                Select Position
+                            </option>
 
-                            <path
-                                d="M3 20c0-3.5 2.5-6 6-6s6 2.5 6 6"
-                            ></path>
+                            <option value="President">
+                                President
+                            </option>
 
-                            <circle
-                                cx="17"
-                                cy="9"
-                                r="2.5"
-                            ></circle>
+                            <option value="Vice President">
+                                Vice President
+                            </option>
 
-                            <path
-                                d="M15 15c3 0 5 2 5 5"
-                            ></path>
+                            <option value="Secretary">
+                                Secretary
+                            </option>
 
-                        </svg>
+                            <option value="Treasurer">
+                                Treasurer
+                            </option>
 
-                    </div>
+                            <option value="Auditor">
+                                Auditor
+                            </option>
 
+                            <option value="Public Information Officer">
+                                Public Information Officer
+                            </option>
 
-                    <select
-                        id="position"
-                        name="position"
-                        required
-                    >
+                            <option value="Business Manager">
+                                Business Manager
+                            </option>
 
-                        <option
-                            value=""
-                            selected
-                            disabled
-                        >
-                            Select your position
-                        </option>
+                            <option value="Representative">
+                                Representative
+                            </option>
 
-                        <option value="President">
-                            President
-                        </option>
-
-                        <option value="Vice President">
-                            Vice President
-                        </option>
-
-                        <option value="Secretary">
-                            Secretary
-                        </option>
-
-                        <option value="Treasurer">
-                            Treasurer
-                        </option>
-
-                        <option value="Auditor">
-                            Auditor
-                        </option>
-
-                        <option value="PIO">
-                            Public Information Officer
-                        </option>
-
-                        <option value="Events Head">
-                            Events Head
-                        </option>
-
-                        <option value="Membership Head">
-                            Membership Head
-                        </option>
-
-                        <option value="Academic Affairs Head">
-                            Academic Affairs Head
-                        </option>
-
-                    </select>
+                        </select>
 
 
-                    <div class="select-arrow">
+                        <span class="select-arrow">
 
-                        <svg
-                            viewBox="0 0 24 24"
-                        >
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
 
-                            <path
-                                d="M6 9l6 6 6-6"
-                            ></path>
+                                <path
+                                    d="M6 9l6 6 6-6"
+                                />
 
-                        </svg>
+                            </svg>
+
+                        </span>
 
                     </div>
 
@@ -363,9 +379,10 @@
 
                 <!-- OPTIONS -->
 
-                <div class="form-options">
+                <div class="options">
 
-                    <label class="remember-option">
+
+                    <label class="remember-me">
 
                         <input
                             type="checkbox"
@@ -374,7 +391,7 @@
 
                         <span class="custom-checkbox"></span>
 
-                        <span class="remember-text">
+                        <span>
                             Remember me
                         </span>
 
@@ -383,11 +400,12 @@
 
                     <button
                         type="button"
+                        class="forgot-link"
                         id="forgotPassword"
-                        class="forgot-password"
                     >
                         Forgot password?
                     </button>
+
 
                 </div>
 
@@ -397,464 +415,587 @@
 
                 <button
                     type="submit"
-                    class="sign-in-button"
+                    class="signin-btn"
+                    id="signInButton"
                 >
 
-                    <span>
+                    <span id="signInText">
                         Sign In
+                    </span>
+
+                    <span
+                        class="arrow"
+                        id="signInArrow"
+                    >
+                        →
                     </span>
 
                 </button>
 
 
 
-                <!-- AUTHORIZED -->
-
-                <div class="authorized-message">
-
-                    <span class="authorized-line"></span>
-
-                    <span>
-                        Authorized organization members only
-                    </span>
-
-                    <span class="authorized-line"></span>
-
-                </div>
-
-
-                <!-- MESSAGE -->
+                <!-- LOGIN MESSAGE -->
 
                 <div
                     id="loginMessage"
                     class="login-message"
                 ></div>
 
+
+
+                <!-- AUTHORIZED -->
+
+                <div class="authorized">
+
+                    <span class="line"></span>
+
+                    <span>
+                        Authorized organization members only
+                    </span>
+
+                    <span class="line"></span>
+
+                </div>
+
+
             </form>
 
         </section>
 
-    </main>
+
+    </div>
 
 
 
     <!-- =====================================================
-         JAVASCRIPT
+         LOGIN JAVASCRIPT
     ====================================================== -->
 
     <script>
 
-        document.addEventListener(
-            "DOMContentLoaded",
-            function () {
+
+        /* =================================================
+           GOOGLE APPS SCRIPT WEB APP URL
+        ================================================== */
+
+        const WEB_APP_URL =
+            "https://script.google.com/macros/s/AKfycbzTZORNDMsHLxoPeOLNAHurKurC14whoFKxT10RVPyCxP-z9H03slRLTUyhVx7tkyMW/exec";
 
 
-                const loadingScreen =
-                    document.getElementById(
-                        "loadingScreen"
-                    );
+        /* =================================================
+           ELEMENTS
+        ================================================== */
 
-                const loadingBrand =
-                    document.getElementById(
-                        "loadingBrand"
-                    );
-
-                const backgroundLayer =
-                    document.getElementById(
-                        "backgroundLayer"
-                    );
-
-                const loginPage =
-                    document.getElementById(
-                        "loginPage"
-                    );
-
-                const loginForm =
-                    document.getElementById(
-                        "loginForm"
-                    );
-
-                const password =
-                    document.getElementById(
-                        "password"
-                    );
-
-                const togglePassword =
-                    document.getElementById(
-                        "togglePassword"
-                    );
-
-                const position =
-                    document.getElementById(
-                        "position"
-                    );
-
-                const rememberMe =
-                    document.getElementById(
-                        "rememberMe"
-                    );
-
-                const username =
-                    document.getElementById(
-                        "username"
-                    );
-
-                const loginMessage =
-                    document.getElementById(
-                        "loginMessage"
-                    );
-
-                const forgotPassword =
-                    document.getElementById(
-                        "forgotPassword"
-                    );
+        const loginForm =
+            document.getElementById(
+                "loginForm"
+            );
 
 
-
-                /* =================================================
-                   BACKGROUND PRELOAD
-                ================================================= */
-
-                const backgroundImage =
-                    new Image();
+        const usernameInput =
+            document.getElementById(
+                "username"
+            );
 
 
-                backgroundImage.src =
-                    "assets/management-background.png";
+        const passwordInput =
+            document.getElementById(
+                "password"
+            );
 
 
-                function startLoadingAnimation() {
-
-                    /*
-                        First make the background visible.
-                        The logo does NOT appear yet.
-                    */
-
-                    backgroundLayer.classList.add(
-                        "background-loaded"
-                    );
+        const positionInput =
+            document.getElementById(
+                "position"
+            );
 
 
-                    /*
-                        Wait for the browser to paint the
-                        background before showing the logo.
-                    */
-
-                    requestAnimationFrame(
-                        function () {
-
-                            requestAnimationFrame(
-                                function () {
-
-                                    loadingBrand.classList.add(
-                                        "brand-visible"
-                                    );
-
-                                }
-                            );
-
-                        }
-                    );
+        const togglePassword =
+            document.getElementById(
+                "togglePassword"
+            );
 
 
-                    /*
-                        Loading screen duration
-                    */
-
-                    setTimeout(
-                        function () {
-
-                            loadingScreen.classList.add(
-                                "loading-hidden"
-                            );
+        const eyeIcon =
+            document.getElementById(
+                "eyeIcon"
+            );
 
 
-                            setTimeout(
-                                function () {
-
-                                    loadingScreen.style.display =
-                                        "none";
-
-                                    document.body.classList.remove(
-                                        "loading-active"
-                                    );
-
-                                    loginPage.classList.add(
-                                        "login-visible"
-                                    );
-
-                                },
-                                850
-                            );
-
-                        },
-                        2300
-                    );
-
-                }
+        const loginMessage =
+            document.getElementById(
+                "loginMessage"
+            );
 
 
+        const signInButton =
+            document.getElementById(
+                "signInButton"
+            );
 
-                /*
-                    Wait for the background to load.
-                */
+
+        const signInText =
+            document.getElementById(
+                "signInText"
+            );
+
+
+        const signInArrow =
+            document.getElementById(
+                "signInArrow"
+            );
+
+
+        const rememberMe =
+            document.getElementById(
+                "rememberMe"
+            );
+
+
+        /* =================================================
+           PASSWORD VISIBILITY
+        ================================================== */
+
+        togglePassword.addEventListener(
+            "click",
+            function() {
 
                 if (
-                    backgroundImage.complete &&
-                    backgroundImage.naturalWidth > 0
+                    passwordInput.type ===
+                    "password"
                 ) {
 
-                    startLoadingAnimation();
-
-                } else {
-
-                    backgroundImage.onload =
-                        startLoadingAnimation;
-
-                    backgroundImage.onerror =
-                        startLoadingAnimation;
-
-                }
+                    passwordInput.type =
+                        "text";
 
 
+                    eyeIcon.innerHTML = `
+                        <path d="M3 6l18 12M6 6h12v12H6z"/>
+                    `;
 
-                /* =================================================
-                   REMEMBERED LOGIN
-                ================================================= */
 
-                const savedUsername =
-                    localStorage.getItem(
-                        "psabeRememberedUsername"
-                    );
-
-                const savedPosition =
-                    localStorage.getItem(
-                        "psabeRememberedPosition"
+                    togglePassword.classList.add(
+                        "active"
                     );
 
 
-                if (savedUsername) {
-
-                    username.value =
-                        savedUsername;
-
-                    rememberMe.checked =
-                        true;
+                    togglePassword.setAttribute(
+                        "aria-label",
+                        "Hide password"
+                    );
 
                 }
 
+                else {
 
-                if (savedPosition) {
+                    passwordInput.type =
+                        "password";
 
-                    position.value =
-                        savedPosition;
 
-                }
+                    eyeIcon.innerHTML = `
+                        <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z"/>
+                        <circle cx="12" cy="12" r="2.5"/>
+                    `;
 
 
+                    togglePassword.classList.remove(
+                        "active"
+                    );
 
-                /* =================================================
-                   PASSWORD TOGGLE
-                ================================================= */
 
-                togglePassword.addEventListener(
-                    "click",
-                    function () {
-
-                        if (
-                            password.type ===
-                            "password"
-                        ) {
-
-                            password.type =
-                                "text";
-
-                            togglePassword.setAttribute(
-                                "aria-label",
-                                "Hide password"
-                            );
-
-                            togglePassword.classList.add(
-                                "password-visible"
-                            );
-
-                        } else {
-
-                            password.type =
-                                "password";
-
-                            togglePassword.setAttribute(
-                                "aria-label",
-                                "Show password"
-                            );
-
-                            togglePassword.classList.remove(
-                                "password-visible"
-                            );
-
-                        }
-
-                    }
-                );
-
-
-
-                /* =================================================
-                   FORGOT PASSWORD
-                ================================================= */
-
-                forgotPassword.addEventListener(
-                    "click",
-                    function () {
-
-                        showMessage(
-                            "Please contact the PSABE-PPG system administrator to reset your password.",
-                            "info"
-                        );
-
-                    }
-                );
-
-
-
-                /* =================================================
-                   LOGIN
-                ================================================= */
-
-                loginForm.addEventListener(
-                    "submit",
-                    function (event) {
-
-                        event.preventDefault();
-
-
-                        const enteredUsername =
-                            username.value.trim();
-
-                        const enteredPassword =
-                            password.value;
-
-                        const selectedPosition =
-                            position.value;
-
-
-                        if (
-                            !enteredUsername ||
-                            !enteredPassword ||
-                            !selectedPosition
-                        ) {
-
-                            showMessage(
-                                "Please complete all login fields.",
-                                "error"
-                            );
-
-                            return;
-
-                        }
-
-
-                        /*
-                            TEMPORARY LOGIN
-                        */
-
-                        const validUsername =
-                            "admin";
-
-                        const validPassword =
-                            "psabe123";
-
-
-                        if (
-                            enteredUsername ===
-                            validUsername &&
-
-                            enteredPassword ===
-                            validPassword
-                        ) {
-
-
-                            if (
-                                rememberMe.checked
-                            ) {
-
-                                localStorage.setItem(
-                                    "psabeRememberedUsername",
-                                    enteredUsername
-                                );
-
-                                localStorage.setItem(
-                                    "psabeRememberedPosition",
-                                    selectedPosition
-                                );
-
-                            } else {
-
-                                localStorage.removeItem(
-                                    "psabeRememberedUsername"
-                                );
-
-                                localStorage.removeItem(
-                                    "psabeRememberedPosition"
-                                );
-
-                            }
-
-
-                            showMessage(
-                                "Login successful. Opening management system...",
-                                "success"
-                            );
-
-
-                            setTimeout(
-                                function () {
-
-                                    window.location.href =
-                                        "dashboard.html";
-
-                                },
-                                900
-                            );
-
-
-                        } else {
-
-                            showMessage(
-                                "Incorrect username or password.",
-                                "error"
-                            );
-
-                        }
-
-                    }
-                );
-
-
-
-                /* =================================================
-                   MESSAGE
-                ================================================= */
-
-                function showMessage(
-                    message,
-                    type
-                ) {
-
-                    loginMessage.textContent =
-                        message;
-
-                    loginMessage.className =
-                        "login-message " +
-                        type;
+                    togglePassword.setAttribute(
+                        "aria-label",
+                        "Show password"
+                    );
 
                 }
 
             }
         );
 
+
+
+        /* =================================================
+           REMEMBER ME
+        ================================================== */
+
+        const savedUsername =
+            localStorage.getItem(
+                "psabeRememberUsername"
+            );
+
+
+        if (savedUsername) {
+
+            usernameInput.value =
+                savedUsername;
+
+            rememberMe.checked =
+                true;
+
+        }
+
+
+        rememberMe.addEventListener(
+            "change",
+            function() {
+
+                if (
+                    !this.checked
+                ) {
+
+                    localStorage.removeItem(
+                        "psabeRememberUsername"
+                    );
+
+                }
+
+            }
+        );
+
+
+
+        /* =================================================
+           LOGIN FORM
+        ================================================== */
+
+        loginForm.addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+
+                const username =
+                    usernameInput.value.trim();
+
+
+                const password =
+                    passwordInput.value;
+
+
+                /*
+                   Position is intentionally NOT
+                   used for authentication.
+
+                   The correct position is retrieved
+                   automatically from the OFFICERS sheet.
+                */
+
+
+                if (
+                    !username ||
+                    !password
+                ) {
+
+                    showMessage(
+                        "Please enter your username and password.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                if (
+                    !WEB_APP_URL ||
+                    WEB_APP_URL ===
+                    "YOUR_WEB_APP_URL"
+                ) {
+
+                    showMessage(
+                        "The system connection has not been configured yet.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                setLoading(
+                    true
+                );
+
+
+                showMessage(
+                    "Signing in...",
+                    "success"
+                );
+
+
+                try {
+
+
+                    const response =
+                        await fetch(
+                            WEB_APP_URL,
+                            {
+
+                                method:
+                                    "POST",
+
+                                headers: {
+
+                                    "Content-Type":
+                                        "text/plain;charset=utf-8"
+
+                                },
+
+                                body:
+                                    JSON.stringify({
+
+                                        action:
+                                            "login",
+
+                                        data: {
+
+                                            username:
+                                                username,
+
+                                            password:
+                                                password
+
+                                        }
+
+                                    })
+
+                            }
+                        );
+
+
+                    const result =
+                        await response.json();
+
+
+                    console.log(
+                        "Login response:",
+                        result
+                    );
+
+
+                    if (
+                        result &&
+                        result.success
+                    ) {
+
+
+                        /*
+                           Save username only if
+                           Remember Me is checked.
+                        */
+
+                        if (
+                            rememberMe.checked
+                        ) {
+
+                            localStorage.setItem(
+                                "psabeRememberUsername",
+                                username
+                            );
+
+                        }
+
+                        else {
+
+                            localStorage.removeItem(
+                                "psabeRememberUsername"
+                            );
+
+                        }
+
+
+                        /*
+                           Store current logged-in
+                           officer information.
+                        */
+
+                        sessionStorage.setItem(
+                            "psabeLoggedIn",
+                            "true"
+                        );
+
+
+                        sessionStorage.setItem(
+                            "psabeUsername",
+                            result.user.username
+                        );
+
+
+                        sessionStorage.setItem(
+                            "psabeName",
+                            result.user.name
+                        );
+
+
+                        sessionStorage.setItem(
+                            "psabePosition",
+                            result.user.position
+                        );
+
+
+                        sessionStorage.setItem(
+                            "psabeStatus",
+                            result.user.status
+                        );
+
+
+                        showMessage(
+                            "Login successful. Opening Management System...",
+                            "success"
+                        );
+
+
+                        /*
+                           Small delay so the
+                           success message can
+                           appear before redirect.
+                        */
+
+                        setTimeout(
+                            function() {
+
+                                window.location.href =
+                                    "dashboard.html";
+
+                            },
+                            500
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    /*
+                       Failed login
+                    */
+
+                    showMessage(
+                        result &&
+                        result.message
+                            ? result.message
+                            : "Incorrect username or password.",
+                        "error"
+                    );
+
+
+                    setLoading(
+                        false
+                    );
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "Login error:",
+                        error
+                    );
+
+
+                    showMessage(
+                        "Unable to connect to the PSABE-PPG Management System. Please check the system connection.",
+                        "error"
+                    );
+
+
+                    setLoading(
+                        false
+                    );
+
+                }
+
+            }
+        );
+
+
+
+        /* =================================================
+           FORGOT PASSWORD
+        ================================================== */
+
+        document
+            .getElementById(
+                "forgotPassword"
+            )
+            .addEventListener(
+                "click",
+                function() {
+
+                    showMessage(
+                        "Please contact the PSABE-PPG administrator for account assistance.",
+                        "information"
+                    );
+
+                }
+            );
+
+
+
+        /* =================================================
+           MESSAGE
+        ================================================== */
+
+        function showMessage(
+            message,
+            type
+        ) {
+
+            loginMessage.textContent =
+                message;
+
+
+            loginMessage.className =
+                "login-message " +
+                type;
+
+        }
+
+
+
+        /* =================================================
+           LOADING STATE
+        ================================================== */
+
+        function setLoading(
+            loading
+        ) {
+
+            signInButton.disabled =
+                loading;
+
+
+            if (loading) {
+
+                signInText.textContent =
+                    "Signing In";
+
+
+                signInArrow.textContent =
+                    "⋯";
+
+            }
+
+            else {
+
+                signInText.textContent =
+                    "Sign In";
+
+
+                signInArrow.textContent =
+                    "→";
+
+            }
+
+        }
+
+
     </script>
+
 
 </body>
 
-</html>
+</html>f
