@@ -3313,22 +3313,38 @@
 
     window.renderAvailabilityTable = renderAvailabilityTable;
 
-    document.addEventListener("DOMContentLoaded", function () {
+    function initializeAvailabilityControls() {
         const openButton = document.getElementById("openAvailabilityButton");
         const closeButton = document.getElementById("closeAvailabilityButton");
         const cancelButton = document.getElementById("cancelAvailabilityButton");
         const saveButton = document.getElementById("saveAvailabilityButton");
         const modal = document.getElementById("availabilityModal");
 
-        if (openButton) openButton.addEventListener("click", openAvailabilityModal);
-        if (closeButton) closeButton.addEventListener("click", closeAvailabilityModal);
-        if (cancelButton) cancelButton.addEventListener("click", closeAvailabilityModal);
-        if (saveButton) saveButton.addEventListener("click", saveMyAvailability);
+        if (openButton && !openButton.dataset.availabilityBound) {
+            openButton.addEventListener("click", openAvailabilityModal);
+            openButton.dataset.availabilityBound = "true";
+        }
 
-        if (modal) {
+        if (closeButton && !closeButton.dataset.availabilityBound) {
+            closeButton.addEventListener("click", closeAvailabilityModal);
+            closeButton.dataset.availabilityBound = "true";
+        }
+
+        if (cancelButton && !cancelButton.dataset.availabilityBound) {
+            cancelButton.addEventListener("click", closeAvailabilityModal);
+            cancelButton.dataset.availabilityBound = "true";
+        }
+
+        if (saveButton && !saveButton.dataset.availabilityBound) {
+            saveButton.addEventListener("click", saveMyAvailability);
+            saveButton.dataset.availabilityBound = "true";
+        }
+
+        if (modal && !modal.dataset.availabilityBound) {
             modal.addEventListener("click", function (event) {
                 if (event.target === modal) closeAvailabilityModal();
             });
+            modal.dataset.availabilityBound = "true";
         }
 
         renderAvailabilityTable();
@@ -3336,7 +3352,11 @@
         if (window.lucide) {
             lucide.createIcons();
         }
-    });
+    }
+
+    // The modal is placed after the main dashboard markup, so initialize
+    // immediately when this script reaches the end of the document.
+    initializeAvailabilityControls();
 
 })();
 </script>
