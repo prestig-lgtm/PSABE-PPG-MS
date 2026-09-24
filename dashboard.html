@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -16,12 +17,17 @@
 
     <title>PSABE-PPG Management System</title>
 
-    <link rel="preload"
-          as="image"
-          href="assets/management-background.png">
+    <link
+        rel="preload"
+        as="image"
+        href="assets/management-background.png"
+    >
 
-    <link rel="stylesheet"
-          href="dashboard.css">
+    <link
+        rel="stylesheet"
+        href="dashboard.css"
+    >
+
 </head>
 
 
@@ -363,8 +369,6 @@
 
                 </button>
 
-
-
             </nav>
 
 
@@ -372,7 +376,6 @@
             <!-- SIDEBAR BOTTOM -->
 
             <div class="sidebar-bottom">
-
 
                 <button
                     class="nav-item"
@@ -484,14 +487,13 @@
 
             <div class="profile-area">
 
-
                 <div class="profile-text">
 
-                    <strong id="officerName">
+                    <strong>
                         MC RJ Escote
                     </strong>
 
-                    <span id="officerPosition">
+                    <span>
                         Vice President
                     </span>
 
@@ -520,226 +522,834 @@
 
 
             <!-- =================================================
-                 WELCOME
+                 DASHBOARD PAGE
             ================================================== -->
 
-            <div class="welcome-section">
+            <div
+                id="dashboardPage"
+                class="page-section active-page"
+            >
 
-                <div>
 
-                    <p
-                        class="eyebrow"
-                        id="currentDate"
+                <div class="welcome-section">
+
+                    <div>
+
+                        <p
+                            class="eyebrow"
+                            id="currentDate"
+                        >
+                            TODAY
+                        </p>
+
+                        <h1>
+                            Good evening,
+                            <span>MC RJ</span>.
+                        </h1>
+
+                        <p class="welcome-description">
+                            Here's what's happening with
+                            PSABE-PPG today.
+                        </p>
+
+                    </div>
+
+
+                    <div class="current-time-card">
+
+                        <span>
+                            CURRENT TIME
+                        </span>
+
+                        <strong id="currentTime">
+                            00:00:00
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- SUMMARY -->
+
+                <div class="summary-grid">
+
+
+                    <div class="summary-card">
+
+                        <div class="summary-icon task-icon">
+
+                            <svg viewBox="0 0 24 24">
+
+                                <rect
+                                    x="4"
+                                    y="3"
+                                    width="16"
+                                    height="18"
+                                    rx="2"
+                                ></rect>
+
+                                <line
+                                    x1="8"
+                                    y1="8"
+                                    x2="16"
+                                    y2="8"
+                                ></line>
+
+                                <line
+                                    x1="8"
+                                    y1="12"
+                                    x2="16"
+                                    y2="12"
+                                ></line>
+
+                                <line
+                                    x1="8"
+                                    y1="16"
+                                    x2="13"
+                                    y2="16"
+                                ></line>
+
+                            </svg>
+
+                        </div>
+
+                        <div class="summary-info">
+
+                            <span>
+                                MY TASKS
+                            </span>
+
+                            <strong>
+                                3
+                            </strong>
+
+                            <small>
+                                Active tasks
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="summary-card">
+
+                        <div class="summary-icon event-icon">
+
+                            <svg viewBox="0 0 24 24">
+
+                                <rect
+                                    x="3"
+                                    y="4"
+                                    width="18"
+                                    height="17"
+                                    rx="2"
+                                ></rect>
+
+                                <line
+                                    x1="16"
+                                    y1="2"
+                                    x2="16"
+                                    y2="6"
+                                ></line>
+
+                                <line
+                                    x1="8"
+                                    y1="2"
+                                    x2="8"
+                                    y2="6"
+                                ></line>
+
+                                <line
+                                    x1="3"
+                                    y1="9"
+                                    x2="21"
+                                    y2="9"
+                                ></line>
+
+                            </svg>
+
+                        </div>
+
+                        <div class="summary-info">
+
+                            <span>
+                                EVENTS
+                            </span>
+
+                            <strong>
+                                2
+                            </strong>
+
+                            <small>
+                                Upcoming
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="summary-card">
+
+                        <div class="summary-icon meeting-icon">
+
+                            <svg viewBox="0 0 24 24">
+
+                                <circle
+                                    cx="8"
+                                    cy="8"
+                                    r="3"
+                                ></circle>
+
+                                <circle
+                                    cx="17"
+                                    cy="9"
+                                    r="2.5"
+                                ></circle>
+
+                                <path
+                                    d="M2.5 21c0-4 2.5-6 5.5-6s5.5 2 5.5 6"
+                                ></path>
+
+                                <path
+                                    d="M14 16c3 0 5 2 5 5"
+                                ></path>
+
+                            </svg>
+
+                        </div>
+
+                        <div class="summary-info">
+
+                            <span>
+                                MEETINGS
+                            </span>
+
+                            <strong>
+                                1
+                            </strong>
+
+                            <small>
+                                This week
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="summary-card">
+
+                        <div class="summary-icon availability-icon">
+
+                            <svg viewBox="0 0 24 24">
+
+                                <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="9"
+                                ></circle>
+
+                                <path
+                                    d="M8 12l2.5 2.5L16 9"
+                                ></path>
+
+                            </svg>
+
+                        </div>
+
+                        <div class="summary-info">
+
+                            <span>
+                                AVAILABILITY
+                            </span>
+
+                            <strong>
+                                Available
+                            </strong>
+
+                            <small>
+                                Today
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- MAIN DASHBOARD GRID -->
+
+                <div class="main-grid">
+
+
+                    <section class="dashboard-panel activities-panel">
+
+                        <div class="panel-header">
+
+                            <div>
+
+                                <span class="panel-label">
+                                    TODAY
+                                </span>
+
+                                <h2>
+                                    Today's Activities
+                                </h2>
+
+                            </div>
+
+
+                            <button
+                                class="panel-link"
+                                data-page-link="calendar"
+                            >
+                                View Calendar
+                            </button>
+
+                        </div>
+
+
+
+                        <div class="activity-list">
+
+
+                            <div class="activity-item">
+
+                                <div class="activity-time">
+
+                                    <strong>
+                                        2:00 PM
+                                    </strong>
+
+                                    <span>
+                                        DUE
+                                    </span>
+
+                                </div>
+
+
+                                <div class="activity-line task-line"></div>
+
+
+                                <div class="activity-details">
+
+                                    <span class="activity-type task-type">
+                                        TASK
+                                    </span>
+
+                                    <h3>
+                                        Prepare attendance materials
+                                    </h3>
+
+                                    <p>
+                                        Prepare and organize the
+                                        attendance materials for
+                                        the upcoming activity.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <div class="activity-item">
+
+                                <div class="activity-time">
+
+                                    <strong>
+                                        4:00 PM
+                                    </strong>
+
+                                    <span>
+                                        6:00 PM
+                                    </span>
+
+                                </div>
+
+
+                                <div class="activity-line event-line"></div>
+
+
+                                <div class="activity-details">
+
+                                    <span class="activity-type event-type">
+                                        EVENT
+                                    </span>
+
+                                    <h3>
+                                        General Assembly
+                                    </h3>
+
+                                    <p>
+                                        PSABE-PPG CSU Chapter
+                                        General Assembly.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <div class="activity-item">
+
+                                <div class="activity-time">
+
+                                    <strong>
+                                        7:00 PM
+                                    </strong>
+
+                                    <span>
+                                        8:00 PM
+                                    </span>
+
+                                </div>
+
+
+                                <div class="activity-line meeting-line"></div>
+
+
+                                <div class="activity-details">
+
+                                    <span class="activity-type meeting-type">
+                                        MEETING
+                                    </span>
+
+                                    <h3>
+                                        Executive Committee Meeting
+                                    </h3>
+
+                                    <p>
+                                        Executive Committee
+                                        coordination meeting.
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+                    </section>
+
+
+
+                    <section class="dashboard-panel upcoming-panel">
+
+                        <div class="panel-header">
+
+                            <div>
+
+                                <span class="panel-label">
+                                    OVERVIEW
+                                </span>
+
+                                <h2>
+                                    Upcoming
+                                </h2>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="next-event-card">
+
+                            <div class="next-event-date">
+
+                                <span>
+                                    SEP
+                                </span>
+
+                                <strong>
+                                    25
+                                </strong>
+
+                            </div>
+
+
+                            <div class="next-event-info">
+
+                                <span>
+                                    TOMORROW · 9:00 AM
+                                </span>
+
+                                <h3>
+                                    Officer Coordination
+                                </h3>
+
+                                <p>
+                                    Executive officers'
+                                    coordination session.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="availability-preview">
+
+                            <div class="mini-header">
+
+                                <div>
+
+                                    <span class="panel-label">
+                                        OFFICERS
+                                    </span>
+
+                                    <h3>
+                                        Today's Availability
+                                    </h3>
+
+                                </div>
+
+                                <button
+                                    class="text-button"
+                                    data-page-link="availability"
+                                >
+                                    View All
+                                </button>
+
+                            </div>
+
+
+                            <div class="availability-status">
+
+                                <span class="status-dot"></span>
+
+                                <div>
+
+                                    <strong>
+                                        You are available
+                                    </strong>
+
+                                    <small>
+                                        9:00 AM – 12:00 PM
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="availability-status">
+
+                                <span class="status-dot"></span>
+
+                                <div>
+
+                                    <strong>
+                                        4 officers available
+                                    </strong>
+
+                                    <small>
+                                        1:00 PM – 2:00 PM
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                </div>
+
+
+
+                <!-- ANNOUNCEMENT -->
+
+                <section class="announcement-banner">
+
+                    <div class="announcement-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <path d="M4 11v8"></path>
+
+                            <path d="M4 11l15-5v12L4 13z"></path>
+
+                            <path d="M19 10v4"></path>
+
+                            <path d="M7 14l1.5 6h3L10 15"></path>
+
+                        </svg>
+
+                    </div>
+
+
+                    <div class="announcement-content">
+
+                        <span>
+                            LATEST ANNOUNCEMENT
+                        </span>
+
+                        <strong>
+                            General Assembly preparation
+                            is currently underway.
+                        </strong>
+
+                        <p>
+                            Please check your assigned tasks
+                            and availability before the event.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        class="announcement-button"
+                        data-page-link="announcements"
                     >
-                        TODAY
-                    </p>
+                        View Announcements
+                    </button>
 
-                    <h1>
-                        Good evening, <span>MC RJ</span>.
-                    </h1>
+                </section>
 
-                    <p class="welcome-description">
-                        Here's what's happening with
-                        PSABE-PPG today.
-                    </p>
-
-                </div>
-
-
-                <div class="current-time-card">
-
-                    <span>
-                        CURRENT TIME
-                    </span>
-
-                    <strong id="currentTime">
-                        00:00:00
-                    </strong>
-
-                </div>
 
             </div>
 
 
 
             <!-- =================================================
-                 SUMMARY CARDS
+                 CALENDAR PAGE
             ================================================== -->
 
-            <div class="summary-grid">
+            <div
+                id="calendarPage"
+                class="page-section"
+            >
 
 
-                <div class="summary-card">
+                <!-- CALENDAR HEADER -->
 
-                    <div class="summary-icon task-icon">
+                <div class="calendar-page-header">
 
-                        <svg viewBox="0 0 24 24">
+                    <div>
 
-                            <rect
-                                x="4"
-                                y="3"
-                                width="16"
-                                height="18"
-                                rx="2"
-                            ></rect>
+                        <p class="eyebrow">
+                            SCHEDULE
+                        </p>
 
-                            <line
-                                x1="8"
-                                y1="8"
-                                x2="16"
-                                y2="8"
-                            ></line>
+                        <h1>
+                            Calendar
+                        </h1>
 
-                            <line
-                                x1="8"
-                                y1="12"
-                                x2="16"
-                                y2="12"
-                            ></line>
-
-                            <line
-                                x1="8"
-                                y1="16"
-                                x2="13"
-                                y2="16"
-                            ></line>
-
-                        </svg>
+                        <p>
+                            View tasks, events, and meetings
+                            scheduled for the organization.
+                        </p>
 
                     </div>
 
-                    <div class="summary-info">
 
-                        <span>
-                            MY TASKS
-                        </span>
-
-                        <strong>
-                            3
-                        </strong>
-
-                        <small>
-                            Active tasks
-                        </small>
-
-                    </div>
+                    <button
+                        id="calendarTodayButton"
+                        class="calendar-today-button"
+                    >
+                        Today
+                    </button>
 
                 </div>
 
 
 
-                <div class="summary-card">
+                <!-- CALENDAR LAYOUT -->
 
-                    <div class="summary-icon event-icon">
+                <div class="calendar-layout">
 
-                        <svg viewBox="0 0 24 24">
 
-                            <rect
-                                x="3"
-                                y="4"
-                                width="18"
-                                height="17"
-                                rx="2"
-                            ></rect>
+                    <!-- CALENDAR -->
 
-                            <line
-                                x1="16"
-                                y1="2"
-                                x2="16"
-                                y2="6"
-                            ></line>
+                    <section class="calendar-panel">
 
-                            <line
-                                x1="8"
-                                y1="2"
-                                x2="8"
-                                y2="6"
-                            ></line>
 
-                            <line
-                                x1="3"
-                                y1="9"
-                                x2="21"
-                                y2="9"
-                            ></line>
+                        <div class="calendar-toolbar">
 
-                        </svg>
 
-                    </div>
+                            <button
+                                id="previousMonth"
+                                class="calendar-arrow"
+                                aria-label="Previous month"
+                            >
+                                ‹
+                            </button>
 
-                    <div class="summary-info">
 
-                        <span>
-                            EVENTS
-                        </span>
+                            <h2 id="calendarMonth">
+                                September 2026
+                            </h2>
 
-                        <strong>
-                            2
-                        </strong>
 
-                        <small>
-                            Upcoming
-                        </small>
+                            <button
+                                id="nextMonth"
+                                class="calendar-arrow"
+                                aria-label="Next month"
+                            >
+                                ›
+                            </button>
 
-                    </div>
+
+                        </div>
+
+
+
+                        <!-- LEGEND -->
+
+                        <div class="calendar-legend">
+
+                            <span>
+
+                                <i class="legend-dot task-dot"></i>
+
+                                Task
+
+                            </span>
+
+
+                            <span>
+
+                                <i class="legend-dot event-dot"></i>
+
+                                Event
+
+                            </span>
+
+
+                            <span>
+
+                                <i class="legend-dot meeting-dot"></i>
+
+                                Meeting
+
+                            </span>
+
+                        </div>
+
+
+
+                        <!-- WEEKDAYS -->
+
+                        <div class="calendar-weekdays">
+
+                            <span>
+                                MON
+                            </span>
+
+                            <span>
+                                TUE
+                            </span>
+
+                            <span>
+                                WED
+                            </span>
+
+                            <span>
+                                THU
+                            </span>
+
+                            <span>
+                                FRI
+                            </span>
+
+                            <span>
+                                SAT
+                            </span>
+
+                            <span>
+                                SUN
+                            </span>
+
+                        </div>
+
+
+
+                        <!-- DAYS -->
+
+                        <div
+                            id="calendarGrid"
+                            class="calendar-grid"
+                        ></div>
+
+
+                    </section>
+
+
+
+                    <!-- SELECTED DAY -->
+
+                    <section
+                        id="selectedDayPanel"
+                        class="selected-day-panel"
+                    >
+
+                        <div class="selected-day-header">
+
+                            <div>
+
+                                <span>
+                                    SELECTED DATE
+                                </span>
+
+                                <h2 id="selectedDateTitle">
+                                    September 24
+                                </h2>
+
+                                <p id="selectedDateDay">
+                                    Thursday
+                                </p>
+
+                            </div>
+
+
+                            <div
+                                id="selectedDateNumber"
+                                class="selected-date-number"
+                            >
+                                24
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="selected-divider"></div>
+
+
+
+                        <div
+                            id="selectedActivities"
+                            class="selected-activities"
+                        ></div>
+
+
+                    </section>
 
                 </div>
 
 
 
-                <div class="summary-card">
+                <!-- CALENDAR NOTE -->
 
-                    <div class="summary-icon meeting-icon">
+                <div class="calendar-note">
 
-                        <svg viewBox="0 0 24 24">
-
-                            <circle
-                                cx="8"
-                                cy="8"
-                                r="3"
-                            ></circle>
-
-                            <circle
-                                cx="17"
-                                cy="9"
-                                r="2.5"
-                            ></circle>
-
-                            <path
-                                d="M2.5 21c0-4 2.5-6 5.5-6s5.5 2 5.5 6"
-                            ></path>
-
-                            <path
-                                d="M14 16c3 0 5 2 5 5"
-                            ></path>
-
-                        </svg>
-
-                    </div>
-
-                    <div class="summary-info">
-
-                        <span>
-                            MEETINGS
-                        </span>
-
-                        <strong>
-                            1
-                        </strong>
-
-                        <small>
-                            This week
-                        </small>
-
-                    </div>
-
-                </div>
-
-
-
-                <div class="summary-card">
-
-                    <div class="summary-icon availability-icon">
+                    <div class="calendar-note-icon">
 
                         <svg viewBox="0 0 24 24">
 
@@ -750,26 +1360,32 @@
                             ></circle>
 
                             <path
-                                d="M8 12l2.5 2.5L16 9"
+                                d="M12 11v5"
                             ></path>
+
+                            <circle
+                                cx="12"
+                                cy="8"
+                                r="0.7"
+                                fill="currentColor"
+                                stroke="none"
+                            ></circle>
 
                         </svg>
 
                     </div>
 
-                    <div class="summary-info">
-
-                        <span>
-                            AVAILABILITY
-                        </span>
+                    <div>
 
                         <strong>
-                            Available
+                            Organization schedule
                         </strong>
 
-                        <small>
-                            Today
-                        </small>
+                        <p>
+                            Tasks assigned by the Steering Committee
+                            will appear here together with organization
+                            events and meetings.
+                        </p>
 
                     </div>
 
@@ -781,371 +1397,38 @@
 
 
             <!-- =================================================
-                 MAIN GRID
+                 PLACEHOLDER PAGE
             ================================================== -->
 
-            <div class="main-grid">
-
-
-                <!-- =================================================
-                     TODAY'S ACTIVITIES
-                ================================================== -->
-
-                <section class="dashboard-panel activities-panel">
-
-
-                    <div class="panel-header">
-
-                        <div>
-
-                            <span class="panel-label">
-                                TODAY
-                            </span>
-
-                            <h2>
-                                Today's Activities
-                            </h2>
-
-                        </div>
-
-
-                        <button
-                            class="panel-link"
-                            data-page-link="calendar"
-                        >
-                            View Calendar
-                        </button>
-
-                    </div>
-
-
-
-                    <div class="activity-list">
-
-
-                        <!-- TASK -->
-
-                        <div class="activity-item">
-
-                            <div class="activity-time">
-                                <strong>
-                                    2:00 PM
-                                </strong>
-
-                                <span>
-                                    DUE
-                                </span>
-                            </div>
-
-
-                            <div class="activity-line task-line"></div>
-
-
-                            <div class="activity-details">
-
-                                <span class="activity-type task-type">
-                                    TASK
-                                </span>
-
-                                <h3>
-                                    Prepare attendance materials
-                                </h3>
-
-                                <p>
-                                    Prepare and organize the
-                                    attendance materials for
-                                    the upcoming activity.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-
-                        <!-- EVENT -->
-
-                        <div class="activity-item">
-
-                            <div class="activity-time">
-
-                                <strong>
-                                    4:00 PM
-                                </strong>
-
-                                <span>
-                                    6:00 PM
-                                </span>
-
-                            </div>
-
-
-                            <div class="activity-line event-line"></div>
-
-
-                            <div class="activity-details">
-
-                                <span class="activity-type event-type">
-                                    EVENT
-                                </span>
-
-                                <h3>
-                                    General Assembly
-                                </h3>
-
-                                <p>
-                                    PSABE-PPG CSU Chapter
-                                    General Assembly.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-
-                        <!-- MEETING -->
-
-                        <div class="activity-item">
-
-                            <div class="activity-time">
-
-                                <strong>
-                                    7:00 PM
-                                </strong>
-
-                                <span>
-                                    8:00 PM
-                                </span>
-
-                            </div>
-
-
-                            <div class="activity-line meeting-line"></div>
-
-
-                            <div class="activity-details">
-
-                                <span class="activity-type meeting-type">
-                                    MEETING
-                                </span>
-
-                                <h3>
-                                    Executive Committee Meeting
-                                </h3>
-
-                                <p>
-                                    Executive Committee
-                                    coordination meeting.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                    </div>
-
-                </section>
-
-
-
-                <!-- =================================================
-                     RIGHT PANEL
-                ================================================== -->
-
-                <section class="dashboard-panel upcoming-panel">
-
-
-                    <div class="panel-header">
-
-                        <div>
-
-                            <span class="panel-label">
-                                OVERVIEW
-                            </span>
-
-                            <h2>
-                                Upcoming
-                            </h2>
-
-                        </div>
-
-                    </div>
-
-
-
-                    <!-- NEXT EVENT -->
-
-                    <div class="next-event-card">
-
-                        <div class="next-event-date">
-
-                            <span>
-                                SEP
-                            </span>
-
-                            <strong>
-                                25
-                            </strong>
-
-                        </div>
-
-
-                        <div class="next-event-info">
-
-                            <span>
-                                TOMORROW · 9:00 AM
-                            </span>
-
-                            <h3>
-                                Officer Coordination
-                            </h3>
-
-                            <p>
-                                Executive officers'
-                                coordination session.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-
-                    <!-- AVAILABILITY -->
-
-                    <div class="availability-preview">
-
-                        <div class="mini-header">
-
-                            <div>
-
-                                <span class="panel-label">
-                                    OFFICERS
-                                </span>
-
-                                <h3>
-                                    Today's Availability
-                                </h3>
-
-                            </div>
-
-                            <button
-                                class="text-button"
-                                data-page-link="availability"
-                            >
-                                View All
-                            </button>
-
-                        </div>
-
-
-                        <div class="availability-status">
-
-                            <span class="status-dot"></span>
-
-                            <div>
-
-                                <strong>
-                                    You are available
-                                </strong>
-
-                                <small>
-                                    9:00 AM – 12:00 PM
-                                </small>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="availability-status">
-
-                            <span class="status-dot"></span>
-
-                            <div>
-
-                                <strong>
-                                    4 officers available
-                                </strong>
-
-                                <small>
-                                    1:00 PM – 2:00 PM
-                                </small>
-
-                            </div>
-
-                        </div>
-
-
-                    </div>
-
-                </section>
-
-            </div>
-
-
-
-            <!-- =================================================
-                 ANNOUNCEMENT
-            ================================================== -->
-
-            <section class="announcement-banner">
-
-
-                <div class="announcement-icon">
-
-                    <svg viewBox="0 0 24 24">
-
-                        <path
-                            d="M4 11v8"
-                        ></path>
-
-                        <path
-                            d="M4 11l15-5v12L4 13z"
-                        ></path>
-
-                        <path
-                            d="M19 10v4"
-                        ></path>
-
-                        <path
-                            d="M7 14l1.5 6h3L10 15"
-                        ></path>
-
-                    </svg>
-
-                </div>
-
-
-                <div class="announcement-content">
-
-                    <span>
-                        LATEST ANNOUNCEMENT
+            <div
+                id="placeholderPage"
+                class="page-section"
+            >
+
+                <div class="placeholder-panel">
+
+                    <span class="eyebrow">
+                        PSABE-PPG MANAGEMENT SYSTEM
                     </span>
 
-                    <strong>
-                        General Assembly preparation
-                        is currently underway.
-                    </strong>
+                    <h1 id="placeholderTitle">
+                        Coming Soon
+                    </h1>
 
-                    <p>
-                        Please check your assigned tasks
-                        and availability before the event.
+                    <p id="placeholderDescription">
+                        This section will be built next.
                     </p>
+
+                    <button
+                        id="backToDashboard"
+                        class="back-dashboard-button"
+                    >
+                        Back to Dashboard
+                    </button>
 
                 </div>
 
-
-                <button
-                    class="announcement-button"
-                    data-page-link="announcements"
-                >
-                    View Announcements
-                </button>
-
-            </section>
+            </div>
 
 
         </section>
@@ -1160,80 +1443,126 @@
 
     <script>
 
+
+        /* =====================================================
+           SAMPLE CALENDAR DATA
+        ===================================================== */
+
+        const calendarActivities = {
+
+
+            "2026-09-24": [
+
+                {
+                    type: "task",
+                    title: "Prepare attendance materials",
+                    description:
+                        "Prepare and organize the attendance materials for the upcoming activity.",
+                    time:
+                        "Due at 2:00 PM"
+                },
+
+                {
+                    type: "event",
+                    title: "General Assembly",
+                    description:
+                        "PSABE-PPG CSU Chapter General Assembly.",
+                    time:
+                        "4:00 PM – 6:00 PM"
+                },
+
+                {
+                    type: "meeting",
+                    title: "Executive Committee Meeting",
+                    description:
+                        "Executive Committee coordination meeting.",
+                    time:
+                        "7:00 PM – 8:00 PM"
+                }
+
+            ],
+
+
+
+            "2026-09-25": [
+
+                {
+                    type: "meeting",
+                    title: "Officer Coordination",
+                    description:
+                        "Executive officers' coordination session.",
+                    time:
+                        "9:00 AM – 10:00 AM"
+                },
+
+                {
+                    type: "task",
+                    title: "Submit committee updates",
+                    description:
+                        "Submit the latest committee progress updates.",
+                    time:
+                        "Due at 2:00 PM"
+                }
+
+            ],
+
+
+
+            "2026-09-26": [
+
+                {
+                    type: "event",
+                    title: "Membership Engagement Activity",
+                    description:
+                        "Member engagement and organizational activity.",
+                    time:
+                        "10:00 AM – 12:00 PM"
+                }
+
+            ],
+
+
+
+            "2026-09-29": [
+
+                {
+                    type: "task",
+                    title: "Finalize October work plan",
+                    description:
+                        "Review and finalize the upcoming organizational work plan.",
+                    time:
+                        "Due at 5:00 PM"
+                }
+
+            ],
+
+
+
+            "2026-09-30": [
+
+                {
+                    type: "meeting",
+                    title: "Steering Committee Meeting",
+                    description:
+                        "Planning and task coordination meeting.",
+                    time:
+                        "6:00 PM – 7:00 PM"
+                }
+
+            ]
+
+        };
+
+
+
+        /* =====================================================
+           GENERAL ELEMENTS
+        ===================================================== */
+
         document.addEventListener(
             "DOMContentLoaded",
             function () {
 
-
-                /* =============================================
-                   CURRENT DATE
-                ============================================= */
-
-                const currentDate =
-                    document.getElementById(
-                        "currentDate"
-                    );
-
-
-                const currentTime =
-                    document.getElementById(
-                        "currentTime"
-                    );
-
-
-                function updateDateTime() {
-
-                    const now =
-                        new Date();
-
-
-                    const dateText =
-                        now.toLocaleDateString(
-                            "en-PH",
-                            {
-                                weekday: "long",
-                                month: "long",
-                                day: "numeric",
-                                year: "numeric"
-                            }
-                        );
-
-
-                    const timeText =
-                        now.toLocaleTimeString(
-                            "en-PH",
-                            {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                second: "2-digit",
-                                hour12: true
-                            }
-                        );
-
-
-                    currentDate.textContent =
-                        dateText.toUpperCase();
-
-
-                    currentTime.textContent =
-                        timeText;
-
-                }
-
-
-                updateDateTime();
-
-
-                setInterval(
-                    updateDateTime,
-                    1000
-                );
-
-
-
-                /* =============================================
-                   SIDEBAR
-                ============================================= */
 
                 const sidebar =
                     document.getElementById(
@@ -1252,6 +1581,79 @@
                         "menuButton"
                     );
 
+
+                const currentDate =
+                    document.getElementById(
+                        "currentDate"
+                    );
+
+
+                const currentTime =
+                    document.getElementById(
+                        "currentTime"
+                    );
+
+
+
+                /* =================================================
+                   DATE + TIME
+                ================================================= */
+
+                function updateDateTime() {
+
+                    const now =
+                        new Date();
+
+
+                    currentDate.textContent =
+                        now
+                            .toLocaleDateString(
+                                "en-PH",
+                                {
+                                    weekday:
+                                        "long",
+                                    month:
+                                        "long",
+                                    day:
+                                        "numeric",
+                                    year:
+                                        "numeric"
+                                }
+                            )
+                            .toUpperCase();
+
+
+                    currentTime.textContent =
+                        now.toLocaleTimeString(
+                            "en-PH",
+                            {
+                                hour:
+                                    "2-digit",
+                                minute:
+                                    "2-digit",
+                                second:
+                                    "2-digit",
+                                hour12:
+                                    true
+                            }
+                        );
+
+                }
+
+
+                updateDateTime();
+
+
+                setInterval(
+                    updateDateTime,
+                    1000
+                );
+
+
+
+                /* =================================================
+                   SIDEBAR
+                ================================================= */
 
                 function openSidebar() {
 
@@ -1292,9 +1694,50 @@
 
 
 
-                /* =============================================
+                /* =================================================
+                   PAGE ELEMENTS
+                ================================================= */
+
+                const dashboardPage =
+                    document.getElementById(
+                        "dashboardPage"
+                    );
+
+
+                const calendarPage =
+                    document.getElementById(
+                        "calendarPage"
+                    );
+
+
+                const placeholderPage =
+                    document.getElementById(
+                        "placeholderPage"
+                    );
+
+
+                const placeholderTitle =
+                    document.getElementById(
+                        "placeholderTitle"
+                    );
+
+
+                const placeholderDescription =
+                    document.getElementById(
+                        "placeholderDescription"
+                    );
+
+
+                const backToDashboard =
+                    document.getElementById(
+                        "backToDashboard"
+                    );
+
+
+
+                /* =================================================
                    NAVIGATION
-                ============================================= */
+                ================================================= */
 
                 const navigationButtons =
                     document.querySelectorAll(
@@ -1302,108 +1745,109 @@
                     );
 
 
-                navigationButtons.forEach(
-                    function (button) {
-
-                        button.addEventListener(
-                            "click",
-                            function () {
-
-                                const page =
-                                    button.dataset.page;
-
-
-                                if (
-                                    page !==
-                                    "dashboard"
-                                ) {
-
-                                    /*
-                                        These sections will be
-                                        built next.
-                                    */
-
-                                    showComingSoon(
-                                        page
-                                    );
-
-                                    return;
-
-                                }
-
-
-                                navigationButtons
-                                    .forEach(
-                                        function (item) {
-
-                                            item.classList.remove(
-                                                "active"
-                                            );
-
-                                        }
-                                    );
-
-
-                                button.classList.add(
-                                    "active"
-                                );
-
-
-                                closeSidebar();
-
-                            }
-                        );
-
-                    }
-                );
-
-
-
-                /* =============================================
-                   INTERNAL PAGE LINKS
-                ============================================= */
-
-                const pageLinks =
-                    document.querySelectorAll(
-                        "[data-page-link]"
-                    );
-
-
-                pageLinks.forEach(
-                    function (button) {
-
-                        button.addEventListener(
-                            "click",
-                            function () {
-
-                                const page =
-                                    button.dataset.pageLink;
-
-
-                                showComingSoon(
-                                    page
-                                );
-
-                            }
-                        );
-
-                    }
-                );
-
-
-
-                /* =============================================
-                   TEMPORARY PAGE MESSAGE
-                ============================================= */
-
-                function showComingSoon(
+                function setActiveNavigation(
                     page
                 ) {
 
-                    const names = {
+                    navigationButtons.forEach(
+                        function (button) {
 
-                        calendar:
-                            "Calendar",
+                            button.classList.toggle(
+                                "active",
+                                button.dataset.page === page
+                            );
+
+                        }
+                    );
+
+                }
+
+
+
+                function showPage(
+                    page
+                ) {
+
+                    dashboardPage.classList.remove(
+                        "active-page"
+                    );
+
+                    calendarPage.classList.remove(
+                        "active-page"
+                    );
+
+                    placeholderPage.classList.remove(
+                        "active-page"
+                    );
+
+
+                    if (
+                        page === "dashboard"
+                    ) {
+
+                        dashboardPage.classList.add(
+                            "active-page"
+                        );
+
+                        setActiveNavigation(
+                            "dashboard"
+                        );
+
+                    }
+
+
+                    else if (
+                        page === "calendar"
+                    ) {
+
+                        calendarPage.classList.add(
+                            "active-page"
+                        );
+
+                        setActiveNavigation(
+                            "calendar"
+                        );
+
+                        renderCalendar();
+
+                    }
+
+
+                    else {
+
+                        placeholderPage.classList.add(
+                            "active-page"
+                        );
+
+                        setActiveNavigation(
+                            page
+                        );
+
+                        showPlaceholder(
+                            page
+                        );
+
+                    }
+
+
+                    closeSidebar();
+
+                    window.scrollTo(
+                        {
+                            top: 0,
+                            behavior: "smooth"
+                        }
+                    );
+
+                }
+
+
+
+                function showPlaceholder(
+                    page
+                ) {
+
+                    const pageNames = {
 
                         availability:
                             "Available Officers",
@@ -1423,24 +1867,926 @@
                     };
 
 
-                    const pageName =
-                        names[page] ||
-                        "This section";
+                    const descriptions = {
+
+                        availability:
+                            "The centralized officer availability system will be built next.",
+
+                        tasks:
+                            "Your assigned tasks and task progress will be managed here.",
+
+                        officers:
+                            "The PSABE-PPG officer directory will be available here.",
+
+                        announcements:
+                            "Organization announcements will be displayed here.",
+
+                        settings:
+                            "System and account settings will be managed here."
+
+                    };
 
 
-                    alert(
-                        pageName +
-                        " will be connected next."
-                    );
+                    placeholderTitle.textContent =
+                        pageNames[page] ||
+                        "Coming Soon";
 
+
+                    placeholderDescription.textContent =
+                        descriptions[page] ||
+                        "This section will be built next.";
 
                 }
 
 
 
-                /* =============================================
+                navigationButtons.forEach(
+                    function (button) {
+
+                        button.addEventListener(
+                            "click",
+                            function () {
+
+                                showPage(
+                                    button.dataset.page
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+
+
+                /* =================================================
+                   DASHBOARD INTERNAL LINKS
+                ================================================= */
+
+                const pageLinks =
+                    document.querySelectorAll(
+                        "[data-page-link]"
+                    );
+
+
+                pageLinks.forEach(
+                    function (button) {
+
+                        button.addEventListener(
+                            "click",
+                            function () {
+
+                                showPage(
+                                    button.dataset.pageLink
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+
+
+                backToDashboard.addEventListener(
+                    "click",
+                    function () {
+
+                        showPage(
+                            "dashboard"
+                        );
+
+                    }
+                );
+
+
+
+                /* =================================================
+                   CALENDAR
+                ================================================= */
+
+                const calendarGrid =
+                    document.getElementById(
+                        "calendarGrid"
+                    );
+
+
+                const calendarMonth =
+                    document.getElementById(
+                        "calendarMonth"
+                    );
+
+
+                const previousMonth =
+                    document.getElementById(
+                        "previousMonth"
+                    );
+
+
+                const nextMonth =
+                    document.getElementById(
+                        "nextMonth"
+                    );
+
+
+                const todayButton =
+                    document.getElementById(
+                        "calendarTodayButton"
+                    );
+
+
+                const selectedDateTitle =
+                    document.getElementById(
+                        "selectedDateTitle"
+                    );
+
+
+                const selectedDateDay =
+                    document.getElementById(
+                        "selectedDateDay"
+                    );
+
+
+                const selectedDateNumber =
+                    document.getElementById(
+                        "selectedDateNumber"
+                    );
+
+
+                const selectedActivities =
+                    document.getElementById(
+                        "selectedActivities"
+                    );
+
+
+
+                let calendarDate =
+                    new Date(
+                        2026,
+                        8,
+                        1
+                    );
+
+
+                let selectedDate =
+                    "2026-09-24";
+
+
+
+                /* =================================================
+                   DATE KEY
+                ================================================= */
+
+                function makeDateKey(
+                    year,
+                    month,
+                    day
+                ) {
+
+                    return (
+                        year +
+                        "-" +
+                        String(
+                            month + 1
+                        ).padStart(
+                            2,
+                            "0"
+                        ) +
+                        "-" +
+                        String(
+                            day
+                        ).padStart(
+                            2,
+                            "0"
+                        )
+                    );
+
+                }
+
+
+
+                /* =================================================
+                   CALENDAR RENDER
+                ================================================= */
+
+                function renderCalendar() {
+
+                    const year =
+                        calendarDate.getFullYear();
+
+
+                    const month =
+                        calendarDate.getMonth();
+
+
+                    const monthName =
+                        calendarDate.toLocaleDateString(
+                            "en-US",
+                            {
+                                month:
+                                    "long",
+                                year:
+                                    "numeric"
+                            }
+                        );
+
+
+                    calendarMonth.textContent =
+                        monthName;
+
+
+
+                    calendarGrid.innerHTML =
+                        "";
+
+
+
+                    const firstDay =
+                        new Date(
+                            year,
+                            month,
+                            1
+                        );
+
+
+                    let firstWeekday =
+                        firstDay.getDay();
+
+
+                    /*
+                       Convert Sunday-first JavaScript
+                       format to Monday-first calendar.
+                    */
+
+                    firstWeekday =
+                        firstWeekday === 0
+                            ? 6
+                            : firstWeekday - 1;
+
+
+
+                    const daysInMonth =
+                        new Date(
+                            year,
+                            month + 1,
+                            0
+                        ).getDate();
+
+
+
+                    const previousMonthDays =
+                        new Date(
+                            year,
+                            month,
+                            0
+                        ).getDate();
+
+
+
+                    /* PREVIOUS MONTH DAYS */
+
+                    for (
+                        let i = firstWeekday - 1;
+                        i >= 0;
+                        i--
+                    ) {
+
+                        const day =
+                            previousMonthDays -
+                            i;
+
+
+                        const cell =
+                            createCalendarDay(
+                                year,
+                                month - 1,
+                                day,
+                                true
+                            );
+
+
+                        calendarGrid.appendChild(
+                            cell
+                        );
+
+                    }
+
+
+
+                    /* CURRENT MONTH */
+
+                    for (
+                        let day = 1;
+                        day <= daysInMonth;
+                        day++
+                    ) {
+
+                        const cell =
+                            createCalendarDay(
+                                year,
+                                month,
+                                day,
+                                false
+                            );
+
+
+                        calendarGrid.appendChild(
+                            cell
+                        );
+
+                    }
+
+
+
+                    /* NEXT MONTH DAYS */
+
+                    const totalCells =
+                        calendarGrid.children.length;
+
+
+                    const remaining =
+                        totalCells % 7 === 0
+                            ? 0
+                            : 7 -
+                              (
+                                  totalCells %
+                                  7
+                              );
+
+
+                    for (
+                        let day = 1;
+                        day <= remaining;
+                        day++
+                    ) {
+
+                        const cell =
+                            createCalendarDay(
+                                year,
+                                month + 1,
+                                day,
+                                true
+                            );
+
+
+                        calendarGrid.appendChild(
+                            cell
+                        );
+
+                    }
+
+
+
+                    updateSelectedDay();
+
+                }
+
+
+
+                /* =================================================
+                   CREATE DAY CELL
+                ================================================= */
+
+                function createCalendarDay(
+                    year,
+                    month,
+                    day,
+                    outsideMonth
+                ) {
+
+                    const actualDate =
+                        new Date(
+                            year,
+                            month,
+                            day
+                        );
+
+
+                    const actualYear =
+                        actualDate.getFullYear();
+
+
+                    const actualMonth =
+                        actualDate.getMonth();
+
+
+                    const actualDay =
+                        actualDate.getDate();
+
+
+                    const dateKey =
+                        makeDateKey(
+                            actualYear,
+                            actualMonth,
+                            actualDay
+                        );
+
+
+                    const cell =
+                        document.createElement(
+                            "button"
+                        );
+
+
+                    cell.className =
+                        "calendar-day";
+
+
+                    if (
+                        outsideMonth
+                    ) {
+
+                        cell.classList.add(
+                            "outside-month"
+                        );
+
+                    }
+
+
+
+                    const today =
+                        new Date();
+
+
+                    if (
+                        actualYear ===
+                            today.getFullYear() &&
+                        actualMonth ===
+                            today.getMonth() &&
+                        actualDay ===
+                            today.getDate()
+                    ) {
+
+                        cell.classList.add(
+                            "today"
+                        );
+
+                    }
+
+
+
+                    if (
+                        dateKey ===
+                        selectedDate
+                    ) {
+
+                        cell.classList.add(
+                            "selected"
+                        );
+
+                    }
+
+
+
+                    const dayNumber =
+                        document.createElement(
+                            "span"
+                        );
+
+
+                    dayNumber.className =
+                        "calendar-day-number";
+
+
+                    dayNumber.textContent =
+                        actualDay;
+
+
+                    cell.appendChild(
+                        dayNumber
+                    );
+
+
+
+                    const activities =
+                        calendarActivities[
+                            dateKey
+                        ] || [];
+
+
+
+                    if (
+                        activities.length
+                    ) {
+
+                        const activityContainer =
+                            document.createElement(
+                                "div"
+                            );
+
+
+                        activityContainer.className =
+                            "calendar-activity-markers";
+
+
+
+                        const types =
+                            [
+                                "task",
+                                "event",
+                                "meeting"
+                            ];
+
+
+
+                        types.forEach(
+                            function (type) {
+
+                                if (
+                                    activities.some(
+                                        function (item) {
+                                            return (
+                                                item.type ===
+                                                type
+                                            );
+                                        }
+                                    )
+                                ) {
+
+                                    const marker =
+                                        document.createElement(
+                                            "span"
+                                        );
+
+
+                                    marker.className =
+                                        "calendar-marker " +
+                                        type;
+
+
+                                    activityContainer.appendChild(
+                                        marker
+                                    );
+
+                                }
+
+                            }
+                        );
+
+
+                        cell.appendChild(
+                            activityContainer
+                        );
+
+
+
+                        const activityCount =
+                            document.createElement(
+                                "span"
+                            );
+
+
+                        activityCount.className =
+                            "calendar-activity-count";
+
+
+                        activityCount.textContent =
+                            activities.length;
+
+
+                        cell.appendChild(
+                            activityCount
+                        );
+
+                    }
+
+
+
+                    cell.addEventListener(
+                        "click",
+                        function () {
+
+                            selectedDate =
+                                dateKey;
+
+
+                            renderCalendar();
+
+                        }
+                    );
+
+
+                    return cell;
+
+                }
+
+
+
+                /* =================================================
+                   SELECTED DATE
+                ================================================= */
+
+                function updateSelectedDay() {
+
+                    const date =
+                        parseDateKey(
+                            selectedDate
+                        );
+
+
+                    if (
+                        !date
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    selectedDateTitle.textContent =
+                        date.toLocaleDateString(
+                            "en-US",
+                            {
+                                month:
+                                    "long",
+                                day:
+                                    "numeric"
+                            }
+                        );
+
+
+                    selectedDateDay.textContent =
+                        date.toLocaleDateString(
+                            "en-US",
+                            {
+                                weekday:
+                                    "long"
+                            }
+                        );
+
+
+                    selectedDateNumber.textContent =
+                        date.getDate();
+
+
+
+                    const activities =
+                        calendarActivities[
+                            selectedDate
+                        ] || [];
+
+
+
+                    selectedActivities.innerHTML =
+                        "";
+
+
+
+                    if (
+                        activities.length === 0
+                    ) {
+
+                        const empty =
+                            document.createElement(
+                                "div"
+                            );
+
+
+                        empty.className =
+                            "empty-day";
+
+
+                        empty.innerHTML = `
+                            <div class="empty-day-icon">
+                                <svg viewBox="0 0 24 24">
+                                    <rect
+                                        x="3"
+                                        y="4"
+                                        width="18"
+                                        height="17"
+                                        rx="2"
+                                    ></rect>
+                                    <line
+                                        x1="16"
+                                        y1="2"
+                                        x2="16"
+                                        y2="6"
+                                    ></line>
+                                    <line
+                                        x1="8"
+                                        y1="2"
+                                        x2="8"
+                                        y2="6"
+                                    ></line>
+                                    <line
+                                        x1="3"
+                                        y1="9"
+                                        x2="21"
+                                        y2="9"
+                                    ></line>
+                                </svg>
+                            </div>
+
+                            <strong>
+                                No scheduled activities
+                            </strong>
+
+                            <p>
+                                There are no tasks, events,
+                                or meetings scheduled for
+                                this date.
+                            </p>
+                        `;
+
+
+                        selectedActivities.appendChild(
+                            empty
+                        );
+
+
+                        return;
+
+                    }
+
+
+
+                    activities.forEach(
+                        function (activity) {
+
+                            const card =
+                                document.createElement(
+                                    "div"
+                                );
+
+
+                            card.className =
+                                "selected-activity " +
+                                activity.type;
+
+
+                            const typeLabel =
+                                activity.type
+                                    .toUpperCase();
+
+
+
+                            card.innerHTML = `
+
+                                <div class="selected-activity-type">
+
+                                    <span class="activity-status-dot"></span>
+
+                                    ${typeLabel}
+
+                                </div>
+
+                                <h3>
+                                    ${activity.title}
+                                </h3>
+
+                                <p>
+                                    ${activity.description}
+                                </p>
+
+                                <div class="selected-activity-time">
+
+                                    <svg viewBox="0 0 24 24">
+
+                                        <circle
+                                            cx="12"
+                                            cy="12"
+                                            r="9"
+                                        ></circle>
+
+                                        <polyline
+                                            points="12 7 12 12 15 14"
+                                        ></polyline>
+
+                                    </svg>
+
+                                    ${activity.time}
+
+                                </div>
+
+                            `;
+
+
+                            selectedActivities.appendChild(
+                                card
+                            );
+
+                        }
+                    );
+
+                }
+
+
+
+                /* =================================================
+                   PARSE DATE KEY
+                ================================================= */
+
+                function parseDateKey(
+                    key
+                ) {
+
+                    const parts =
+                        key.split("-");
+
+
+                    if (
+                        parts.length !== 3
+                    ) {
+
+                        return null;
+
+                    }
+
+
+                    return new Date(
+                        Number(
+                            parts[0]
+                        ),
+                        Number(
+                            parts[1]
+                        ) - 1,
+                        Number(
+                            parts[2]
+                        )
+                    );
+
+                }
+
+
+
+                /* =================================================
+                   MONTH NAVIGATION
+                ================================================= */
+
+                previousMonth.addEventListener(
+                    "click",
+                    function () {
+
+                        calendarDate.setMonth(
+                            calendarDate.getMonth() - 1
+                        );
+
+
+                        renderCalendar();
+
+                    }
+                );
+
+
+
+                nextMonth.addEventListener(
+                    "click",
+                    function () {
+
+                        calendarDate.setMonth(
+                            calendarDate.getMonth() + 1
+                        );
+
+
+                        renderCalendar();
+
+                    }
+                );
+
+
+
+                todayButton.addEventListener(
+                    "click",
+                    function () {
+
+                        const now =
+                            new Date();
+
+
+                        calendarDate =
+                            new Date(
+                                now.getFullYear(),
+                                now.getMonth(),
+                                1
+                            );
+
+
+                        selectedDate =
+                            makeDateKey(
+                                now.getFullYear(),
+                                now.getMonth(),
+                                now.getDate()
+                            );
+
+
+                        renderCalendar();
+
+                    }
+                );
+
+
+
+                /* =================================================
+                   INITIAL CALENDAR
+                ================================================= */
+
+                renderCalendar();
+
+
+
+                /* =================================================
                    LOGOUT
-                ============================================= */
+                ================================================= */
 
                 const logoutButton =
                     document.getElementById(
@@ -1471,9 +2817,11 @@
                 );
 
             }
+
         );
 
     </script>
+
 
 </body>
 
