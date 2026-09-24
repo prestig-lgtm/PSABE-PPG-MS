@@ -5941,3 +5941,32 @@ body.availability-modal-open {
         min-width: 700px !important;
     }
 }
+
+/* =========================================================
+   EDIT MY AVAILABILITY - INVISIBLE TABLE BORDERS
+   Keeps the grid aligned while removing visible table lines.
+   ========================================================= */
+.editor-header-container .editor-table,
+.editor-header-container .editor-table th,
+.editor-container .editor-table,
+.editor-container .editor-table th,
+.editor-container .editor-table td {
+    border-color: transparent !important;
+}
+
+.editor-header-container {
+    border-color: transparent !important;
+}
+
+.editor-table-header th {
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+.editor-table tbody td {
+    border-color: transparent !important;
+}
+
+.editor-table tbody tr:first-child td {
+    border-top-color: transparent !important;
+}
