@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <meta
+        name="theme-color"
+        content="#002d24"
+    >
+
+    <title>PSABE-PPG Management System</title>
+
+    <link rel="preload"
+          as="image"
+          href="assets/management-background.png">
+
+    <link rel="stylesheet"
+          href="dashboard.css">
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         BACKGROUND
+    ====================================================== -->
+
+    <div class="dashboard-background"></div>
+
+
+
+    <!-- =====================================================
+         MOBILE OVERLAY
+    ====================================================== -->
+
+    <div
+        id="sidebarOverlay"
+        class="sidebar-overlay"
+    ></div>
+
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside
+        id="sidebar"
+        class="sidebar"
+    >
+
+        <div class="sidebar-inner">
+
+
+            <!-- BRAND -->
+
+            <div class="sidebar-brand">
+
+                <img
+                    src="assets/psabe-ppg-logo.png"
+                    alt="PSABE-PPG Logo"
+                >
+
+                <div class="brand-text">
+
+                    <strong>
+                        PSABE-PPG
+                    </strong>
+
+                    <span>
+                        CSU CHAPTER
+                    </span>
+
+                    <small>
+                        MANAGEMENT SYSTEM
+                    </small>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- NAVIGATION -->
+
+            <nav class="main-navigation">
+
+
+                <button
+                    class="nav-item active"
+                    data-page="dashboard"
+                >
+
+                    <span class="nav-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <rect
+                                x="3"
+                                y="3"
+                                width="7"
+                                height="7"
+                                rx="1"
+                            ></rect>
+
+                            <rect
+                                x="14"
+                                y="3"
+                                width="7"
+                                height="7"
+                                rx="1"
+                            ></rect>
+
+                            <rect
+                                x="3"
+                                y="14"
+                                width="7"
+                                height="7"
+                                rx="1"
+                            ></rect>
+
+                            <rect
+                                x="14"
+                                y="14"
+                                width="7"
+                                height="7"
+                                rx="1"
+                            ></rect>
+
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        Dashboard
+                    </span>
+
+                </button>
+
+
+
+                <button
+                    class="nav-item"
+                    data-page="calendar"
+                >
+
+                    <span class="nav-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <rect
+                                x="3"
+                                y="4"
+                                width="18"
+                                height="17"
+                                rx="2"
+                            ></rect>
+
+                            <line
+                                x1="16"
+                                y1="2"
+                                x2="16"
+                                y2="6"
+                            ></line>
+
+                            <line
+                                x1="8"
+                                y1="2"
+                                x2="8"
+                                y2="6"
+                            ></line>
+
+                            <line
+                                x1="3"
+                                y1="9"
+                                x2="21"
+                                y2="9"
+                            ></line>
+
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        Calendar
+                    </span>
+
+                </button>
+
+
+
+                <button
+                    class="nav-item"
+                    data-page="availability"
+                >
+
+                    <span class="nav-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <circle
+                                cx="9"
+                                cy="8"
+                                r="3"
+                            ></circle>
+
+                            <path
+                                d="M3 21c0-4 2.5-6 6-6s6 2 6 6"
+                            ></path>
+
+                            <circle
+                                cx="17"
+                                cy="8"
+                                r="2.5"
+                            ></circle>
+
+                            <path
+                                d="M15 15c3 0 5 2 5 6"
+                            ></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        Available Officers
+                    </span>
+
+                </button>
+
+
+
+                <button
+                    class="nav-item"
+                    data-page="tasks"
+                >
+
+                    <span class="nav-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <rect
+                                x="4"
+                                y="3"
+                                width="16"
+                                height="18"
+                                rx="2"
+                            ></rect>
+
+                            <line
+                                x1="8"
+                                y1="8"
+                                x2="16"
+                                y2="8"
+                            ></line>
+
+                            <line
+                                x1="8"
+                                y1="12"
+                                x2="16"
+                                y2="12"
+                            ></line>
+
+                            <line
+                                x1="8"
+                                y1="16"
+                                x2="13"
+                                y2="16"
+                            ></line>
+
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        My Tasks
+                    </span>
+
+                </button>
+
+
+
+                <button
+                    class="nav-item"
+                    data-page="officers"
+                >
+
+                    <span class="nav-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <circle
+                                cx="9"
+                                cy="8"
+                                r="3"
+                            ></circle>
+
+                            <circle
+                                cx="17"
+                                cy="9"
+                                r="2.5"
+                            ></circle>
+
+                            <path
+                                d="M3 21c0-4 2.5-6 6-6s6 2 6 6"
+                            ></path>
+
+                            <path
+                                d="M15 16c3 0 5 2 5 5"
+                            ></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        Officers
+                    </span>
+
+                </button>
+
+
+
+                <button
+                    class="nav-item"
+                    data-page="announcements"
+                >
+
+                    <span class="nav-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <path
+                                d="M4 11v8"
+                            ></path>
+
+                            <path
+                                d="M4 11l15-5v12L4 13z"
+                            ></path>
+
+                            <path
+                                d="M19 10v4"
+                            ></path>
+
+                            <path
+                                d="M7 14l1.5 6h3L10 15"
+                            ></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        Announcements
+                    </span>
+
+                </button>
+
+
+
+            </nav>
+
+
+
+            <!-- SIDEBAR BOTTOM -->
+
+            <div class="sidebar-bottom">
+
+
+                <button
+                    class="nav-item"
+                    data-page="settings"
+                >
+
+                    <span class="nav-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <circle
+                                cx="12"
+                                cy="12"
+                                r="3"
+                            ></circle>
+
+                            <path
+                                d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.7 1.7-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V20h-2.4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L8 17l.1-.1A1.7 1.7 0 0 0 8.4 15a1.7 1.7 0 0 0-1.6-1H6v-2.4h.8a1.7 1.7 0 0 0 1.6-1A1.7 1.7 0 0 0 8.1 9L8 8.9l1.7-1.7.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V6h2.4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 9l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.1v2.4H20a1.7 1.7 0 0 0-1.6.6z"
+                            ></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        Settings
+                    </span>
+
+                </button>
+
+
+
+                <button
+                    id="logoutButton"
+                    class="nav-item logout-item"
+                >
+
+                    <span class="nav-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <path
+                                d="M10 17l5-5-5-5"
+                            ></path>
+
+                            <path
+                                d="M15 12H3"
+                            ></path>
+
+                            <path
+                                d="M14 4h5a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5"
+                            ></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span>
+                        Sign Out
+                    </span>
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main class="dashboard-main">
+
+
+        <!-- =================================================
+             TOP BAR
+        ================================================== -->
+
+        <header class="top-bar">
+
+
+            <button
+                id="menuButton"
+                class="menu-button"
+                aria-label="Open navigation"
+            >
+
+                <span></span>
+                <span></span>
+                <span></span>
+
+            </button>
+
+
+
+            <div class="top-bar-title">
+
+                <span>
+                    PSABE-PPG CSU CHAPTER
+                </span>
+
+            </div>
+
+
+
+            <div class="profile-area">
+
+
+                <div class="profile-text">
+
+                    <strong id="officerName">
+                        MC RJ Escote
+                    </strong>
+
+                    <span id="officerPosition">
+                        Vice President
+                    </span>
+
+                </div>
+
+
+                <div class="profile-avatar">
+
+                    <span>
+                        MC
+                    </span>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- =================================================
+             PAGE CONTENT
+        ================================================== -->
+
+        <section class="dashboard-content">
+
+
+            <!-- =================================================
+                 WELCOME
+            ================================================== -->
+
+            <div class="welcome-section">
+
+                <div>
+
+                    <p
+                        class="eyebrow"
+                        id="currentDate"
+                    >
+                        TODAY
+                    </p>
+
+                    <h1>
+                        Good evening, <span>MC RJ</span>.
+                    </h1>
+
+                    <p class="welcome-description">
+                        Here's what's happening with
+                        PSABE-PPG today.
+                    </p>
+
+                </div>
+
+
+                <div class="current-time-card">
+
+                    <span>
+                        CURRENT TIME
+                    </span>
+
+                    <strong id="currentTime">
+                        00:00:00
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 SUMMARY CARDS
+            ================================================== -->
+
+            <div class="summary-grid">
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon task-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <rect
+                                x="4"
+                                y="3"
+                                width="16"
+                                height="18"
+                                rx="2"
+                            ></rect>
+
+                            <line
+                                x1="8"
+                                y1="8"
+                                x2="16"
+                                y2="8"
+                            ></line>
+
+                            <line
+                                x1="8"
+                                y1="12"
+                                x2="16"
+                                y2="12"
+                            ></line>
+
+                            <line
+                                x1="8"
+                                y1="16"
+                                x2="13"
+                                y2="16"
+                            ></line>
+
+                        </svg>
+
+                    </div>
+
+                    <div class="summary-info">
+
+                        <span>
+                            MY TASKS
+                        </span>
+
+                        <strong>
+                            3
+                        </strong>
+
+                        <small>
+                            Active tasks
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon event-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <rect
+                                x="3"
+                                y="4"
+                                width="18"
+                                height="17"
+                                rx="2"
+                            ></rect>
+
+                            <line
+                                x1="16"
+                                y1="2"
+                                x2="16"
+                                y2="6"
+                            ></line>
+
+                            <line
+                                x1="8"
+                                y1="2"
+                                x2="8"
+                                y2="6"
+                            ></line>
+
+                            <line
+                                x1="3"
+                                y1="9"
+                                x2="21"
+                                y2="9"
+                            ></line>
+
+                        </svg>
+
+                    </div>
+
+                    <div class="summary-info">
+
+                        <span>
+                            EVENTS
+                        </span>
+
+                        <strong>
+                            2
+                        </strong>
+
+                        <small>
+                            Upcoming
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon meeting-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <circle
+                                cx="8"
+                                cy="8"
+                                r="3"
+                            ></circle>
+
+                            <circle
+                                cx="17"
+                                cy="9"
+                                r="2.5"
+                            ></circle>
+
+                            <path
+                                d="M2.5 21c0-4 2.5-6 5.5-6s5.5 2 5.5 6"
+                            ></path>
+
+                            <path
+                                d="M14 16c3 0 5 2 5 5"
+                            ></path>
+
+                        </svg>
+
+                    </div>
+
+                    <div class="summary-info">
+
+                        <span>
+                            MEETINGS
+                        </span>
+
+                        <strong>
+                            1
+                        </strong>
+
+                        <small>
+                            This week
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="summary-card">
+
+                    <div class="summary-icon availability-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <circle
+                                cx="12"
+                                cy="12"
+                                r="9"
+                            ></circle>
+
+                            <path
+                                d="M8 12l2.5 2.5L16 9"
+                            ></path>
+
+                        </svg>
+
+                    </div>
+
+                    <div class="summary-info">
+
+                        <span>
+                            AVAILABILITY
+                        </span>
+
+                        <strong>
+                            Available
+                        </strong>
+
+                        <small>
+                            Today
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 MAIN GRID
+            ================================================== -->
+
+            <div class="main-grid">
+
+
+                <!-- =================================================
+                     TODAY'S ACTIVITIES
+                ================================================== -->
+
+                <section class="dashboard-panel activities-panel">
+
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <span class="panel-label">
+                                TODAY
+                            </span>
+
+                            <h2>
+                                Today's Activities
+                            </h2>
+
+                        </div>
+
+
+                        <button
+                            class="panel-link"
+                            data-page-link="calendar"
+                        >
+                            View Calendar
+                        </button>
+
+                    </div>
+
+
+
+                    <div class="activity-list">
+
+
+                        <!-- TASK -->
+
+                        <div class="activity-item">
+
+                            <div class="activity-time">
+                                <strong>
+                                    2:00 PM
+                                </strong>
+
+                                <span>
+                                    DUE
+                                </span>
+                            </div>
+
+
+                            <div class="activity-line task-line"></div>
+
+
+                            <div class="activity-details">
+
+                                <span class="activity-type task-type">
+                                    TASK
+                                </span>
+
+                                <h3>
+                                    Prepare attendance materials
+                                </h3>
+
+                                <p>
+                                    Prepare and organize the
+                                    attendance materials for
+                                    the upcoming activity.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- EVENT -->
+
+                        <div class="activity-item">
+
+                            <div class="activity-time">
+
+                                <strong>
+                                    4:00 PM
+                                </strong>
+
+                                <span>
+                                    6:00 PM
+                                </span>
+
+                            </div>
+
+
+                            <div class="activity-line event-line"></div>
+
+
+                            <div class="activity-details">
+
+                                <span class="activity-type event-type">
+                                    EVENT
+                                </span>
+
+                                <h3>
+                                    General Assembly
+                                </h3>
+
+                                <p>
+                                    PSABE-PPG CSU Chapter
+                                    General Assembly.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- MEETING -->
+
+                        <div class="activity-item">
+
+                            <div class="activity-time">
+
+                                <strong>
+                                    7:00 PM
+                                </strong>
+
+                                <span>
+                                    8:00 PM
+                                </span>
+
+                            </div>
+
+
+                            <div class="activity-line meeting-line"></div>
+
+
+                            <div class="activity-details">
+
+                                <span class="activity-type meeting-type">
+                                    MEETING
+                                </span>
+
+                                <h3>
+                                    Executive Committee Meeting
+                                </h3>
+
+                                <p>
+                                    Executive Committee
+                                    coordination meeting.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- =================================================
+                     RIGHT PANEL
+                ================================================== -->
+
+                <section class="dashboard-panel upcoming-panel">
+
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <span class="panel-label">
+                                OVERVIEW
+                            </span>
+
+                            <h2>
+                                Upcoming
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- NEXT EVENT -->
+
+                    <div class="next-event-card">
+
+                        <div class="next-event-date">
+
+                            <span>
+                                SEP
+                            </span>
+
+                            <strong>
+                                25
+                            </strong>
+
+                        </div>
+
+
+                        <div class="next-event-info">
+
+                            <span>
+                                TOMORROW · 9:00 AM
+                            </span>
+
+                            <h3>
+                                Officer Coordination
+                            </h3>
+
+                            <p>
+                                Executive officers'
+                                coordination session.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- AVAILABILITY -->
+
+                    <div class="availability-preview">
+
+                        <div class="mini-header">
+
+                            <div>
+
+                                <span class="panel-label">
+                                    OFFICERS
+                                </span>
+
+                                <h3>
+                                    Today's Availability
+                                </h3>
+
+                            </div>
+
+                            <button
+                                class="text-button"
+                                data-page-link="availability"
+                            >
+                                View All
+                            </button>
+
+                        </div>
+
+
+                        <div class="availability-status">
+
+                            <span class="status-dot"></span>
+
+                            <div>
+
+                                <strong>
+                                    You are available
+                                </strong>
+
+                                <small>
+                                    9:00 AM – 12:00 PM
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="availability-status">
+
+                            <span class="status-dot"></span>
+
+                            <div>
+
+                                <strong>
+                                    4 officers available
+                                </strong>
+
+                                <small>
+                                    1:00 PM – 2:00 PM
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                </section>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 ANNOUNCEMENT
+            ================================================== -->
+
+            <section class="announcement-banner">
+
+
+                <div class="announcement-icon">
+
+                    <svg viewBox="0 0 24 24">
+
+                        <path
+                            d="M4 11v8"
+                        ></path>
+
+                        <path
+                            d="M4 11l15-5v12L4 13z"
+                        ></path>
+
+                        <path
+                            d="M19 10v4"
+                        ></path>
+
+                        <path
+                            d="M7 14l1.5 6h3L10 15"
+                        ></path>
+
+                    </svg>
+
+                </div>
+
+
+                <div class="announcement-content">
+
+                    <span>
+                        LATEST ANNOUNCEMENT
+                    </span>
+
+                    <strong>
+                        General Assembly preparation
+                        is currently underway.
+                    </strong>
+
+                    <p>
+                        Please check your assigned tasks
+                        and availability before the event.
+                    </p>
+
+                </div>
+
+
+                <button
+                    class="announcement-button"
+                    data-page-link="announcements"
+                >
+                    View Announcements
+                </button>
+
+            </section>
+
+
+        </section>
+
+    </main>
+
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script>
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+
+                /* =============================================
+                   CURRENT DATE
+                ============================================= */
+
+                const currentDate =
+                    document.getElementById(
+                        "currentDate"
+                    );
+
+
+                const currentTime =
+                    document.getElementById(
+                        "currentTime"
+                    );
+
+
+                function updateDateTime() {
+
+                    const now =
+                        new Date();
+
+
+                    const dateText =
+                        now.toLocaleDateString(
+                            "en-PH",
+                            {
+                                weekday: "long",
+                                month: "long",
+                                day: "numeric",
+                                year: "numeric"
+                            }
+                        );
+
+
+                    const timeText =
+                        now.toLocaleTimeString(
+                            "en-PH",
+                            {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                second: "2-digit",
+                                hour12: true
+                            }
+                        );
+
+
+                    currentDate.textContent =
+                        dateText.toUpperCase();
+
+
+                    currentTime.textContent =
+                        timeText;
+
+                }
+
+
+                updateDateTime();
+
+
+                setInterval(
+                    updateDateTime,
+                    1000
+                );
+
+
+
+                /* =============================================
+                   SIDEBAR
+                ============================================= */
+
+                const sidebar =
+                    document.getElementById(
+                        "sidebar"
+                    );
+
+
+                const overlay =
+                    document.getElementById(
+                        "sidebarOverlay"
+                    );
+
+
+                const menuButton =
+                    document.getElementById(
+                        "menuButton"
+                    );
+
+
+                function openSidebar() {
+
+                    sidebar.classList.add(
+                        "sidebar-open"
+                    );
+
+                    overlay.classList.add(
+                        "overlay-visible"
+                    );
+
+                }
+
+
+                function closeSidebar() {
+
+                    sidebar.classList.remove(
+                        "sidebar-open"
+                    );
+
+                    overlay.classList.remove(
+                        "overlay-visible"
+                    );
+
+                }
+
+
+                menuButton.addEventListener(
+                    "click",
+                    openSidebar
+                );
+
+
+                overlay.addEventListener(
+                    "click",
+                    closeSidebar
+                );
+
+
+
+                /* =============================================
+                   NAVIGATION
+                ============================================= */
+
+                const navigationButtons =
+                    document.querySelectorAll(
+                        ".nav-item[data-page]"
+                    );
+
+
+                navigationButtons.forEach(
+                    function (button) {
+
+                        button.addEventListener(
+                            "click",
+                            function () {
+
+                                const page =
+                                    button.dataset.page;
+
+
+                                if (
+                                    page !==
+                                    "dashboard"
+                                ) {
+
+                                    /*
+                                        These sections will be
+                                        built next.
+                                    */
+
+                                    showComingSoon(
+                                        page
+                                    );
+
+                                    return;
+
+                                }
+
+
+                                navigationButtons
+                                    .forEach(
+                                        function (item) {
+
+                                            item.classList.remove(
+                                                "active"
+                                            );
+
+                                        }
+                                    );
+
+
+                                button.classList.add(
+                                    "active"
+                                );
+
+
+                                closeSidebar();
+
+                            }
+                        );
+
+                    }
+                );
+
+
+
+                /* =============================================
+                   INTERNAL PAGE LINKS
+                ============================================= */
+
+                const pageLinks =
+                    document.querySelectorAll(
+                        "[data-page-link]"
+                    );
+
+
+                pageLinks.forEach(
+                    function (button) {
+
+                        button.addEventListener(
+                            "click",
+                            function () {
+
+                                const page =
+                                    button.dataset.pageLink;
+
+
+                                showComingSoon(
+                                    page
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+
+
+                /* =============================================
+                   TEMPORARY PAGE MESSAGE
+                ============================================= */
+
+                function showComingSoon(
+                    page
+                ) {
+
+                    const names = {
+
+                        calendar:
+                            "Calendar",
+
+                        availability:
+                            "Available Officers",
+
+                        tasks:
+                            "My Tasks",
+
+                        officers:
+                            "Officers",
+
+                        announcements:
+                            "Announcements",
+
+                        settings:
+                            "Settings"
+
+                    };
+
+
+                    const pageName =
+                        names[page] ||
+                        "This section";
+
+
+                    alert(
+                        pageName +
+                        " will be connected next."
+                    );
+
+
+                }
+
+
+
+                /* =============================================
+                   LOGOUT
+                ============================================= */
+
+                const logoutButton =
+                    document.getElementById(
+                        "logoutButton"
+                    );
+
+
+                logoutButton.addEventListener(
+                    "click",
+                    function () {
+
+                        const confirmLogout =
+                            confirm(
+                                "Are you sure you want to sign out?"
+                            );
+
+
+                        if (
+                            confirmLogout
+                        ) {
+
+                            window.location.href =
+                                "index.html";
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>
