@@ -5808,3 +5808,136 @@ body.availability-modal-open {
         margin-right: 14px !important;
     }
 }
+
+
+/* =========================================================
+   FINAL EDITOR GRID ALIGNMENT
+   Header and body use the same grid. The body is the only
+   vertically scrolling area; horizontal scrolling is synced.
+   ========================================================= */
+.availability-modal .editor-header-container,
+.availability-modal .editor-container {
+    box-sizing: border-box !important;
+    width: calc(100% - 32px) !important;
+    margin-left: 16px !important;
+    margin-right: 16px !important;
+}
+
+.availability-modal .editor-header-container {
+    height: 54px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #004b3d !important;
+    border: 1px solid rgba(0, 216, 192, 0.12) !important;
+    scrollbar-gutter: stable !important;
+}
+
+.availability-modal .editor-container {
+    padding: 0 !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    scrollbar-gutter: stable !important;
+}
+
+/* The two inner tables have the exact same dimensions. */
+.availability-modal .editor-header-container .editor-table,
+.availability-modal .editor-container .editor-table {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+    margin: 0 !important;
+}
+
+.availability-modal .editor-table col.editor-time-col {
+    width: 20% !important;
+}
+
+.availability-modal .editor-table col:not(.editor-time-col) {
+    width: 16% !important;
+}
+
+.availability-modal .editor-table-header th,
+.availability-modal .editor-table-body td {
+    box-sizing: border-box !important;
+    width: auto !important;
+    max-width: none !important;
+}
+
+.availability-modal .editor-table-header th {
+    height: 53px !important;
+    padding: 0 10px !important;
+    background: #004b3d !important;
+    color: rgba(244, 240, 220, 0.72) !important;
+    border: 1px solid rgba(0, 216, 192, 0.12) !important;
+    border-bottom: 0 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+}
+
+.availability-modal .editor-table-body {
+    background: #00382f !important;
+}
+
+.availability-modal .editor-table-body td {
+    height: 52px !important;
+    padding: 0 10px !important;
+    background: #00382f !important;
+    border: 1px solid rgba(0, 216, 192, 0.10) !important;
+    text-align: center !important;
+}
+
+.availability-modal .editor-table-body .editor-time-cell {
+    color: #f4f0dc !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+}
+
+/* Keep the same border positions on both tables. */
+.availability-modal .editor-table-header th:first-child,
+.availability-modal .editor-table-body td:first-child {
+    border-left: 0 !important;
+}
+
+.availability-modal .editor-table-header th:last-child,
+.availability-modal .editor-table-body td:last-child {
+    border-right: 0 !important;
+}
+
+/* Mobile: use one fixed inner width so horizontal scrolling cannot
+   change the column proportions between header and body. */
+@media (max-width: 700px) {
+    .availability-modal .editor-header-container,
+    .availability-modal .editor-container {
+        width: calc(100% - 32px) !important;
+        margin-left: 16px !important;
+        margin-right: 16px !important;
+    }
+
+    .availability-modal .editor-header-container .editor-table,
+    .availability-modal .editor-container .editor-table {
+        width: 700px !important;
+        min-width: 700px !important;
+    }
+
+    .availability-modal .editor-header-container {
+        overflow: hidden !important;
+    }
+}
+
+@media (max-width: 380px) {
+    .availability-modal .editor-header-container,
+    .availability-modal .editor-container {
+        width: calc(100% - 28px) !important;
+        margin-left: 14px !important;
+        margin-right: 14px !important;
+    }
+
+    .availability-modal .editor-header-container .editor-table,
+    .availability-modal .editor-container .editor-table {
+        width: 700px !important;
+        min-width: 700px !important;
+    }
+}
