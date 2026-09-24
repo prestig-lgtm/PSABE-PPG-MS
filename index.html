@@ -8,14 +8,9 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     >
 
-    <meta
-        name="theme-color"
-        content="#002d24"
-    >
+    <meta name="theme-color" content="#002d24">
 
-    <title>
-        PSABE-PPG CSU Chapter Management System
-    </title>
+    <title>PSABE-PPG CSU Chapter Management System</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
@@ -30,7 +25,6 @@
 
         <div class="loading-brand">
 
-            <!-- LOGO -->
             <div class="loading-logo-container">
                 <img
                     src="assets/psabe-ppg-logo.png"
@@ -39,10 +33,8 @@
                 >
             </div>
 
-            <!-- VERTICAL LINE -->
             <div class="loading-divider"></div>
 
-            <!-- TEXT -->
             <div class="loading-text">
 
                 <div class="loading-title">
@@ -68,22 +60,15 @@
          LOGIN PAGE
     ====================================================== -->
 
-    <main
-        id="loginPage"
-        class="login-page"
-    >
+    <main id="loginPage" class="login-page">
 
         <section class="login-card">
 
-            <!-- =============================================
-                 LOGIN HEADER
-            ============================================== -->
+            <!-- LOGIN HEADER -->
 
             <div class="login-header">
 
-                <h1>
-                    Welcome back!
-                </h1>
+                <h1>Welcome back!</h1>
 
                 <p>
                     Sign in to your account to continue<br>
@@ -93,24 +78,18 @@
             </div>
 
 
-            <!-- =============================================
-                 LOGIN FORM
-            ============================================== -->
+            <!-- LOGIN FORM -->
 
-            <form
-                id="loginForm"
-                class="login-form"
-                autocomplete="on"
-            >
+            <form id="loginForm" class="login-form" autocomplete="on">
 
                 <!-- USERNAME -->
+
                 <div class="input-group">
 
                     <div class="input-icon">
-                        <svg
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                        >
+
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+
                             <circle
                                 cx="12"
                                 cy="7"
@@ -120,7 +99,9 @@
                             <path
                                 d="M5 21c0-4 3-7 7-7s7 3 7 7"
                             ></path>
+
                         </svg>
+
                     </div>
 
                     <input
@@ -136,14 +117,13 @@
 
 
                 <!-- PASSWORD -->
+
                 <div class="input-group">
 
                     <div class="input-icon">
 
-                        <svg
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                        >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+
                             <rect
                                 x="5"
                                 y="10"
@@ -161,6 +141,7 @@
                                 cy="15.5"
                                 r="1"
                             ></circle>
+
                         </svg>
 
                     </div>
@@ -176,7 +157,6 @@
                     >
 
 
-                    <!-- SHOW PASSWORD -->
                     <button
                         type="button"
                         id="togglePassword"
@@ -208,14 +188,12 @@
 
 
                 <!-- POSITION -->
+
                 <div class="input-group position-group">
 
                     <div class="input-icon">
 
-                        <svg
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                        >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
 
                             <circle
                                 cx="9"
@@ -295,15 +273,12 @@
                     </select>
 
 
-                    <!-- CUSTOM DROPDOWN ARROW -->
                     <div
                         class="select-arrow"
                         aria-hidden="true"
                     >
 
-                        <svg
-                            viewBox="0 0 24 24"
-                        >
+                        <svg viewBox="0 0 24 24">
 
                             <path
                                 d="M6 9l6 6 6-6"
@@ -316,9 +291,7 @@
                 </div>
 
 
-                <!-- =========================================
-                     OPTIONS
-                ========================================== -->
+                <!-- OPTIONS -->
 
                 <div class="form-options">
 
@@ -349,23 +322,17 @@
                 </div>
 
 
-                <!-- =========================================
-                     SIGN IN
-                ========================================== -->
+                <!-- SIGN IN -->
 
                 <button
                     type="submit"
                     class="sign-in-button"
                 >
-                    <span>
-                        Sign In
-                    </span>
+                    <span>Sign In</span>
                 </button>
 
 
-                <!-- =========================================
-                     AUTHORIZED MESSAGE
-                ========================================== -->
+                <!-- AUTHORIZED MESSAGE -->
 
                 <div class="authorized-message">
 
@@ -380,7 +347,8 @@
                 </div>
 
 
-                <!-- ERROR / SUCCESS -->
+                <!-- LOGIN MESSAGE -->
+
                 <div
                     id="loginMessage"
                     class="login-message"
@@ -438,13 +406,17 @@
 
             setTimeout(function () {
 
-                loadingScreen.classList.add("loading-hidden");
+                loadingScreen.classList.add(
+                    "loading-hidden"
+                );
 
                 setTimeout(function () {
 
                     loadingScreen.style.display = "none";
 
-                    loginPage.classList.add("login-visible");
+                    loginPage.classList.add(
+                        "login-visible"
+                    );
 
                 }, 850);
 
@@ -456,10 +428,14 @@
             ================================================= */
 
             const savedUsername =
-                localStorage.getItem("psabeRememberedUsername");
+                localStorage.getItem(
+                    "psabeRememberedUsername"
+                );
 
             const savedPosition =
-                localStorage.getItem("psabeRememberedPosition");
+                localStorage.getItem(
+                    "psabeRememberedPosition"
+                );
 
 
             if (savedUsername) {
@@ -467,7 +443,8 @@
                 username.value =
                     savedUsername;
 
-                rememberMe.checked = true;
+                rememberMe.checked =
+                    true;
 
             }
 
@@ -492,7 +469,8 @@
                         password.type === "password"
                     ) {
 
-                        password.type = "text";
+                        password.type =
+                            "text";
 
                         togglePassword.setAttribute(
                             "aria-label",
@@ -505,7 +483,8 @@
 
                     } else {
 
-                        password.type = "password";
+                        password.type =
+                            "password";
 
                         togglePassword.setAttribute(
                             "aria-label",
@@ -540,9 +519,7 @@
 
 
             /* =================================================
-               LOGIN
-               
-               TEMPORARY LOGIN ONLY
+               TEMPORARY LOGIN
             ================================================= */
 
             loginForm.addEventListener(
@@ -581,17 +558,8 @@
                     /*
                      * TEMPORARY LOGIN
                      *
-                     * Username:
-                     * admin
-                     *
-                     * Password:
-                     * psabe123
-                     *
-                     * Position:
-                     * Any available position
-                     *
-                     * This will later be replaced by
-                     * Google Apps Script authentication.
+                     * Username: admin
+                     * Password: psabe123
                      */
 
                     const validUsername =
@@ -602,11 +570,15 @@
 
 
                     if (
-                        enteredUsername === validUsername &&
-                        enteredPassword === validPassword
+                        enteredUsername ===
+                            validUsername &&
+                        enteredPassword ===
+                            validPassword
                     ) {
 
-                        if (rememberMe.checked) {
+                        if (
+                            rememberMe.checked
+                        ) {
 
                             localStorage.setItem(
                                 "psabeRememberedUsername",
@@ -639,13 +611,6 @@
 
                         setTimeout(function () {
 
-                            /*
-                             * TEMPORARY REDIRECT
-                             *
-                             * Change this later to:
-                             * dashboard.html
-                             */
-
                             window.location.href =
                                 "dashboard.html";
 
@@ -665,7 +630,7 @@
 
 
             /* =================================================
-               MESSAGE FUNCTION
+               MESSAGE
             ================================================= */
 
             function showMessage(
