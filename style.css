@@ -1,5 +1,5 @@
 /* =========================================================
-   GLOBAL
+   RESET
 ========================================================= */
 
 * {
@@ -8,38 +8,63 @@
     padding: 0;
 }
 
-html,
-body {
-    width: 100%;
-    min-height: 100%;
-}
 
 html {
+
+    width: 100%;
+    height: 100%;
+
     background: #002d24;
+
 }
 
+
 body {
-    min-height: 100vh;
+
+    width: 100%;
+    min-height: 100%;
+
+    margin: 0;
+
+    background: #002d24;
+
+    color: #f8f3df;
 
     font-family:
         Arial,
         Helvetica,
         sans-serif;
 
-    color: #f8f3df;
-
-    background: #002d24;
-
     overflow-x: hidden;
+
 }
 
 
 /* =========================================================
-   FIXED WEBSITE BACKGROUND
+   LOCK PAGE DURING LOADING
 ========================================================= */
 
-body::before {
-    content: "";
+body.loading-active {
+
+    overflow: hidden;
+
+    width: 100%;
+
+    height: 100%;
+
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+}
+
+
+/* =========================================================
+   FIXED BACKGROUND
+========================================================= */
+
+.background-layer {
 
     position: fixed;
 
@@ -47,25 +72,52 @@ body::before {
     left: 0;
 
     width: 100vw;
+
     height: 100vh;
-    height: 100dvh;
+    height: 100svh;
 
     z-index: 0;
 
-    background:
-        linear-gradient(
-            rgba(0, 45, 36, 0.12),
-            rgba(0, 45, 36, 0.12)
-        ),
-        url("assets/management-background.png");
-
-    background-size: cover;
-
-    background-position: center center;
+    background-color: #002d24;
 
     background-repeat: no-repeat;
 
+    background-position:
+        center center;
+
+    background-size:
+        cover;
+
+    background-image: none;
+
     pointer-events: none;
+
+    transform:
+        translate3d(
+            0,
+            0,
+            0
+        );
+
+    -webkit-transform:
+        translate3d(
+            0,
+            0,
+            0
+        );
+
+}
+
+
+/* =========================================================
+   BACKGROUND AFTER IMAGE LOAD
+========================================================= */
+
+.background-layer.background-loaded {
+
+    background-image:
+        url("assets/management-background.png");
+
 }
 
 
@@ -74,16 +126,18 @@ body::before {
 ========================================================= */
 
 .loading-screen {
+
     position: fixed;
 
     top: 0;
     left: 0;
 
     width: 100vw;
-    height: 100vh;
-    height: 100dvh;
 
-    z-index: 99999;
+    height: 100vh;
+    height: 100svh;
+
+    z-index: 1000;
 
     display: flex;
 
@@ -92,57 +146,49 @@ body::before {
 
     overflow: hidden;
 
-    /*
-       IMPORTANT:
-       The background is directly attached to the loading
-       screen so it cannot scroll with the page.
-    */
-
-    background:
-        linear-gradient(
-            rgba(0, 45, 36, 0.18),
-            rgba(0, 45, 36, 0.18)
-        ),
-        url("assets/management-background.png");
-
-    background-size: cover;
-
-    background-position: center center;
-
-    background-repeat: no-repeat;
+    background: transparent;
 
     opacity: 1;
 
     visibility: visible;
 
+    pointer-events: auto;
+
     transition:
         opacity 0.85s ease,
         visibility 0.85s ease;
+
 }
 
+
 .loading-screen.loading-hidden {
+
     opacity: 0;
 
     visibility: hidden;
 
     pointer-events: none;
+
 }
 
 
 /* =========================================================
    LOADING BRAND
+
+   IMPORTANT:
+   The animation ONLY changes opacity.
+
+   It does NOT change transform.
+
+   This allows the mobile scale to remain active.
 ========================================================= */
 
 .loading-brand {
+
     display: flex;
 
     align-items: center;
     justify-content: center;
-
-    /*
-       Let the complete logo + divider + text determine
-       its own width.
-    */
 
     width: max-content;
 
@@ -150,11 +196,23 @@ body::before {
 
     flex-shrink: 0;
 
+    opacity: 0;
+
+    visibility: hidden;
+
+}
+
+
+.loading-brand.brand-visible {
+
+    visibility: visible;
+
     animation:
         loadingBrandAppear
-        1s
+        0.6s
         ease-out
-        both;
+        forwards;
+
 }
 
 
@@ -163,6 +221,7 @@ body::before {
 ========================================================= */
 
 .loading-logo-container {
+
     width: 280px;
 
     flex-shrink: 0;
@@ -171,14 +230,19 @@ body::before {
 
     align-items: center;
     justify-content: center;
+
 }
 
+
 .loading-logo {
+
     display: block;
 
     width: 280px;
 
     height: auto;
+
+    max-width: 280px;
 
     max-height: 280px;
 
@@ -188,18 +252,20 @@ body::before {
 
     animation:
         loadingLogoAppear
-        0.9s
+        0.8s
         ease-out
         0.15s
         forwards;
+
 }
 
 
 /* =========================================================
-   LOADING DIVIDER
+   DIVIDER
 ========================================================= */
 
 .loading-divider {
+
     width: 3px;
 
     height: 280px;
@@ -207,20 +273,24 @@ body::before {
     flex-shrink: 0;
 
     margin-left: 42px;
+
     margin-right: 42px;
 
     background: #00d8b5;
 
-    transform-origin: center;
+    transform:
+        scaleY(0);
 
-    transform: scaleY(0);
+    transform-origin:
+        center;
 
     animation:
         loadingDividerAppear
-        0.8s
+        0.75s
         ease-out
-        0.3s
+        0.35s
         forwards;
+
 }
 
 
@@ -229,31 +299,40 @@ body::before {
 ========================================================= */
 
 .loading-text {
+
     display: flex;
 
     flex-direction: column;
 
-    justify-content: center;
-
     align-items: flex-start;
 
-    text-align: left;
+    justify-content: center;
+
+    width: max-content;
 
     min-width: max-content;
 
     flex-shrink: 0;
+
+    text-align: left;
+
 }
 
+
+/* =========================================================
+   TITLE
+========================================================= */
+
 .loading-title {
+
     color: #f8f3df;
 
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
     font-size:
-        clamp(42px, 5.5vw, 76px);
+        clamp(
+            42px,
+            5.5vw,
+            76px
+        );
 
     font-weight: 800;
 
@@ -265,28 +344,35 @@ body::before {
 
     opacity: 0;
 
-    transform: translateX(-35px);
+    transform:
+        translateX(-30px);
 
     animation:
         loadingTextAppear
-        0.75s
-        ease-out
         0.7s
+        ease-out
+        0.65s
         forwards;
+
 }
 
+
+/* =========================================================
+   CHAPTER
+========================================================= */
+
 .loading-chapter {
+
     margin-top: 20px;
 
     color: #f8f3df;
 
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
     font-size:
-        clamp(20px, 2.5vw, 34px);
+        clamp(
+            20px,
+            2.5vw,
+            34px
+        );
 
     font-weight: 700;
 
@@ -298,28 +384,35 @@ body::before {
 
     opacity: 0;
 
-    transform: translateX(-35px);
+    transform:
+        translateX(-30px);
 
     animation:
         loadingTextAppear
-        0.75s
+        0.7s
         ease-out
-        0.85s
+        0.8s
         forwards;
+
 }
 
+
+/* =========================================================
+   SYSTEM
+========================================================= */
+
 .loading-system {
+
     margin-top: 27px;
 
     color: #00d8b5;
 
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
     font-size:
-        clamp(20px, 2.5vw, 34px);
+        clamp(
+            20px,
+            2.5vw,
+            34px
+        );
 
     font-weight: 700;
 
@@ -331,14 +424,16 @@ body::before {
 
     opacity: 0;
 
-    transform: translateX(-35px);
+    transform:
+        translateX(-30px);
 
     animation:
         loadingTextAppear
-        0.75s
+        0.7s
         ease-out
-        1s
+        0.95s
         forwards;
+
 }
 
 
@@ -347,67 +442,88 @@ body::before {
 ========================================================= */
 
 @keyframes loadingBrandAppear {
+
     from {
+
         opacity: 0;
 
-        transform:
-            scale(0.98);
     }
 
     to {
+
         opacity: 1;
 
-        transform:
-            scale(1);
     }
+
 }
 
+
 @keyframes loadingLogoAppear {
+
     from {
+
         opacity: 0;
 
         transform:
             translateX(-20px);
+
     }
 
     to {
+
         opacity: 1;
 
         transform:
             translateX(0);
+
     }
+
 }
 
+
 @keyframes loadingDividerAppear {
+
     from {
+
         opacity: 0;
 
         transform:
             scaleY(0);
+
     }
 
     to {
+
         opacity: 1;
 
         transform:
             scaleY(1);
+
     }
+
 }
 
+
 @keyframes loadingTextAppear {
+
     from {
+
         opacity: 0;
 
         transform:
-            translateX(-35px);
+            translateX(-30px);
+
     }
 
     to {
+
         opacity: 1;
 
         transform:
             translateX(0);
+
     }
+
 }
 
 
@@ -416,14 +532,15 @@ body::before {
 ========================================================= */
 
 .login-page {
+
     position: relative;
 
-    z-index: 1;
+    z-index: 10;
 
     width: 100%;
 
     min-height: 100vh;
-    min-height: 100dvh;
+    min-height: 100svh;
 
     display: flex;
 
@@ -431,8 +548,7 @@ body::before {
     justify-content: center;
 
     padding:
-        30px
-        20px;
+        30px 20px;
 
     overflow-x: hidden;
 
@@ -442,10 +558,14 @@ body::before {
 
     transition:
         opacity 0.8s ease;
+
 }
 
+
 .login-page.login-visible {
+
     opacity: 1;
+
 }
 
 
@@ -454,6 +574,7 @@ body::before {
 ========================================================= */
 
 .login-card {
+
     position: relative;
 
     width:
@@ -469,12 +590,22 @@ body::before {
 
     border:
         2px solid
-        rgba(0, 216, 181, 0.78);
+        rgba(
+            0,
+            216,
+            181,
+            0.78
+        );
 
     border-radius: 22px;
 
     background:
-        rgba(0, 37, 30, 0.30);
+        rgba(
+            0,
+            37,
+            30,
+            0.30
+        );
 
     backdrop-filter:
         blur(7px);
@@ -484,7 +615,13 @@ body::before {
 
     box-shadow:
         0 20px 60px
-        rgba(0, 0, 0, 0.25);
+        rgba(
+            0,
+            0,
+            0,
+            0.25
+        );
+
 }
 
 
@@ -493,12 +630,16 @@ body::before {
 ========================================================= */
 
 .login-header {
+
     text-align: center;
 
     margin-bottom: 21px;
+
 }
 
+
 .login-header h1 {
+
     color: #f8f3df;
 
     font-size: 29px;
@@ -508,23 +649,29 @@ body::before {
     line-height: 1.1;
 
     margin-bottom: 7px;
+
 }
 
+
 .login-header p {
+
     color: #b7d9d1;
 
     font-size: 14px;
 
     line-height: 1.4;
+
 }
 
 
 /* =========================================================
-   LOGIN FORM
+   FORM
 ========================================================= */
 
 .login-form {
+
     width: 100%;
+
 }
 
 
@@ -533,6 +680,7 @@ body::before {
 ========================================================= */
 
 .input-group {
+
     position: relative;
 
     width: 100%;
@@ -543,29 +691,53 @@ body::before {
 
     border:
         2px solid
-        rgba(0, 216, 181, 0.75);
+        rgba(
+            0,
+            216,
+            181,
+            0.75
+        );
 
     border-radius: 14px;
 
     background:
-        rgba(0, 32, 27, 0.30);
+        rgba(
+            0,
+            32,
+            27,
+            0.30
+        );
 
     transition:
         border-color 0.2s ease,
         background 0.2s ease,
         box-shadow 0.2s ease;
+
 }
 
+
 .input-group:focus-within {
+
     border-color:
         #00d8b5;
 
     background:
-        rgba(0, 45, 36, 0.42);
+        rgba(
+            0,
+            45,
+            36,
+            0.42
+        );
 
     box-shadow:
         0 0 0 3px
-        rgba(0, 216, 181, 0.08);
+        rgba(
+            0,
+            216,
+            181,
+            0.08
+        );
+
 }
 
 
@@ -574,6 +746,7 @@ body::before {
 ========================================================= */
 
 .input-icon {
+
     position: absolute;
 
     left: 18px;
@@ -592,9 +765,12 @@ body::before {
     justify-content: center;
 
     pointer-events: none;
+
 }
 
+
 .input-icon svg {
+
     width: 26px;
     height: 26px;
 
@@ -606,19 +782,24 @@ body::before {
     stroke-width: 2;
 
     stroke-linecap: round;
+
     stroke-linejoin: round;
+
 }
 
 
 /* =========================================================
-   TEXT INPUT
+   INPUT
 ========================================================= */
 
 .input-group input {
+
     width: 100%;
+
     height: 100%;
 
     border: none;
+
     outline: none;
 
     background: transparent;
@@ -638,39 +819,31 @@ body::before {
         Arial,
         Helvetica,
         sans-serif;
+
 }
+
 
 .input-group input::placeholder {
+
     color:
-        rgba(205, 224, 218, 0.75);
+        rgba(
+            205,
+            224,
+            218,
+            0.75
+        );
 
     opacity: 1;
-}
 
-.input-group input:-webkit-autofill,
-.input-group input:-webkit-autofill:hover,
-.input-group input:-webkit-autofill:focus {
-    -webkit-text-fill-color:
-        #f8f3df;
-
-    -webkit-box-shadow:
-        0 0 0 1000px
-        rgba(0, 45, 36, 0.5)
-        inset;
-
-    transition:
-        background-color
-        9999s
-        ease-in-out
-        0s;
 }
 
 
 /* =========================================================
-   PASSWORD TOGGLE
+   PASSWORD BUTTON
 ========================================================= */
 
 .password-toggle {
+
     position: absolute;
 
     right: 12px;
@@ -689,19 +862,18 @@ body::before {
     justify-content: center;
 
     border: none;
-    outline: none;
 
     background: transparent;
-
-    color:
-        #00e6c0;
 
     cursor: pointer;
 
     padding: 0;
+
 }
 
+
 .password-toggle svg {
+
     width: 23px;
     height: 23px;
 
@@ -713,12 +885,9 @@ body::before {
     stroke-width: 2;
 
     stroke-linecap: round;
-    stroke-linejoin: round;
-}
 
-.password-toggle:hover svg {
-    stroke:
-        #f8f3df;
+    stroke-linejoin: round;
+
 }
 
 
@@ -727,12 +896,18 @@ body::before {
 ========================================================= */
 
 .position-group {
+
     overflow: hidden;
+
 }
 
+
 .position-group select {
+
     appearance: none;
+
     -webkit-appearance: none;
+
     -moz-appearance: none;
 
     position: absolute;
@@ -743,6 +918,7 @@ body::before {
     height: 100%;
 
     border: none;
+
     outline: none;
 
     background: transparent;
@@ -752,11 +928,6 @@ body::before {
 
     font-size: 15px;
 
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
     padding:
         0
         52px
@@ -764,21 +935,17 @@ body::before {
         58px;
 
     cursor: pointer;
+
 }
 
-.position-group select:invalid {
-    color:
-        rgba(205, 224, 218, 0.75);
-}
 
 .position-group select option {
-    color:
-        #f8f3df;
+
+    color: #f8f3df;
 
     background:
         #00372c;
 
-    font-size: 15px;
 }
 
 
@@ -787,6 +954,7 @@ body::before {
 ========================================================= */
 
 .select-arrow {
+
     position: absolute;
 
     right: 12px;
@@ -805,10 +973,11 @@ body::before {
         translateY(-50%);
 
     pointer-events: none;
+
 }
 
+
 .select-arrow svg {
-    display: block;
 
     width: 21px;
     height: 21px;
@@ -821,15 +990,18 @@ body::before {
     stroke-width: 2.2;
 
     stroke-linecap: round;
+
     stroke-linejoin: round;
+
 }
 
 
 /* =========================================================
-   FORM OPTIONS
+   OPTIONS
 ========================================================= */
 
 .form-options {
+
     width: 100%;
 
     display: flex;
@@ -842,14 +1014,16 @@ body::before {
         17px
         0
         18px;
+
 }
 
 
 /* =========================================================
-   REMEMBER ME
+   REMEMBER
 ========================================================= */
 
 .remember-option {
+
     display: flex;
 
     align-items: center;
@@ -859,17 +1033,23 @@ body::before {
     cursor: pointer;
 
     user-select: none;
+
 }
 
+
 .remember-option input {
+
     position: absolute;
 
     opacity: 0;
 
     pointer-events: none;
+
 }
 
+
 .custom-checkbox {
+
     width: 25px;
     height: 25px;
 
@@ -881,29 +1061,29 @@ body::before {
 
     border-radius: 5px;
 
-    background:
-        transparent;
-
     display: flex;
 
     align-items: center;
     justify-content: center;
 
-    transition:
-        0.2s ease;
 }
+
 
 .remember-option input:checked
 + .custom-checkbox {
+
     background:
         #00d8b5;
 
     border-color:
         #00d8b5;
+
 }
+
 
 .remember-option input:checked
 + .custom-checkbox::after {
+
     content: "";
 
     width: 7px;
@@ -920,15 +1100,18 @@ body::before {
     transform:
         rotate(45deg)
         translateY(-2px);
+
 }
 
+
 .remember-text {
+
     color:
         #f8f3df;
 
-    font-size: 13px;
+    font-size:
+        13px;
 
-    line-height: 1;
 }
 
 
@@ -937,6 +1120,7 @@ body::before {
 ========================================================= */
 
 .forgot-password {
+
     border: none;
 
     background: transparent;
@@ -944,32 +1128,22 @@ body::before {
     color:
         #00e6c0;
 
-    font-size: 13px;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
+    font-size:
+        13px;
 
     cursor: pointer;
 
     padding: 4px;
 
-    transition:
-        color 0.2s ease;
-}
-
-.forgot-password:hover {
-    color:
-        #f8f3df;
 }
 
 
 /* =========================================================
-   SIGN IN BUTTON
+   SIGN IN
 ========================================================= */
 
 .sign-in-button {
+
     width: 100%;
 
     height: 54px;
@@ -985,13 +1159,7 @@ body::before {
             #00d8a8
         );
 
-    color:
-        #ffffff;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
+    color: #ffffff;
 
     font-size: 18px;
 
@@ -1001,29 +1169,42 @@ body::before {
 
     box-shadow:
         0 8px 24px
-        rgba(0, 216, 168, 0.20);
+        rgba(
+            0,
+            216,
+            168,
+            0.20
+        );
 
     transition:
         transform 0.2s ease,
-        box-shadow 0.2s ease,
-        filter 0.2s ease;
+        box-shadow 0.2s ease;
+
 }
 
+
 .sign-in-button:hover {
+
     transform:
         translateY(-2px);
 
     box-shadow:
         0 12px 30px
-        rgba(0, 216, 168, 0.30);
+        rgba(
+            0,
+            216,
+            168,
+            0.30
+        );
 
-    filter:
-        brightness(1.04);
 }
 
+
 .sign-in-button:active {
+
     transform:
         translateY(0);
+
 }
 
 
@@ -1032,6 +1213,7 @@ body::before {
 ========================================================= */
 
 .authorized-message {
+
     display: flex;
 
     align-items: center;
@@ -1047,9 +1229,12 @@ body::before {
     font-size: 11px;
 
     white-space: nowrap;
+
 }
 
+
 .authorized-line {
+
     width: 45px;
 
     height: 1px;
@@ -1058,6 +1243,7 @@ body::before {
         #00a98f;
 
     opacity: 0.75;
+
 }
 
 
@@ -1066,6 +1252,7 @@ body::before {
 ========================================================= */
 
 .login-message {
+
     min-height: 18px;
 
     margin-top: 12px;
@@ -1075,25 +1262,38 @@ body::before {
     font-size: 12px;
 
     line-height: 1.4;
+
 }
+
 
 .login-message:empty {
+
     display: none;
+
 }
+
 
 .login-message.error {
+
     color:
         #ff9f9f;
+
 }
+
 
 .login-message.success {
+
     color:
         #7fffd4;
+
 }
 
+
 .login-message.info {
+
     color:
         #b7d9d1;
+
 }
 
 
@@ -1104,55 +1304,29 @@ body::before {
 @media (max-width: 800px) {
 
     .loading-brand {
+
         transform:
-            scale(0.78);
+            translate(-50%, -50%)
+            scale(0.65);
+
+        position: absolute;
+
+        left: 50%;
+        top: 50%;
+
     }
 
-    .loading-logo-container {
-        width: 220px;
-    }
-
-    .loading-logo {
-        width: 220px;
-        max-height: 220px;
-    }
-
-    .loading-divider {
-        height: 220px;
-
-        margin-left: 28px;
-        margin-right: 28px;
-    }
-
-    .loading-title {
-        font-size: 46px;
-    }
-
-    .loading-chapter {
-        font-size: 21px;
-
-        letter-spacing: 6px;
-    }
-
-    .loading-system {
-        font-size: 21px;
-
-        letter-spacing: 4px;
-    }
-
-    .login-page {
-        padding:
-            25px
-            18px;
-    }
 
     .login-card {
+
         width:
             min(
                 440px,
                 92vw
             );
+
     }
+
 }
 
 
@@ -1162,21 +1336,34 @@ body::before {
 
 @media (max-width: 600px) {
 
+
+    /* -----------------------------------------------------
+       MOBILE PAGE
+    ----------------------------------------------------- */
+
     html,
     body {
+
         width: 100%;
 
         min-width: 100%;
 
+        max-width: 100%;
+
         overflow-x: hidden;
+
     }
 
 
-    /* -----------------------------------------------
+    /* -----------------------------------------------------
        FIXED BACKGROUND
-    ----------------------------------------------- */
 
-    body::before {
+       The background remains full-screen and independent
+       from the loading composition.
+    ----------------------------------------------------- */
+
+    .background-layer {
+
         position: fixed;
 
         top: 0;
@@ -1184,236 +1371,193 @@ body::before {
 
         width: 100vw;
 
-        height: 100vh;
-        height: 100dvh;
+        height: 100svh;
 
-        z-index: 0;
-
-        background:
-            linear-gradient(
-                rgba(0, 45, 36, 0.12),
-                rgba(0, 45, 36, 0.12)
-            ),
-            url("assets/management-background.png");
-
-        background-size:
-            cover;
+        min-height: 100svh;
 
         background-position:
             center center;
 
-        background-repeat:
-            no-repeat;
+        background-size:
+            cover;
+
+        transform:
+            translate3d(
+                0,
+                0,
+                0
+            );
+
+        -webkit-transform:
+            translate3d(
+                0,
+                0,
+                0
+            );
+
     }
 
 
-    /* -----------------------------------------------
+    /* -----------------------------------------------------
+       LOADING SCREEN
+    ----------------------------------------------------- */
+
+    .loading-screen {
+
+        position: fixed;
+
+        top: 0;
+        left: 0;
+
+        width: 100vw;
+
+        height: 100svh;
+
+        min-height: 100svh;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        overflow: hidden;
+
+    }
+
+
+    /* -----------------------------------------------------
+       MOBILE LOADING COMPOSITION
+
+       The entire logo + divider + text is treated as
+       ONE composition and scaled down.
+
+       The translate keeps it perfectly centered.
+    ----------------------------------------------------- */
+
+    .loading-brand {
+
+        position: absolute;
+
+        left: 50%;
+        top: 50%;
+
+        width: max-content;
+
+        max-width: none;
+
+        flex-shrink: 0;
+
+        transform:
+            translate(
+                -50%,
+                -50%
+            )
+            scale(0.40);
+
+        transform-origin:
+            center center;
+
+    }
+
+
+    /* -----------------------------------------------------
+       LOGO
+    ----------------------------------------------------- */
+
+    .loading-logo-container {
+
+        width: 280px;
+
+    }
+
+
+    .loading-logo {
+
+        width: 280px;
+
+        max-width: 280px;
+
+        max-height: 280px;
+
+    }
+
+
+    /* -----------------------------------------------------
+       DIVIDER
+    ----------------------------------------------------- */
+
+    .loading-divider {
+
+        width: 3px;
+
+        height: 280px;
+
+        margin-left: 42px;
+
+        margin-right: 42px;
+
+    }
+
+
+    /* -----------------------------------------------------
+       TEXT
+
+       Keep desktop sizing because the whole composition
+       is scaled down by .40 above.
+    ----------------------------------------------------- */
+
+    .loading-title {
+
+        font-size: 76px;
+
+        letter-spacing: 2px;
+
+    }
+
+
+    .loading-chapter {
+
+        font-size: 34px;
+
+        letter-spacing: 9px;
+
+    }
+
+
+    .loading-system {
+
+        font-size: 34px;
+
+        letter-spacing: 7px;
+
+    }
+
+
+    /* -----------------------------------------------------
        LOGIN PAGE
-    ----------------------------------------------- */
+    ----------------------------------------------------- */
 
     .login-page {
-        position: relative;
-
-        z-index: 1;
 
         width: 100%;
 
-        min-height: 100vh;
-        min-height: 100dvh;
+        min-height: 100svh;
 
         padding:
             20px
             14px;
 
-        align-items:
-            center;
+        overflow-x: hidden;
 
-        background:
-            transparent;
-
-        overflow-x:
-            hidden;
     }
 
 
-    /* -----------------------------------------------
-       LOADING SCREEN
-    ----------------------------------------------- */
-
-    .loading-screen {
-        position: fixed;
-
-        top: 0;
-        left: 0;
-
-        width: 100vw;
-
-        height: 100vh;
-        height: 100dvh;
-
-        z-index: 99999;
-
-        display: flex;
-
-        align-items:
-            center;
-
-        justify-content:
-            center;
-
-        overflow:
-            hidden;
-
-        /*
-           Keep the SAME background on mobile.
-           It is fixed because the entire loading screen
-           itself is fixed.
-        */
-
-        background:
-            linear-gradient(
-                rgba(0, 45, 36, 0.18),
-                rgba(0, 45, 36, 0.18)
-            ),
-            url("assets/management-background.png");
-
-        background-size:
-            cover;
-
-        background-position:
-            center center;
-
-        background-repeat:
-            no-repeat;
-    }
-
-
-    /* -----------------------------------------------
-       MOBILE LOADING BRAND
-
-       The complete composition is scaled as one unit.
-       This prevents the right side from being cut off.
-    ----------------------------------------------- */
-
-    .loading-brand {
-        width:
-            max-content;
-
-        max-width:
-            none;
-
-        flex-shrink:
-            0;
-
-        transform:
-            scale(0.43);
-
-        transform-origin:
-            center center;
-
-        margin:
-            0;
-
-        display:
-            flex;
-
-        align-items:
-            center;
-
-        justify-content:
-            center;
-    }
-
-
-    .loading-logo-container {
-        width:
-            280px;
-
-        flex-shrink:
-            0;
-    }
-
-
-    .loading-logo {
-        width:
-            280px;
-
-        max-width:
-            280px;
-
-        max-height:
-            280px;
-    }
-
-
-    .loading-divider {
-        width:
-            3px;
-
-        height:
-            280px;
-
-        margin-left:
-            42px;
-
-        margin-right:
-            42px;
-
-        flex-shrink:
-            0;
-    }
-
-
-    .loading-text {
-        width:
-            max-content;
-
-        min-width:
-            max-content;
-
-        flex-shrink:
-            0;
-    }
-
-
-    .loading-title {
-        font-size:
-            76px;
-
-        letter-spacing:
-            2px;
-    }
-
-
-    .loading-chapter {
-        margin-top:
-            20px;
-
-        font-size:
-            34px;
-
-        letter-spacing:
-            9px;
-    }
-
-
-    .loading-system {
-        margin-top:
-            27px;
-
-        font-size:
-            34px;
-
-        letter-spacing:
-            7px;
-    }
-
-
-    /* -----------------------------------------------
+    /* -----------------------------------------------------
        LOGIN CARD
-    ----------------------------------------------- */
+    ----------------------------------------------------- */
 
     .login-card {
+
         width:
             min(
                 390px,
@@ -1428,51 +1572,43 @@ body::before {
         border-radius:
             20px;
 
-        background:
-            rgba(
-                0,
-                37,
-                30,
-                0.28
-            );
-
-        backdrop-filter:
-            blur(5px);
-
-        -webkit-backdrop-filter:
-            blur(5px);
     }
 
 
+    /* -----------------------------------------------------
+       LOGIN HEADER
+    ----------------------------------------------------- */
+
     .login-header {
+
         margin-bottom:
             19px;
+
     }
 
 
     .login-header h1 {
+
         font-size:
             27px;
 
-        margin-bottom:
-            6px;
     }
 
 
     .login-header p {
+
         font-size:
             13px;
 
-        line-height:
-            1.4;
     }
 
 
-    /* -----------------------------------------------
+    /* -----------------------------------------------------
        INPUTS
-    ----------------------------------------------- */
+    ----------------------------------------------------- */
 
     .input-group {
+
         height:
             53px;
 
@@ -1481,10 +1617,12 @@ body::before {
 
         border-radius:
             13px;
+
     }
 
 
     .input-icon {
+
         left:
             16px;
 
@@ -1493,19 +1631,23 @@ body::before {
 
         height:
             24px;
+
     }
 
 
     .input-icon svg {
+
         width:
             24px;
 
         height:
             24px;
+
     }
 
 
     .input-group input {
+
         font-size:
             14px;
 
@@ -1514,10 +1656,12 @@ body::before {
             48px
             0
             53px;
+
     }
 
 
     .position-group select {
+
         font-size:
             14px;
 
@@ -1526,89 +1670,62 @@ body::before {
             48px
             0
             53px;
+
     }
 
 
     .password-toggle {
+
         right:
             11px;
 
-        width:
-            31px;
-
-        height:
-            31px;
-    }
-
-
-    .password-toggle svg {
-        width:
-            22px;
-
-        height:
-            22px;
     }
 
 
     .select-arrow {
+
         right:
             11px;
 
-        width:
-            29px;
-
-        height:
-            29px;
     }
 
 
-    .select-arrow svg {
-        width:
-            20px;
-
-        height:
-            20px;
-    }
-
-
-    /* -----------------------------------------------
+    /* -----------------------------------------------------
        OPTIONS
-    ----------------------------------------------- */
+    ----------------------------------------------------- */
 
     .form-options {
+
         margin:
             16px
             0
             17px;
-    }
 
-
-    .custom-checkbox {
-        width:
-            24px;
-
-        height:
-            24px;
     }
 
 
     .remember-text {
+
         font-size:
             12px;
+
     }
 
 
     .forgot-password {
+
         font-size:
             12px;
+
     }
 
 
-    /* -----------------------------------------------
-       BUTTON
-    ----------------------------------------------- */
+    /* -----------------------------------------------------
+       SIGN IN
+    ----------------------------------------------------- */
 
     .sign-in-button {
+
         height:
             53px;
 
@@ -1617,14 +1734,16 @@ body::before {
 
         font-size:
             17px;
+
     }
 
 
-    /* -----------------------------------------------
-       AUTHORIZED MESSAGE
-    ----------------------------------------------- */
+    /* -----------------------------------------------------
+       AUTHORIZED
+    ----------------------------------------------------- */
 
     .authorized-message {
+
         gap:
             8px;
 
@@ -1633,36 +1752,53 @@ body::before {
 
         font-size:
             9px;
+
     }
 
 
     .authorized-line {
+
         width:
             38px;
+
     }
+
 }
 
 
 /* =========================================================
-   SMALL PHONES
+   VERY SMALL PHONES
 ========================================================= */
 
 @media (max-width: 380px) {
 
+
     .loading-brand {
+
+        left: 50%;
+        top: 50%;
+
         transform:
-            scale(0.37);
+            translate(
+                -50%,
+                -50%
+            )
+            scale(0.34);
+
     }
 
 
     .login-page {
+
         padding:
             15px
             10px;
+
     }
 
 
     .login-card {
+
         width:
             93vw;
 
@@ -1671,58 +1807,71 @@ body::before {
             14px
             21px;
 
-        border-radius:
-            19px;
     }
 
 
     .login-header h1 {
+
         font-size:
             25px;
+
     }
 
 
     .login-header p {
+
         font-size:
             12px;
+
     }
 
 
     .input-group {
+
         height:
             51px;
+
     }
 
 
     .input-group input,
     .position-group select {
+
         font-size:
             13px;
+
     }
 
 
     .remember-text,
     .forgot-password {
+
         font-size:
             11px;
+
     }
 
 
     .authorized-message {
+
         font-size:
             8px;
+
     }
 
 
     .authorized-line {
+
         width:
             30px;
+
     }
+
 }
 
 
 /* =========================================================
-   REDUCE MOTION
+   REDUCED MOTION
 ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
@@ -1730,6 +1879,7 @@ body::before {
     *,
     *::before,
     *::after {
+
         animation-duration:
             0.01ms !important;
 
@@ -1738,5 +1888,7 @@ body::before {
 
         transition-duration:
             0.01ms !important;
+
     }
+
 }
