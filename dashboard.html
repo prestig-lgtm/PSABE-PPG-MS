@@ -1715,55 +1715,45 @@
                              EDITOR TABLE
                         ================================================== -->
                 
-                        <div class="editor-container">
-                
-                            <table class="editor-table">
-                
+                        <div class="editor-header-container" aria-hidden="true">
+
+                            <table class="editor-table editor-table-header">
+                                <colgroup>
+                                    <col class="editor-time-col">
+                                    <col><col><col><col><col>
+                                </colgroup>
                                 <thead>
-                
                                     <tr>
-                
-                                        <th>
-                                            TIME
-                                        </th>
-                
-                                        <th>
-                                            MON
-                                        </th>
-                
-                                        <th>
-                                            TUE
-                                        </th>
-                
-                                        <th>
-                                            WED
-                                        </th>
-                
-                                        <th>
-                                            THU
-                                        </th>
-                
-                                        <th>
-                                            FRI
-                                        </th>
-                
+                                        <th>TIME</th>
+                                        <th>MON</th>
+                                        <th>TUE</th>
+                                        <th>WED</th>
+                                        <th>THU</th>
+                                        <th>FRI</th>
                                     </tr>
-                
                                 </thead>
-                
-                
-                                <tbody id="editorTableBody">
-                
-                                    <!-- Filled by JavaScript -->
-                
-                                </tbody>
-                
                             </table>
-                
+
                         </div>
-                
-                
-                
+
+                        <div class="editor-container" id="editorScrollContainer">
+
+                            <table class="editor-table editor-table-body">
+                                <colgroup>
+                                    <col class="editor-time-col">
+                                    <col><col><col><col><col>
+                                </colgroup>
+
+                                <tbody id="editorTableBody">
+                                    <!-- Filled by JavaScript -->
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+
+
                         <!-- MODAL FOOTER -->
                 
                         <div class="modal-footer">
@@ -3492,6 +3482,15 @@
         }
 
         renderAvailabilityTable();
+
+        // Keep the separate header horizontally aligned with the scrollable body.
+        const editorScroll = document.getElementById("editorScrollContainer");
+        const editorHeader = document.querySelector(".editor-header-container");
+        if (editorScroll && editorHeader) {
+            editorScroll.addEventListener("scroll", function () {
+                editorHeader.scrollLeft = editorScroll.scrollLeft;
+            }, { passive: true });
+        }
 
         if (window.lucide) {
             lucide.createIcons();
