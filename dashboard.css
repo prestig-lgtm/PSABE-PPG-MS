@@ -4371,14 +4371,19 @@ body {
 }.availability-page .table-container{
     width: 100%;
 
-    overflow-x: auto;
+    /* Keep the availability table inside the card and scroll vertically */
+    max-height: 520px;
+    overflow: auto;
 
     scrollbar-width: thin;
 
     scrollbar-color:
         rgba(0, 216, 192, 0.35)
         transparent;
+
+    overscroll-behavior: contain;
 }.availability-page .table-container::-webkit-scrollbar{
+    width: 7px;
     height: 7px;
 }.availability-page .table-container::-webkit-scrollbar-track{
     background: transparent;
@@ -4398,11 +4403,15 @@ body {
 }.availability-page .availability-table th{
     height: 55px;
 
+    position: sticky;
+    top: 0;
+    z-index: 4;
+
     color:
         rgba(244, 240, 220, 0.66);
 
     background:
-        rgba(0, 75, 61, 0.45);
+        #004b3d;
 
     border-bottom:
         1px solid rgba(0, 216, 192, 0.16);
@@ -4553,7 +4562,19 @@ body {
         1px solid rgba(0, 216, 192, 0.45);
 
     display: inline-block;
-}.availability-page .availability-information{
+}@media (max-width: 900px){
+    .availability-page .table-container{
+        max-height: 460px;
+    }
+}
+
+@media (max-width: 600px){
+    .availability-page .table-container{
+        max-height: 400px;
+    }
+}
+
+.availability-page .availability-information{
     width: 100%;
 
     max-width: 1445px;
@@ -4757,20 +4778,22 @@ body {
     font-size: 13px;
 
     line-height: 1.5;
-}.availability-page .editor-container{
-    overflow-x: auto;
+}.editor-container{
+    overflow: auto;
+
+    max-height: 430px;
 
     padding:
         0 29px;
 
     scrollbar-width: thin;
-}.availability-page .editor-table{
+}.editor-table{
     width: 100%;
 
     min-width: 750px;
 
     border-collapse: collapse;
-}.availability-page .editor-table th{
+}.editor-table th{
     height: 43px;
 
     background:
@@ -4787,7 +4810,7 @@ body {
 
     border:
         1px solid rgba(0, 216, 192, 0.12);
-}.availability-page .editor-table td{
+}.editor-table td{
     height: 52px;
 
     text-align: center;
@@ -4810,7 +4833,7 @@ body {
 
     border-top:
         1px solid rgba(0, 216, 192, 0.13);
-}.availability-page .save-status{
+}.save-status{
     color:
         rgba(244, 240, 220, 0.40);
 
@@ -4821,7 +4844,7 @@ body {
     align-items: center;
 
     gap: 10px;
-}.availability-page .cancel-button, .availability-page .save-button{
+}.cancel-button, .save-button{
     height: 42px;
 
     border-radius: 9px;
@@ -4846,7 +4869,7 @@ body {
 
     padding:
         0 17px;
-}.availability-page .cancel-button{
+}.cancel-button{
     background:
         transparent;
 
@@ -4855,12 +4878,12 @@ body {
 
     color:
         rgba(244, 240, 220, 0.60);
-}.availability-page .cancel-button:hover{
+}.cancel-button:hover{
     background:
         rgba(255, 255, 255, 0.04);
 
     color: #f4f0dc;
-}.availability-page .save-button{
+}.save-button{
     background:
         #00bca6;
 
@@ -4869,10 +4892,10 @@ body {
 
     color:
         #00352c;
-}.availability-page .save-button:hover{
+}.save-button:hover{
     background:
         #00d8c0;
-}.availability-page .save-button svg{
+}.save-button svg{
     width: 16px;
     height: 16px;
 }@media (max-width: 1200px) {
@@ -5058,7 +5081,7 @@ body {
     }
 
 
-    .availability-page .editor-container{
+    .editor-container{
         padding:
             0 18px;
     }
@@ -5074,7 +5097,7 @@ body {
     }
 
 
-    .availability-page .save-status{
+    .save-status{
         text-align: center;
     }
 
@@ -5084,7 +5107,7 @@ body {
     }
 
 
-    .availability-page .cancel-button, .availability-page .save-button{
+    .cancel-button, .save-button{
         flex: 1;
     }
 
@@ -5112,7 +5135,7 @@ body {
     }
 
 
-    .availability-page .cancel-button, .availability-page .save-button{
+    .cancel-button, .save-button{
         width: 100%;
     }
 
