@@ -1966,6 +1966,24 @@
                     const now =
                         new Date();
 
+                    /* Update the greeting from the actual local time. */
+                    const hour = now.getHours();
+                    let greeting = "Good evening";
+
+                    if (hour >= 5 && hour < 12) {
+                        greeting = "Good morning";
+                    } else if (hour >= 12 && hour < 18) {
+                        greeting = "Good afternoon";
+                    }
+
+                    const welcomeHeading =
+                        document.querySelector(".welcome-section h1");
+
+                    if (welcomeHeading && welcomeHeading.firstChild) {
+                        welcomeHeading.firstChild.textContent =
+                            greeting + ", ";
+                    }
+
 
                     currentDate.textContent =
                         now
@@ -3309,9 +3327,10 @@
 
 
     function isApiConfigured() {
-        return (
+        return Boolean(
             API_URL &&
-            API_URL !== "https://script.google.com/macros/s/AKfycbzTZORNDMsHLxoPeOLNAHurKurC14whoFKxT10RVPyCxP-z9H03slRLTUyhVx7tkyMW/exec"
+            API_URL.trim() !== "" &&
+            API_URL !== "YOUR_GOOGLE_APPS_SCRIPT_EXEC_URL"
         );
     }
 
