@@ -3258,7 +3258,12 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbzTZORNDMsHLxoPeOLNAHurKurC14whoFKxT10RVPyCxP-z9H03slRLTUyhVx7tkyMW/exec";
 
     const CURRENT_USERNAME =
-        sessionStorage.getItem("psabeUsername") || "Mac";
+        String(sessionStorage.getItem("psabeUsername") || "").trim();
+
+    if (!CURRENT_USERNAME) {
+        window.location.replace("index.html");
+        return;
+    }
 
 
     /* =====================================================
@@ -3297,14 +3302,11 @@
     let currentOfficer = {
         Username: CURRENT_USERNAME,
         Name:
-            sessionStorage.getItem("psabeName") ||
-            "MC RJ Escote",
+            String(sessionStorage.getItem("psabeName") || "").trim(),
         Position:
-            sessionStorage.getItem("psabePosition") ||
-            "Vice President",
+            String(sessionStorage.getItem("psabePosition") || "").trim(),
         Status:
-            sessionStorage.getItem("psabeStatus") ||
-            "Active"
+            String(sessionStorage.getItem("psabeStatus") || "").trim()
     };
 
     let myAvailability = {};
@@ -3342,7 +3344,8 @@
                 : "&";
 
         return API_URL + separator +
-            "action=" + encodeURIComponent(action);
+            "action=" + encodeURIComponent(action) +
+            "&_=" + Date.now();
     }
 
 
@@ -3389,12 +3392,10 @@
     function updateOfficerProfile() {
 
         const name =
-            normalize(currentOfficer.Name) ||
-            "MC RJ Escote";
+            normalize(currentOfficer.Name);
 
         const position =
-            normalize(currentOfficer.Position) ||
-            "Vice President";
+            normalize(currentOfficer.Position);
 
         const initials = name
             .split(/\s+/)
@@ -3431,12 +3432,15 @@
             );
 
         if (greetingName) {
+            const nameParts =
+                name.split(/\s+/).filter(Boolean);
+
             const firstName =
-                name.split(/\s+/).filter(Boolean)[0] || "MC RJ";
+                nameParts[0] || "Officer";
 
             greetingName.textContent =
-                firstName === "MC"
-                    ? name.split(/\s+/).slice(0, 2).join(" ")
+                firstName.toUpperCase() === "MC" && nameParts[1]
+                    ? nameParts.slice(0, 2).join(" ")
                     : firstName;
         }
 
@@ -3855,6 +3859,37 @@
 
 
     /* =====================================================
+       APPLY SAVED AVAILABILITY LOCALLY
+       Updates the dashboard immediately after a successful save.
+    ===================================================== */
+
+    function applyMyAvailabilityLocally(records) {
+
+        const username =
+            CURRENT_USERNAME.toLowerCase();
+
+        availabilityRecords =
+            availabilityRecords.filter(function (record) {
+                return normalize(record.Username).toLowerCase() !== username;
+            });
+
+        records.forEach(function (record) {
+            availabilityRecords.push({
+                Username: CURRENT_USERNAME,
+                "Officer Name": normalize(currentOfficer.Name),
+                Position: normalize(currentOfficer.Position),
+                Day: record.day,
+                Time: record.time,
+                Status: "Available"
+            });
+        });
+
+        rebuildAvailabilityTableData();
+        renderAvailabilityTable();
+    }
+
+
+    /* =====================================================
        SAVE TO GOOGLE SHEETS
     ===================================================== */
 
@@ -3921,11 +3956,9 @@
                 data: {
                     username: CURRENT_USERNAME,
                     officerName:
-                        normalize(currentOfficer.Name) ||
-                        "MC RJ Escote",
+                        normalize(currentOfficer.Name),
                     position:
-                        normalize(currentOfficer.Position) ||
-                        "Vice President",
+                        normalize(currentOfficer.Position),
                     records: records
                 }
             };
@@ -3966,23 +3999,19 @@
 
 
             /*
-               Reload the saved data from Google Sheets so the
-               centralized table and editor always reflect the
-               actual database rather than temporary browser data.
+               Update the centralized table immediately from the
+               records that were just saved. This prevents the UI
+               from waiting on a cached GET response.
             */
-
-            const availabilityResult =
-                await fetchJson("getAvailability");
-
-            availabilityRecords =
-                Array.isArray(availabilityResult.data)
-                    ? availabilityResult.data
-                    : [];
-
-            rebuildAvailabilityTableData();
-            renderAvailabilityTable();
+            applyMyAvailabilityLocally(records);
 
             closeAvailabilityModal();
+
+            /*
+               Refresh from Google Sheets in the background so the
+               dashboard remains synchronized with the database.
+            */
+            loadAvailability();
 
         } catch (error) {
 
