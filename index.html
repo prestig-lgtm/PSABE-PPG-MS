@@ -272,10 +272,7 @@
                     return;
                 }
 
-                if (
-                    !WEB_APP_URL ||
-                    WEB_APP_URL === "https://script.google.com/macros/s/AKfycbzTZORNDMsHLxoPeOLNAHurKurC14whoFKxT10RVPyCxP-z9H03slRLTUyhVx7tkyMW/exec"
-                ) {
+                if (!WEB_APP_URL || WEB_APP_URL.trim() === "") {
                     showMessage(
                         "The Google Sheets login connection has not been configured yet.",
                         "error"
