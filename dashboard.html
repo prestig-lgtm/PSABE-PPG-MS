@@ -24,6 +24,22 @@
     >
 
     <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
         rel="stylesheet"
         href="dashboard.css"
     >
@@ -1398,13 +1414,18 @@
 
 
 
-            
+
+
             <!-- =================================================
                  AVAILABLE OFFICERS PAGE
             ================================================== -->
 
-            <div id="availabilityPage" class="page-section">
+            <div
+                id="availabilityPage"
+                class="page-section availability-page"
+            >
 
+<section class="page-content">
 
 
         <!-- PAGE HEADING -->
@@ -1482,6 +1503,15 @@
             <div class="table-container">
 
                 <table class="availability-table">
+
+                    <colgroup>
+                        <col class="availability-time-col">
+                        <col class="availability-day-col">
+                        <col class="availability-day-col">
+                        <col class="availability-day-col">
+                        <col class="availability-day-col">
+                        <col class="availability-day-col">
+                    </colgroup>
 
                     <thead>
 
@@ -1585,10 +1615,16 @@
 
         </div>
 
-    
+    </section>
+
+                <!-- =========================================================
+                     JAVASCRIPT
+                ========================================================= -->
+
             </div>
 
-<!-- =================================================
+
+                <!-- =================================================
                  PLACEHOLDER PAGE
             ================================================== -->
 
@@ -1629,154 +1665,138 @@
 
 
 
-<!-- =========================================================
-     AVAILABILITY MODAL
-========================================================= -->
-
+<!-- AVAILABILITY MODAL -->
 <div
-    class="modal-overlay"
-    id="availabilityModal"
->
+                    class="modal-overlay"
+                    id="availabilityModal"
+                >
+                
+                    <div class="availability-modal">
+                
+                
+                        <!-- MODAL HEADER -->
+                
+                        <div class="modal-header">
+                
+                            <div>
+                
+                                <div class="modal-label">
+                                    MY AVAILABILITY
+                                </div>
+                
+                                <h2>
+                                    MC RJ Escote
+                                </h2>
+                
+                                <p>
+                                    Vice President
+                                </p>
+                
+                            </div>
+                
+                
+                            <button
+                                class="modal-close"
+                                id="closeAvailabilityButton"
+                                type="button"
+                                aria-label="Close"
+                            >
+                                <i data-lucide="x"></i>
+                            </button>
+                
+                        </div>
+                
+                
+                
+                        <!-- MODAL DESCRIPTION -->
+                
+                        <div class="modal-description">
+                
+                            Select the time slots when you are available.
+                            Your selections will be included in the centralized
+                            officer availability table.
+                
+                        </div>
+                
+                
+                
+                        <!-- =================================================
+                             EDITOR TABLE
+                        ================================================== -->
+                
+                        <div class="editor-header-container" aria-hidden="true">
 
-    <div class="availability-modal">
+                            <table class="editor-table editor-table-header">
+                                <colgroup>
+                                    <col class="editor-time-col">
+                                    <col><col><col><col><col>
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th>TIME</th>
+                                        <th>MON</th>
+                                        <th>TUE</th>
+                                        <th>WED</th>
+                                        <th>THU</th>
+                                        <th>FRI</th>
+                                    </tr>
+                                </thead>
+                            </table>
+
+                        </div>
+
+                        <div class="editor-container" id="editorScrollContainer">
+
+                            <table class="editor-table editor-table-body">
+                                <colgroup>
+                                    <col class="editor-time-col">
+                                    <col><col><col><col><col>
+                                </colgroup>
+
+                                <tbody id="editorTableBody">
+                                    <!-- Filled by JavaScript -->
+                                </tbody>
+
+                            </table>
+
+                        </div>
 
 
-        <!-- MODAL HEADER -->
 
-        <div class="modal-header">
-
-            <div>
-
-                <div class="modal-label">
-                    MY AVAILABILITY
+                        <!-- MODAL FOOTER -->
+                
+                        <div class="modal-footer">
+                
+                            <div class="save-status" id="saveStatus">
+                                Changes are not yet saved.
+                            </div>
+                
+                            <div class="modal-actions">
+                
+                                <button
+                                    class="cancel-button"
+                                    id="cancelAvailabilityButton"
+                                    type="button"
+                                >
+                                    CANCEL
+                                </button>
+                
+                                <button
+                                    class="save-button"
+                                    id="saveAvailabilityButton"
+                                    type="button"
+                                >
+                                    <i data-lucide="save"></i>
+                                    SAVE AVAILABILITY
+                                </button>
+                
+                            </div>
+                
+                        </div>
+                
+                    </div>
+                
                 </div>
-
-                <h2>
-                    MC RJ Escote
-                </h2>
-
-                <p>
-                    Vice President
-                </p>
-
-            </div>
-
-
-            <button
-                class="modal-close"
-                id="closeAvailabilityButton"
-                aria-label="Close"
-            >
-                <i data-lucide="x"></i>
-            </button>
-
-        </div>
-
-
-
-        <!-- MODAL DESCRIPTION -->
-
-        <div class="modal-description">
-
-            Select the time slots when you are available.
-            Your selections will be included in the centralized
-            officer availability table.
-
-        </div>
-
-
-
-        <!-- =================================================
-             EDITOR TABLE
-        ================================================== -->
-
-        <div class="editor-container">
-
-            <table class="editor-table">
-
-                <thead>
-
-                    <tr>
-
-                        <th>
-                            TIME
-                        </th>
-
-                        <th>
-                            MON
-                        </th>
-
-                        <th>
-                            TUE
-                        </th>
-
-                        <th>
-                            WED
-                        </th>
-
-                        <th>
-                            THU
-                        </th>
-
-                        <th>
-                            FRI
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody id="editorTableBody">
-
-                    <!-- Filled by JavaScript -->
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-
-
-        <!-- MODAL FOOTER -->
-
-        <div class="modal-footer">
-
-            <div class="save-status" id="saveStatus">
-                Changes are not yet saved.
-            </div>
-
-            <div class="modal-actions">
-
-                <button
-                    class="cancel-button"
-                    id="cancelAvailabilityButton"
-                >
-                    CANCEL
-                </button>
-
-                <button
-                    class="save-button"
-                    id="saveAvailabilityButton"
-                >
-                    <i data-lucide="save"></i>
-                    SAVE AVAILABILITY
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-
-<!-- =========================================================
-     JAVASCRIPT
-========================================================= -->
 
 
     <!-- =====================================================
@@ -2052,6 +2072,12 @@
                     );
 
 
+                const availabilityPage =
+                    document.getElementById(
+                        "availabilityPage"
+                    );
+
+
                 const placeholderPage =
                     document.getElementById(
                         "placeholderPage"
@@ -2118,6 +2144,10 @@
                         "active-page"
                     );
 
+                    availabilityPage.classList.remove(
+                        "active-page"
+                    );
+
                     placeholderPage.classList.remove(
                         "active-page"
                     );
@@ -2151,6 +2181,25 @@
                         );
 
                         renderCalendar();
+
+                    }
+
+
+                    else if (
+                        page === "availability"
+                    ) {
+
+                        availabilityPage.classList.add(
+                            "active-page"
+                        );
+
+                        setActiveNavigation(
+                            "availability"
+                        );
+
+                        if (typeof window.renderAvailabilityTable === "function") {
+                            window.renderAvailabilityTable();
+                        }
 
                     }
 
@@ -3164,308 +3213,919 @@
 
     </script>
 
-    <!-- =====================================================
-         GOOGLE SHEETS AVAILABILITY CONNECTION
-    ====================================================== -->
 
-    <script>
-        const PSABE_API_URL = "PASTE_YOUR_WEB_APP_URL_HERE";
-        const CURRENT_USERNAME = "Mac";
 
-        const availabilityTimeSlots = [
-            "7:00–8:00", "8:00–9:00", "9:00–10:00", "10:00–11:00",
-            "11:00–12:00", "12:00–1:00", "1:00–2:00", "3:00–4:00",
-            "4:00–5:00", "5:00–6:00"
-        ];
-        const availabilityDays = ["mon", "tue", "wed", "thu", "fri"];
+<script>
+/* =========================================================
+   AVAILABLE OFFICERS
+   Google Sheets integrated version
+   UI/HTML structure intentionally preserved.
+========================================================= */
+(function () {
 
-        let centralizedAvailability = {};
-        let currentOfficer = {
-            username: CURRENT_USERNAME,
-            name: "MC RJ Escote",
-            position: "Vice President"
-        };
-        let currentMyAvailability = {};
+    /* =====================================================
+       GOOGLE APPS SCRIPT SETTINGS
+    ===================================================== */
 
-        function createEmptyAvailability() {
-            const result = {};
-            availabilityTimeSlots.forEach(function(time) {
-                result[time] = {};
-                availabilityDays.forEach(function(day) { result[time][day] = []; });
+    const API_URL = "PASTE_YOUR_WEB_APP_URL_HERE";
+    const CURRENT_USERNAME = "Mac";
+
+
+    /* =====================================================
+       AVAILABILITY SETTINGS
+    ===================================================== */
+
+    const timeSlots = [
+        "7:00–8:00",
+        "8:00–9:00",
+        "9:00–10:00",
+        "10:00–11:00",
+        "11:00–12:00",
+        "12:00–1:00",
+        "1:00–2:00",
+        "3:00–4:00",
+        "4:00–5:00",
+        "5:00–6:00"
+    ];
+
+    const days = [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri"
+    ];
+
+
+    /* =====================================================
+       DATA
+    ===================================================== */
+
+    let officerAvailability = {};
+    let availabilityRecords = [];
+    let officersData = [];
+    let currentOfficer = {
+        Username: CURRENT_USERNAME,
+        Name: "MC RJ Escote",
+        Position: "Vice President",
+        Status: "Active"
+    };
+
+    let myAvailability = {};
+
+
+    /* =====================================================
+       HELPERS
+    ===================================================== */
+
+    function normalize(value) {
+        return String(value == null ? "" : value).trim();
+    }
+
+
+    function normalizeTime(value) {
+        return normalize(value)
+            .replace(/-/g, "–")
+            .replace(/\s+/g, "");
+    }
+
+
+    function isApiConfigured() {
+        return (
+            API_URL &&
+            API_URL !== "PASTE_YOUR_WEB_APP_URL_HERE"
+        );
+    }
+
+
+    function getApiUrl(action) {
+        const separator =
+            API_URL.indexOf("?") === -1
+                ? "?"
+                : "&";
+
+        return API_URL + separator +
+            "action=" + encodeURIComponent(action);
+    }
+
+
+    async function fetchJson(action) {
+
+        if (!isApiConfigured()) {
+            throw new Error(
+                "Google Apps Script Web App URL has not been added yet."
+            );
+        }
+
+        const response = await fetch(
+            getApiUrl(action),
+            {
+                method: "GET",
+                cache: "no-store"
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                "API request failed with status " +
+                response.status + "."
+            );
+        }
+
+        const result = await response.json();
+
+        if (!result.success) {
+            throw new Error(
+                result.message ||
+                "The API returned an unsuccessful response."
+            );
+        }
+
+        return result;
+    }
+
+
+    /* =====================================================
+       LOAD OFFICER PROFILE
+    ===================================================== */
+
+    function updateOfficerProfile() {
+
+        const name =
+            normalize(currentOfficer.Name) ||
+            "MC RJ Escote";
+
+        const position =
+            normalize(currentOfficer.Position) ||
+            "Vice President";
+
+        const initials = name
+            .split(/\s+/)
+            .filter(Boolean)
+            .slice(0, 2)
+            .map(function (part) {
+                return part.charAt(0).toUpperCase();
+            })
+            .join("");
+
+
+        document
+            .querySelectorAll(".profile-text strong")
+            .forEach(function (element) {
+                element.textContent = name;
             });
-            return result;
+
+        document
+            .querySelectorAll(".profile-text span")
+            .forEach(function (element) {
+                element.textContent = position;
+            });
+
+        document
+            .querySelectorAll(".profile-avatar span")
+            .forEach(function (element) {
+                element.textContent = initials || "MC";
+            });
+
+
+        const modal =
+            document.getElementById("availabilityModal");
+
+        if (modal) {
+
+            const modalName =
+                modal.querySelector(".modal-header h2");
+
+            const modalPosition =
+                modal.querySelector(".modal-header p");
+
+            if (modalName) {
+                modalName.textContent = name;
+            }
+
+            if (modalPosition) {
+                modalPosition.textContent = position;
+            }
+        }
+    }
+
+
+    async function loadOfficerProfile() {
+
+        try {
+
+            const result =
+                await fetchJson("getOfficers");
+
+            officersData =
+                Array.isArray(result.data)
+                    ? result.data
+                    : [];
+
+            const foundOfficer =
+                officersData.find(function (officer) {
+                    return normalize(officer.Username).toLowerCase() ===
+                        CURRENT_USERNAME.toLowerCase();
+                });
+
+            if (foundOfficer) {
+                currentOfficer = foundOfficer;
+            }
+
+            updateOfficerProfile();
+
+        } catch (error) {
+
+            console.error(
+                "Unable to load officer profile:",
+                error
+            );
+
+            updateOfficerProfile();
+        }
+    }
+
+
+    /* =====================================================
+       BUILD CENTRALIZED AVAILABILITY DATA
+    ===================================================== */
+
+    function createEmptyAvailability() {
+
+        const result = {};
+
+        timeSlots.forEach(function (time) {
+
+            result[time] = {};
+
+            days.forEach(function (day) {
+                result[time][day] = [];
+            });
+        });
+
+        return result;
+    }
+
+
+    function rebuildAvailabilityTableData() {
+
+        officerAvailability =
+            createEmptyAvailability();
+
+        availabilityRecords.forEach(function (record) {
+
+            const time =
+                normalizeTime(record.Time);
+
+            const day =
+                normalize(record.Day).toLowerCase();
+
+            const officerName =
+                normalize(record["Officer Name"]);
+
+            if (!officerName) return;
+
+            const matchingTime =
+                timeSlots.find(function (slot) {
+                    return normalizeTime(slot) === time;
+                });
+
+            if (!matchingTime) return;
+
+            if (!days.includes(day)) return;
+
+            if (!officerAvailability[matchingTime][day].includes(officerName)) {
+                officerAvailability[matchingTime][day].push(officerName);
+            }
+        });
+    }
+
+
+    async function loadAvailability() {
+
+        try {
+
+            const result =
+                await fetchJson("getAvailability");
+
+            availabilityRecords =
+                Array.isArray(result.data)
+                    ? result.data
+                    : [];
+
+            rebuildAvailabilityTableData();
+            renderAvailabilityTable();
+
+        } catch (error) {
+
+            console.error(
+                "Unable to load availability:",
+                error
+            );
+
+            availabilityRecords = [];
+            rebuildAvailabilityTableData();
+            renderAvailabilityTable();
+        }
+    }
+
+
+    /* =====================================================
+       CENTRALIZED AVAILABILITY TABLE
+    ===================================================== */
+
+    function renderAvailabilityTable() {
+
+        const tableBody =
+            document.getElementById(
+                "availabilityTableBody"
+            );
+
+        if (!tableBody) return;
+
+        tableBody.innerHTML = "";
+
+        timeSlots.forEach(function (time) {
+
+            const row =
+                document.createElement("tr");
+
+            const timeCell =
+                document.createElement("td");
+
+            timeCell.className =
+                "time-cell";
+
+            timeCell.textContent =
+                time;
+
+            row.appendChild(timeCell);
+
+
+            days.forEach(function (day) {
+
+                const cell =
+                    document.createElement("td");
+
+                const officers =
+                    officerAvailability[time][day] || [];
+
+
+                if (!officers.length) {
+
+                    cell.classList.add(
+                        "empty-cell"
+                    );
+
+                    cell.innerHTML =
+                        '<span class="no-officer">—</span>';
+
+                } else {
+
+                    cell.classList.add(
+                        officers.length > 1
+                            ? "multiple-cell"
+                            : "single-cell"
+                    );
+
+                    const officerList =
+                        document.createElement("div");
+
+                    officerList.className =
+                        "officer-list";
+
+
+                    officers.forEach(function (officer) {
+
+                        const chip =
+                            document.createElement("span");
+
+                        chip.className =
+                            "officer-chip";
+
+                        chip.textContent =
+                            officer === "MC RJ Escote"
+                                ? "MC RJ"
+                                : officer;
+
+                        officerList.appendChild(chip);
+                    });
+
+                    cell.appendChild(officerList);
+                }
+
+                row.appendChild(cell);
+            });
+
+            tableBody.appendChild(row);
+        });
+    }
+
+
+    /* =====================================================
+       MY AVAILABILITY EDITOR
+    ===================================================== */
+
+    function initializeMyAvailability() {
+
+        myAvailability = {};
+
+        timeSlots.forEach(function (time) {
+
+            myAvailability[time] = {};
+
+            days.forEach(function (day) {
+
+                myAvailability[time][day] =
+                    availabilityRecords.some(function (record) {
+
+                        return (
+                            normalize(record.Username).toLowerCase() ===
+                            CURRENT_USERNAME.toLowerCase() &&
+                            normalize(record.Day).toLowerCase() === day &&
+                            normalizeTime(record.Time) === normalizeTime(time)
+                        );
+                    });
+            });
+        });
+    }
+
+
+    function renderEditorTable() {
+
+        const tableBody =
+            document.getElementById(
+                "editorTableBody"
+            );
+
+        if (!tableBody) return;
+
+        tableBody.innerHTML = "";
+
+        timeSlots.forEach(function (time) {
+
+            const row =
+                document.createElement("tr");
+
+            const timeCell =
+                document.createElement("td");
+
+            timeCell.className =
+                "editor-time-cell";
+
+            timeCell.textContent =
+                time;
+
+            row.appendChild(timeCell);
+
+
+            days.forEach(function (day) {
+
+                const cell =
+                    document.createElement("td");
+
+                const wrapper =
+                    document.createElement("label");
+
+                wrapper.className =
+                    "availability-checkbox";
+
+
+                const checkbox =
+                    document.createElement("input");
+
+                checkbox.type =
+                    "checkbox";
+
+                checkbox.checked =
+                    myAvailability[time][day];
+
+                checkbox.dataset.time =
+                    time;
+
+                checkbox.dataset.day =
+                    day;
+
+
+                const customBox =
+                    document.createElement("span");
+
+                customBox.className =
+                    "custom-checkbox";
+
+
+                checkbox.addEventListener(
+                    "change",
+                    function () {
+
+                        myAvailability[time][day] =
+                            this.checked;
+
+                        const status =
+                            document.getElementById(
+                                "saveStatus"
+                            );
+
+                        if (status) {
+                            status.textContent =
+                                "You have unsaved changes.";
+                        }
+                    }
+                );
+
+
+                wrapper.appendChild(checkbox);
+                wrapper.appendChild(customBox);
+                cell.appendChild(wrapper);
+                row.appendChild(cell);
+            });
+
+            tableBody.appendChild(row);
+        });
+    }
+
+
+    /* =====================================================
+       OPEN / CLOSE MODAL
+    ===================================================== */
+
+    function openAvailabilityModal() {
+
+        updateOfficerProfile();
+        initializeMyAvailability();
+        renderEditorTable();
+
+        const status =
+            document.getElementById(
+                "saveStatus"
+            );
+
+        if (status) {
+            status.textContent =
+                "Changes are not yet saved.";
         }
 
-        function normalizeDay(day) {
-            const value = String(day || "").trim().toLowerCase();
-            return ({monday:"mon",mon:"mon",tuesday:"tue",tue:"tue",wednesday:"wed",wed:"wed",thursday:"thu",thu:"thu",friday:"fri",fri:"fri"})[value] || value;
+        const modal =
+            document.getElementById(
+                "availabilityModal"
+            );
+
+        if (modal) {
+            modal.classList.add("show");
         }
 
-        function apiReady() {
-            return PSABE_API_URL && PSABE_API_URL !== "PASTE_YOUR_WEB_APP_URL_HERE";
+        document.body.classList.add(
+            "availability-modal-open"
+        );
+
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    }
+
+
+    function closeAvailabilityModal() {
+
+        const modal =
+            document.getElementById(
+                "availabilityModal"
+            );
+
+        if (modal) {
+            modal.classList.remove("show");
         }
 
-        async function getApiData(action) {
-            if (!apiReady()) throw new Error("Google Apps Script Web App URL has not been added yet.");
-            const response = await fetch(PSABE_API_URL + "?action=" + encodeURIComponent(action), {cache:"no-store"});
-            if (!response.ok) throw new Error("Unable to connect to the Google Sheets backend.");
-            const result = await response.json();
-            if (!result.success) throw new Error(result.message || "The backend returned an error.");
-            return result.data || [];
+        document.body.classList.remove(
+            "availability-modal-open"
+        );
+    }
+
+
+    /* =====================================================
+       SAVE TO GOOGLE SHEETS
+    ===================================================== */
+
+    async function saveMyAvailability() {
+
+        const saveButton =
+            document.getElementById(
+                "saveAvailabilityButton"
+            );
+
+        const status =
+            document.getElementById(
+                "saveStatus"
+            );
+
+        if (!isApiConfigured()) {
+
+            if (status) {
+                status.textContent =
+                    "Add your Google Apps Script Web App URL first.";
+            }
+
+            console.error(
+                "API_URL is not configured."
+            );
+
+            return;
         }
 
-        async function saveAvailabilityToApi(records) {
-            if (!apiReady()) throw new Error("Google Apps Script Web App URL has not been added yet.");
+
+        const records = [];
+
+        timeSlots.forEach(function (time) {
+
+            days.forEach(function (day) {
+
+                if (myAvailability[time][day]) {
+
+                    records.push({
+                        day: day,
+                        time: time
+                    });
+                }
+            });
+        });
+
+
+        if (saveButton) {
+            saveButton.disabled = true;
+        }
+
+        if (status) {
+            status.textContent =
+                "Saving availability...";
+        }
+
+
+        try {
+
             const payload = {
+
                 action: "saveAvailability",
+
                 data: {
-                    username: currentOfficer.username,
-                    officerName: currentOfficer.name,
-                    position: currentOfficer.position,
+                    username: CURRENT_USERNAME,
+                    officerName:
+                        normalize(currentOfficer.Name) ||
+                        "MC RJ Escote",
+                    position:
+                        normalize(currentOfficer.Position) ||
+                        "Vice President",
                     records: records
                 }
             };
-            const response = await fetch(PSABE_API_URL, {
-                method: "POST",
-                headers: {"Content-Type":"text/plain;charset=utf-8"},
-                body: JSON.stringify(payload)
-            });
-            if (!response.ok) throw new Error("Unable to save availability to Google Sheets.");
-            const result = await response.json();
-            if (!result.success) throw new Error(result.message || "The backend could not save the availability.");
-            return result;
-        }
 
-        function buildCentralizedAvailability(records) {
-            centralizedAvailability = createEmptyAvailability();
-            records.forEach(function(record) {
-                const time = String(record.Time || "").trim();
-                const day = normalizeDay(record.Day);
-                const name = String(record["Officer Name"] || "").trim();
-                if (centralizedAvailability[time] && centralizedAvailability[time][day] && name && !centralizedAvailability[time][day].includes(name)) {
-                    centralizedAvailability[time][day].push(name);
-                }
-            });
-        }
 
-        function buildMyAvailability(records) {
-            currentMyAvailability = {};
-            availabilityTimeSlots.forEach(function(time) {
-                currentMyAvailability[time] = {};
-                availabilityDays.forEach(function(day) { currentMyAvailability[time][day] = false; });
-            });
-            records.forEach(function(record) {
-                const time = String(record.Time || "").trim();
-                const day = normalizeDay(record.Day);
-                const username = String(record.Username || "").trim();
-                if (username.toLowerCase() === currentOfficer.username.toLowerCase() && currentMyAvailability[time] && Object.prototype.hasOwnProperty.call(currentMyAvailability[time], day)) {
-                    currentMyAvailability[time][day] = true;
-                }
-            });
-        }
-
-        function renderConnectedAvailabilityTable() {
-            const tableBody = document.getElementById("availabilityTableBody");
-            if (!tableBody) return;
-            tableBody.innerHTML = "";
-            availabilityTimeSlots.forEach(function(time) {
-                const row = document.createElement("tr");
-                const timeCell = document.createElement("td");
-                timeCell.className = "time-cell";
-                timeCell.textContent = time;
-                row.appendChild(timeCell);
-                availabilityDays.forEach(function(day) {
-                    const cell = document.createElement("td");
-                    const officers = centralizedAvailability[time][day] || [];
-                    if (!officers.length) {
-                        cell.classList.add("empty-cell");
-                        cell.innerHTML = '<span class="no-officer">—</span>';
-                    } else {
-                        cell.classList.add(officers.length > 1 ? "multiple-cell" : "single-cell");
-                        const list = document.createElement("div");
-                        list.className = "officer-list";
-                        officers.forEach(function(officer) {
-                            const chip = document.createElement("span");
-                            chip.className = "officer-chip";
-                            chip.textContent = officer === currentOfficer.name ? "MC RJ" : officer;
-                            list.appendChild(chip);
-                        });
-                        cell.appendChild(list);
+            const response =
+                await fetch(
+                    API_URL,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "text/plain;charset=utf-8"
+                        },
+                        body: JSON.stringify(payload)
                     }
-                    row.appendChild(cell);
-                });
-                tableBody.appendChild(row);
-            });
-        }
+                );
 
-        function renderConnectedEditorTable() {
-            const tableBody = document.getElementById("editorTableBody");
-            if (!tableBody) return;
-            tableBody.innerHTML = "";
-            availabilityTimeSlots.forEach(function(time) {
-                const row = document.createElement("tr");
-                const timeCell = document.createElement("td");
-                timeCell.className = "editor-time-cell";
-                timeCell.textContent = time;
-                row.appendChild(timeCell);
-                availabilityDays.forEach(function(day) {
-                    const cell = document.createElement("td");
-                    const wrapper = document.createElement("label");
-                    wrapper.className = "availability-checkbox";
-                    const checkbox = document.createElement("input");
-                    checkbox.type = "checkbox";
-                    checkbox.checked = !!currentMyAvailability[time][day];
-                    checkbox.addEventListener("change", function() {
-                        currentMyAvailability[time][day] = this.checked;
-                        const status = document.getElementById("saveStatus");
-                        if (status) status.textContent = "You have unsaved changes.";
-                    });
-                    const customBox = document.createElement("span");
-                    customBox.className = "custom-checkbox";
-                    wrapper.appendChild(checkbox);
-                    wrapper.appendChild(customBox);
-                    cell.appendChild(wrapper);
-                    row.appendChild(cell);
-                });
-                tableBody.appendChild(row);
-            });
-        }
 
-        function updateAvailabilityProfile() {
-            const modal = document.getElementById("availabilityModal");
-            if (!modal) return;
-            const heading = modal.querySelector(".modal-header h2");
-            const position = modal.querySelector(".modal-header p");
-            if (heading) heading.textContent = currentOfficer.name;
-            if (position) position.textContent = currentOfficer.position;
-        }
-
-        async function loadAvailabilityFromGoogleSheets() {
-            try {
-                const officers = await getApiData("getOfficers");
-                const availability = await getApiData("getAvailability");
-                const foundOfficer = officers.find(function(officer) {
-                    return String(officer.Username || "").trim().toLowerCase() === currentOfficer.username.toLowerCase();
-                });
-                if (foundOfficer) {
-                    currentOfficer = {
-                        username: String(foundOfficer.Username || CURRENT_USERNAME).trim(),
-                        name: String(foundOfficer.Name || "MC RJ Escote").trim(),
-                        position: String(foundOfficer.Position || "Vice President").trim()
-                    };
-                }
-                buildCentralizedAvailability(availability);
-                buildMyAvailability(availability);
-                updateAvailabilityProfile();
-                renderConnectedAvailabilityTable();
-            } catch (error) {
-                console.error("Availability connection error:", error);
-                centralizedAvailability = createEmptyAvailability();
-                buildMyAvailability([]);
-                renderConnectedAvailabilityTable();
-            }
-        }
-
-        function openConnectedAvailabilityModal() {
-            renderConnectedEditorTable();
-            const status = document.getElementById("saveStatus");
-            if (status) status.textContent = "Changes are not yet saved.";
-            const modal = document.getElementById("availabilityModal");
-            if (modal) modal.classList.add("show");
-            document.body.classList.add("modal-open");
-        }
-
-        function closeConnectedAvailabilityModal() {
-            const modal = document.getElementById("availabilityModal");
-            if (modal) modal.classList.remove("show");
-            document.body.classList.remove("modal-open");
-        }
-
-        async function saveConnectedAvailability() {
-            const status = document.getElementById("saveStatus");
-            const saveButton = document.getElementById("saveAvailabilityButton");
-            const records = [];
-            availabilityTimeSlots.forEach(function(time) {
-                availabilityDays.forEach(function(day) {
-                    if (currentMyAvailability[time][day]) records.push({day:day, time:time});
-                });
-            });
-            if (status) status.textContent = "Saving availability...";
-            if (saveButton) saveButton.disabled = true;
-            try {
-                await saveAvailabilityToApi(records);
-                const availability = await getApiData("getAvailability");
-                buildCentralizedAvailability(availability);
-                buildMyAvailability(availability);
-                renderConnectedAvailabilityTable();
-                closeConnectedAvailabilityModal();
-            } catch (error) {
-                console.error("Save availability error:", error);
-                if (status) status.textContent = "Unable to save. Please check your connection.";
-            } finally {
-                if (saveButton) saveButton.disabled = false;
-            }
-        }
-
-        function showConnectedAvailabilityPage() {
-            document.querySelectorAll(".page-section").forEach(function(section) { section.classList.remove("active-page"); });
-            const page = document.getElementById("availabilityPage");
-            if (page) page.classList.add("active-page");
-            document.querySelectorAll(".nav-item[data-page]").forEach(function(button) {
-                button.classList.toggle("active", button.dataset.page === "availability");
-            });
-            const sidebar = document.getElementById("sidebar");
-            const overlay = document.getElementById("sidebarOverlay");
-            if (sidebar) sidebar.classList.remove("sidebar-open");
-            if (overlay) overlay.classList.remove("overlay-visible");
-            window.scrollTo({top:0, behavior:"smooth"});
-        }
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const openButton = document.getElementById("openAvailabilityButton");
-            const closeButton = document.getElementById("closeAvailabilityButton");
-            const cancelButton = document.getElementById("cancelAvailabilityButton");
-            const saveButton = document.getElementById("saveAvailabilityButton");
-            const modal = document.getElementById("availabilityModal");
-
-            if (openButton) openButton.addEventListener("click", openConnectedAvailabilityModal);
-            if (closeButton) closeButton.addEventListener("click", closeConnectedAvailabilityModal);
-            if (cancelButton) cancelButton.addEventListener("click", closeConnectedAvailabilityModal);
-            if (saveButton) saveButton.addEventListener("click", saveConnectedAvailability);
-            if (modal) modal.addEventListener("click", function(event) {
-                if (event.target === modal) closeConnectedAvailabilityModal();
-            });
-
-            document.querySelectorAll(".nav-item[data-page]").forEach(function(button) {
-                button.addEventListener("click", function() {
-                    if (button.dataset.page === "availability") {
-                        showConnectedAvailabilityPage();
-                    } else {
-                        const page = document.getElementById("availabilityPage");
-                        if (page) page.classList.remove("active-page");
-                    }
-                });
-            });
-
-            document.querySelectorAll("[data-page-link]").forEach(function(button) {
-                button.addEventListener("click", function() {
-                    if (button.dataset.pageLink === "availability") {
-                        showConnectedAvailabilityPage();
-                    } else {
-                        const page = document.getElementById("availabilityPage");
-                        if (page) page.classList.remove("active-page");
-                    }
-                });
-            });
-
-            if (window.lucide) {
-                lucide.createIcons();
+            if (!response.ok) {
+                throw new Error(
+                    "Save request failed with status " +
+                    response.status + "."
+                );
             }
 
-            loadAvailabilityFromGoogleSheets();
+
+            const result =
+                await response.json();
+
+
+            if (!result.success) {
+                throw new Error(
+                    result.message ||
+                    "The availability could not be saved."
+                );
+            }
+
+
+            /*
+               Reload the saved data from Google Sheets so the
+               centralized table and editor always reflect the
+               actual database rather than temporary browser data.
+            */
+
+            const availabilityResult =
+                await fetchJson("getAvailability");
+
+            availabilityRecords =
+                Array.isArray(availabilityResult.data)
+                    ? availabilityResult.data
+                    : [];
+
+            rebuildAvailabilityTableData();
+            renderAvailabilityTable();
+
+            closeAvailabilityModal();
+
+        } catch (error) {
+
+            console.error(
+                "Unable to save availability:",
+                error
+            );
+
+            if (status) {
+                status.textContent =
+                    "Unable to save. Please check your connection and Web App URL.";
+            }
+
+        } finally {
+
+            if (saveButton) {
+                saveButton.disabled = false;
+            }
+        }
+    }
+
+
+    window.renderAvailabilityTable =
+        renderAvailabilityTable;
+
+
+    /* =====================================================
+       INITIALIZE AVAILABILITY CONTROLS
+    ===================================================== */
+
+    function initializeAvailabilityControls() {
+
+        const openButton =
+            document.getElementById(
+                "openAvailabilityButton"
+            );
+
+        const closeButton =
+            document.getElementById(
+                "closeAvailabilityButton"
+            );
+
+        const cancelButton =
+            document.getElementById(
+                "cancelAvailabilityButton"
+            );
+
+        const saveButton =
+            document.getElementById(
+                "saveAvailabilityButton"
+            );
+
+        const modal =
+            document.getElementById(
+                "availabilityModal"
+            );
+
+
+        if (openButton && !openButton.dataset.availabilityBound) {
+
+            openButton.addEventListener(
+                "click",
+                openAvailabilityModal
+            );
+
+            openButton.dataset.availabilityBound =
+                "true";
+        }
+
+
+        if (closeButton && !closeButton.dataset.availabilityBound) {
+
+            closeButton.addEventListener(
+                "click",
+                closeAvailabilityModal
+            );
+
+            closeButton.dataset.availabilityBound =
+                "true";
+        }
+
+
+        if (cancelButton && !cancelButton.dataset.availabilityBound) {
+
+            cancelButton.addEventListener(
+                "click",
+                closeAvailabilityModal
+            );
+
+            cancelButton.dataset.availabilityBound =
+                "true";
+        }
+
+
+        if (saveButton && !saveButton.dataset.availabilityBound) {
+
+            saveButton.addEventListener(
+                "click",
+                saveMyAvailability
+            );
+
+            saveButton.dataset.availabilityBound =
+                "true";
+        }
+
+
+        if (modal && !modal.dataset.availabilityBound) {
+
+            modal.addEventListener(
+                "click",
+                function (event) {
+
+                    if (event.target === modal) {
+                        closeAvailabilityModal();
+                    }
+                }
+            );
+
+            modal.dataset.availabilityBound =
+                "true";
+        }
+
+
+        /*
+           Keep the separate editor header horizontally aligned
+           with the scrollable editor body.
+        */
+
+        const editorScroll =
+            document.getElementById(
+                "editorScrollContainer"
+            );
+
+        const editorHeader =
+            document.querySelector(
+                ".editor-header-container"
+            );
+
+        if (editorScroll && editorHeader) {
+
+            editorScroll.addEventListener(
+                "scroll",
+                function () {
+
+                    editorHeader.scrollLeft =
+                        editorScroll.scrollLeft;
+                },
+                { passive: true }
+            );
+        }
+
+
+        updateOfficerProfile();
+        rebuildAvailabilityTableData();
+        renderAvailabilityTable();
+
+
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+
+
+        /*
+           Load real data from Google Sheets after the page is ready.
+        */
+
+        Promise.all([
+            loadOfficerProfile(),
+            loadAvailability()
+        ]).then(function () {
+
+            updateOfficerProfile();
+            renderAvailabilityTable();
+
         });
-    </script>
+    }
 
+
+    /* =====================================================
+       START
+    ===================================================== */
+
+    if (document.readyState === "loading") {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initializeAvailabilityControls
+        );
+
+    } else {
+
+        initializeAvailabilityControls();
+    }
+
+})();
+</script>
 
 </body>
 
