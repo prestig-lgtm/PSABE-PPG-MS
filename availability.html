@@ -1,0 +1,1661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Officer Availability | PSABE-PPG Management System</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="availability.css">
+</head>
+
+<body>
+
+    <!-- BACKGROUND -->
+    <div class="availability-background"></div>
+
+    <!-- MOBILE OVERLAY -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-brand">
+
+            <img
+                src="assets/psabe-ppg-logo.png"
+                alt="PSABE-PPG CSU Chapter"
+                class="sidebar-logo"
+            >
+
+            <div class="brand-text">
+
+                <div class="brand-title">
+                    PSABE-PPG
+                </div>
+
+                <div class="brand-subtitle">
+                    CSU CHAPTER
+                </div>
+
+                <div class="brand-system">
+                    MANAGEMENT SYSTEM
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="sidebar-divider"></div>
+
+
+        <!-- PROFILE -->
+
+        <div class="sidebar-profile">
+
+            <div class="profile-avatar">
+                MC
+            </div>
+
+            <div class="profile-info">
+
+                <div class="profile-name">
+                    MC RJ Escote
+                </div>
+
+                <div class="profile-position">
+                    Vice President
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- NAVIGATION -->
+
+        <nav class="sidebar-navigation">
+
+            <div class="nav-section-title">
+                MAIN
+            </div>
+
+
+            <button
+                class="nav-item"
+                data-page="dashboard"
+            >
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </button>
+
+
+            <button
+                class="nav-item"
+                data-page="calendar"
+            >
+                <span class="nav-icon">▣</span>
+                <span>Calendar</span>
+            </button>
+
+
+            <button
+                class="nav-item active"
+                data-page="availability"
+            >
+                <span class="nav-icon">◷</span>
+                <span>Officer Availability</span>
+            </button>
+
+
+            <button
+                class="nav-item"
+                data-page="tasks"
+            >
+                <span class="nav-icon">✓</span>
+                <span>My Tasks</span>
+            </button>
+
+
+            <div class="nav-section-title second">
+                ORGANIZATION
+            </div>
+
+
+            <button
+                class="nav-item"
+                data-page="officers"
+            >
+                <span class="nav-icon">♙</span>
+                <span>Officers</span>
+            </button>
+
+
+            <button
+                class="nav-item"
+                data-page="announcements"
+            >
+                <span class="nav-icon">◉</span>
+                <span>Announcements</span>
+            </button>
+
+
+            <div class="nav-section-title second">
+                SYSTEM
+            </div>
+
+
+            <button
+                class="nav-item"
+                data-page="settings"
+            >
+                <span class="nav-icon">⚙</span>
+                <span>Settings</span>
+            </button>
+
+        </nav>
+
+
+        <!-- LOGOUT -->
+
+        <div class="sidebar-bottom">
+
+            <button
+                class="logout-button"
+                id="logoutButton"
+            >
+                <span class="logout-icon">↪</span>
+                <span>Log Out</span>
+            </button>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main class="main-content">
+
+
+        <!-- TOP BAR -->
+
+        <header class="topbar">
+
+            <button
+                class="menu-button"
+                id="menuButton"
+                aria-label="Open menu"
+            >
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+
+            <div class="topbar-title">
+
+                <div class="topbar-main-title">
+                    Officer Availability
+                </div>
+
+                <div class="topbar-subtitle">
+                    PSABE-PPG CSU Chapter
+                </div>
+
+            </div>
+
+
+            <div class="topbar-profile">
+
+                <div class="topbar-profile-text">
+
+                    <div class="topbar-name">
+                        MC RJ Escote
+                    </div>
+
+                    <div class="topbar-position">
+                        Vice President
+                    </div>
+
+                </div>
+
+
+                <div class="topbar-avatar">
+                    MC
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- =================================================
+             PAGE CONTENT
+        ================================================== -->
+
+        <section class="page-content">
+
+
+            <!-- PAGE INTRO -->
+
+            <div class="page-heading">
+
+                <div>
+
+                    <div class="page-eyebrow">
+                        ORGANIZATION SCHEDULING
+                    </div>
+
+                    <h1>
+                        AVAILABLE OFFICER(S)
+                    </h1>
+
+                    <p>
+                        View and manage the weekly availability of PSABE-PPG officers.
+                    </p>
+
+                </div>
+
+
+                <button
+                    class="primary-button"
+                    id="editAvailabilityButton"
+                >
+                    <span>✎</span>
+                    EDIT MY AVAILABILITY
+                </button>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 MY AVAILABILITY STATUS
+            ================================================== -->
+
+            <section class="status-panel">
+
+                <div class="status-left">
+
+                    <div class="status-avatar">
+                        MC
+                    </div>
+
+                    <div>
+
+                        <div class="status-name">
+                            MC RJ Escote
+                        </div>
+
+                        <div class="status-position">
+                            Vice President
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="status-right">
+
+                    <div class="status-label">
+                        AVAILABILITY STATUS
+                    </div>
+
+                    <div class="status-value">
+                        <span class="status-dot"></span>
+                        DECLARED
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 LEGEND
+            ================================================== -->
+
+            <div class="legend">
+
+                <div class="legend-item">
+                    <span class="legend-dot available-dot"></span>
+                    Available
+                </div>
+
+                <div class="legend-item">
+                    <span class="legend-dot unavailable-dot"></span>
+                    Unavailable
+                </div>
+
+                <div class="legend-item">
+                    <span class="legend-dot multiple-dot"></span>
+                    Multiple officers
+                </div>
+
+                <div class="legend-note">
+                    Centralized view
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 AVAILABILITY TABLE
+            ================================================== -->
+
+            <section class="availability-panel">
+
+                <div class="availability-panel-header">
+
+                    <div>
+
+                        <div class="panel-title">
+                            WEEKLY OFFICER AVAILABILITY
+                        </div>
+
+                        <div class="panel-subtitle">
+                            Monday to Friday
+                        </div>
+
+                    </div>
+
+
+                    <div class="week-label">
+                        CURRENT WEEK
+                    </div>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table
+                        class="availability-table"
+                        id="availabilityTable"
+                    >
+
+                        <thead>
+
+                            <tr>
+
+                                <th class="time-column">
+                                    TIME
+                                </th>
+
+                                <th>
+                                    MON
+                                </th>
+
+                                <th>
+                                    TUE
+                                </th>
+
+                                <th>
+                                    WED
+                                </th>
+
+                                <th>
+                                    THU
+                                </th>
+
+                                <th>
+                                    FRI
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            <!-- 7:00 - 8:00 -->
+
+                            <tr>
+
+                                <td class="time-cell">
+                                    7:00–8:00
+                                </td>
+
+                                <td class="availability-cell">
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            MC RJ
+                                        </span>
+
+                                        <span class="officer-chip">
+                                            President
+                                        </span>
+
+                                        <span class="officer-chip">
+                                            PIO
+                                        </span>
+
+                                    </div>
+                                </td>
+
+                                <td class="availability-cell">
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+                                </td>
+
+                                <td class="availability-cell">
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+                                </td>
+
+                                <td class="availability-cell">
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            Secretary
+                                        </span>
+
+                                    </div>
+                                </td>
+
+                                <td class="availability-cell">
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+                                </td>
+
+                            </tr>
+
+
+                            <!-- 8:00 - 9:00 -->
+
+                            <tr>
+
+                                <td class="time-cell">
+                                    8:00–9:00
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            MC RJ
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            Treasurer
+                                        </span>
+
+                                        <span class="officer-chip">
+                                            Auditor
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            PIO
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+
+                                </td>
+
+                            </tr>
+
+
+                            <!-- 9:00 - 10:00 -->
+
+                            <tr>
+
+                                <td class="time-cell">
+                                    9:00–10:00
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            MC RJ
+                                        </span>
+
+                                        <span class="officer-chip">
+                                            Secretary
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            President
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            Treasurer
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+
+                            <!-- 10:00 - 11:00 -->
+
+                            <tr>
+
+                                <td class="time-cell">
+                                    10:00–11:00
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            President
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            PIO
+                                        </span>
+
+                                        <span class="officer-chip">
+                                            Auditor
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            MC RJ
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            Secretary
+                                        </span>
+
+                                        <span class="officer-chip">
+                                            PIO
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+
+                            <!-- 11:00 - 12:00 -->
+
+                            <tr>
+
+                                <td class="time-cell">
+                                    11:00–12:00
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            MC RJ
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            Treasurer
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+
+                                </td>
+
+                            </tr>
+
+
+                            <!-- 12:00 - 1:00 -->
+
+                            <tr>
+
+                                <td class="time-cell">
+                                    12:00–1:00
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            MC RJ
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            President
+                                        </span>
+
+                                        <span class="officer-chip">
+                                            PIO
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            Auditor
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+
+                            <!-- 1:00 - 2:00 -->
+
+                            <tr>
+
+                                <td class="time-cell">
+                                    1:00–2:00
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            MC RJ
+                                        </span>
+
+                                        <span class="officer-chip">
+                                            President
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            President
+                                        </span>
+
+                                        <span class="officer-chip">
+                                            Treasurer
+                                        </span>
+
+                                        <span class="officer-chip">
+                                            PIO
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            MC RJ
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+
+                            <!-- 3:00 - 4:00 -->
+
+                            <tr>
+
+                                <td class="time-cell">
+                                    3:00–4:00
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            Secretary
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            MC RJ
+                                        </span>
+
+                                        <span class="officer-chip">
+                                            Auditor
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            MC RJ
+                                        </span>
+
+                                        <span class="officer-chip">
+                                            Auditor
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+
+                                </td>
+
+                            </tr>
+
+
+                            <!-- 4:00 - 5:00 -->
+
+                            <tr>
+
+                                <td class="time-cell">
+                                    4:00–5:00
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            PIO
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            MC RJ
+                                        </span>
+
+                                        <span class="officer-chip">
+                                            President
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            Treasurer
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+
+                            <!-- 5:00 - 6:00 -->
+
+                            <tr>
+
+                                <td class="time-cell">
+                                    5:00–6:00
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            MC RJ
+                                        </span>
+
+                                        <span class="officer-chip">
+                                            PIO
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            Secretary
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <span class="empty-cell">
+                                        —
+                                    </span>
+
+                                </td>
+
+                                <td class="availability-cell">
+
+                                    <div class="officer-stack">
+
+                                        <span class="officer-chip">
+                                            President
+                                        </span>
+
+                                        <span class="officer-chip">
+                                            PIO
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 INFORMATION
+            ================================================== -->
+
+            <section class="information-panel">
+
+                <div class="information-icon">
+                    i
+                </div>
+
+                <div class="information-text">
+
+                    <div class="information-title">
+                        HOW AVAILABILITY WORKS
+                    </div>
+
+                    <p>
+                        Each officer declares their own available time.
+                        The centralized table combines all declarations so
+                        officers and Steering can identify suitable time
+                        slots for meetings, activities, and organizational
+                        tasks.
+                    </p>
+
+                </div>
+
+            </section>
+
+
+        </section>
+
+    </main>
+
+
+
+    <!-- =====================================================
+         EDIT AVAILABILITY MODAL
+    ====================================================== -->
+
+    <div
+        class="modal-overlay"
+        id="availabilityModal"
+    >
+
+        <div class="availability-modal">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <div class="modal-title">
+                        MY AVAILABILITY
+                    </div>
+
+                    <div class="modal-subtitle">
+                        MC RJ Escote • Vice President
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="modal-close"
+                    id="closeModal"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="modal-instruction">
+
+                Select the time slots when you are available.
+                Your selections will only modify your own availability.
+
+            </div>
+
+
+            <div class="editor-wrapper">
+
+                <table class="editor-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                TIME
+                            </th>
+
+                            <th>
+                                MON
+                            </th>
+
+                            <th>
+                                TUE
+                            </th>
+
+                            <th>
+                                WED
+                            </th>
+
+                            <th>
+                                THU
+                            </th>
+
+                            <th>
+                                FRI
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        <tr>
+                            <td>7:00–8:00</td>
+
+                            <td>
+                                <label>
+                                    <input type="checkbox" data-day="Mon" data-time="7:00–8:00" checked>
+                                    <span></span>
+                                </label>
+                            </td>
+
+                            <td>
+                                <label>
+                                    <input type="checkbox" data-day="Tue" data-time="7:00–8:00">
+                                    <span></span>
+                                </label>
+                            </td>
+
+                            <td>
+                                <label>
+                                    <input type="checkbox" data-day="Wed" data-time="7:00–8:00">
+                                    <span></span>
+                                </label>
+                            </td>
+
+                            <td>
+                                <label>
+                                    <input type="checkbox" data-day="Thu" data-time="7:00–8:00">
+                                    <span></span>
+                                </label>
+                            </td>
+
+                            <td>
+                                <label>
+                                    <input type="checkbox" data-day="Fri" data-time="7:00–8:00">
+                                    <span></span>
+                                </label>
+                            </td>
+                        </tr>
+
+
+                        <tr>
+                            <td>8:00–9:00</td>
+
+                            <td><label><input type="checkbox" data-day="Mon" data-time="8:00–9:00" checked><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Tue" data-time="8:00–9:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Wed" data-time="8:00–9:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Thu" data-time="8:00–9:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Fri" data-time="8:00–9:00"><span></span></label></td>
+                        </tr>
+
+
+                        <tr>
+                            <td>9:00–10:00</td>
+
+                            <td><label><input type="checkbox" data-day="Mon" data-time="9:00–10:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Tue" data-time="9:00–10:00" checked><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Wed" data-time="9:00–10:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Thu" data-time="9:00–10:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Fri" data-time="9:00–10:00"><span></span></label></td>
+                        </tr>
+
+
+                        <tr>
+                            <td>10:00–11:00</td>
+
+                            <td><label><input type="checkbox" data-day="Mon" data-time="10:00–11:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Tue" data-time="10:00–11:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Wed" data-time="10:00–11:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Thu" data-time="10:00–11:00" checked><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Fri" data-time="10:00–11:00"><span></span></label></td>
+                        </tr>
+
+
+                        <tr>
+                            <td>11:00–12:00</td>
+
+                            <td><label><input type="checkbox" data-day="Mon" data-time="11:00–12:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Tue" data-time="11:00–12:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Wed" data-time="11:00–12:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Thu" data-time="11:00–12:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Fri" data-time="11:00–12:00"><span></span></label></td>
+                        </tr>
+
+
+                        <tr>
+                            <td>12:00–1:00</td>
+
+                            <td><label><input type="checkbox" data-day="Mon" data-time="12:00–1:00" checked><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Tue" data-time="12:00–1:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Wed" data-time="12:00–1:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Thu" data-time="12:00–1:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Fri" data-time="12:00–1:00"><span></span></label></td>
+                        </tr>
+
+
+                        <tr>
+                            <td>1:00–2:00</td>
+
+                            <td><label><input type="checkbox" data-day="Mon" data-time="1:00–2:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Tue" data-time="1:00–2:00" checked><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Wed" data-time="1:00–2:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Thu" data-time="1:00–2:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Fri" data-time="1:00–2:00"><span></span></label></td>
+                        </tr>
+
+
+                        <tr>
+                            <td>3:00–4:00</td>
+
+                            <td><label><input type="checkbox" data-day="Mon" data-time="3:00–4:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Tue" data-time="3:00–4:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Wed" data-time="3:00–4:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Thu" data-time="3:00–4:00" checked><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Fri" data-time="3:00–4:00"><span></span></label></td>
+                        </tr>
+
+
+                        <tr>
+                            <td>4:00–5:00</td>
+
+                            <td><label><input type="checkbox" data-day="Mon" data-time="4:00–5:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Tue" data-time="4:00–5:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Wed" data-time="4:00–5:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Thu" data-time="4:00–5:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Fri" data-time="4:00–5:00"><span></span></label></td>
+                        </tr>
+
+
+                        <tr>
+                            <td>5:00–6:00</td>
+
+                            <td><label><input type="checkbox" data-day="Mon" data-time="5:00–6:00" checked><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Tue" data-time="5:00–6:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Wed" data-time="5:00–6:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Thu" data-time="5:00–6:00"><span></span></label></td>
+                            <td><label><input type="checkbox" data-day="Fri" data-time="5:00–6:00"><span></span></label></td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <div class="modal-footer">
+
+                <button
+                    class="secondary-button"
+                    id="cancelAvailability"
+                >
+                    CANCEL
+                </button>
+
+                <button
+                    class="primary-button save-button"
+                    id="saveAvailability"
+                >
+                    SAVE AVAILABILITY
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script>
+
+        /* ---------------------------------------------
+           NAVIGATION
+        --------------------------------------------- */
+
+        const navigationButtons =
+            document.querySelectorAll("[data-page]");
+
+        navigationButtons.forEach(function(button) {
+
+            button.addEventListener("click", function() {
+
+                const page = this.dataset.page;
+
+                if (page === "dashboard") {
+                    window.location.href = "dashboard.html";
+                    return;
+                }
+
+                if (page === "calendar") {
+                    window.location.href = "calendar.html";
+                    return;
+                }
+
+                if (page === "availability") {
+                    window.location.href = "availability.html";
+                    return;
+                }
+
+                alert(
+                    page.charAt(0).toUpperCase() +
+                    page.slice(1) +
+                    " module will be connected next."
+                );
+
+            });
+
+        });
+
+
+        /* ---------------------------------------------
+           MOBILE SIDEBAR
+        --------------------------------------------- */
+
+        const menuButton =
+            document.getElementById("menuButton");
+
+        const sidebar =
+            document.getElementById("sidebar");
+
+        const sidebarOverlay =
+            document.getElementById("sidebarOverlay");
+
+
+        function openSidebar() {
+
+            sidebar.classList.add("sidebar-open");
+
+            sidebarOverlay.classList.add("overlay-visible");
+
+            document.body.classList.add("sidebar-active");
+
+        }
+
+
+        function closeSidebar() {
+
+            sidebar.classList.remove("sidebar-open");
+
+            sidebarOverlay.classList.remove("overlay-visible");
+
+            document.body.classList.remove("sidebar-active");
+
+        }
+
+
+        menuButton.addEventListener(
+            "click",
+            function() {
+
+                if (
+                    sidebar.classList.contains("sidebar-open")
+                ) {
+
+                    closeSidebar();
+
+                } else {
+
+                    openSidebar();
+
+                }
+
+            }
+        );
+
+
+        sidebarOverlay.addEventListener(
+            "click",
+            closeSidebar
+        );
+
+
+        /* ---------------------------------------------
+           LOGOUT
+        --------------------------------------------- */
+
+        document
+            .getElementById("logoutButton")
+            .addEventListener("click", function() {
+
+                if (
+                    confirm("Are you sure you want to log out?")
+                ) {
+
+                    window.location.href = "index.html";
+
+                }
+
+            });
+
+
+        /* ---------------------------------------------
+           MODAL
+        --------------------------------------------- */
+
+        const modal =
+            document.getElementById("availabilityModal");
+
+        const editButton =
+            document.getElementById(
+                "editAvailabilityButton"
+            );
+
+        const closeModalButton =
+            document.getElementById("closeModal");
+
+        const cancelButton =
+            document.getElementById(
+                "cancelAvailability"
+            );
+
+
+        function openAvailabilityModal() {
+
+            modal.classList.add("modal-visible");
+
+            document.body.classList.add("modal-open");
+
+        }
+
+
+        function closeAvailabilityModal() {
+
+            modal.classList.remove("modal-visible");
+
+            document.body.classList.remove("modal-open");
+
+        }
+
+
+        editButton.addEventListener(
+            "click",
+            openAvailabilityModal
+        );
+
+
+        closeModalButton.addEventListener(
+            "click",
+            closeAvailabilityModal
+        );
+
+
+        cancelButton.addEventListener(
+            "click",
+            closeAvailabilityModal
+        );
+
+
+        modal.addEventListener(
+            "click",
+            function(event) {
+
+                if (event.target === modal) {
+
+                    closeAvailabilityModal();
+
+                }
+
+            }
+        );
+
+
+        /* ---------------------------------------------
+           SAVE AVAILABILITY
+        --------------------------------------------- */
+
+        document
+            .getElementById("saveAvailability")
+            .addEventListener("click", function() {
+
+                const checked =
+                    document.querySelectorAll(
+                        '.editor-table input[type="checkbox"]:checked'
+                    );
+
+                console.log(
+                    "Selected availability:",
+                    checked.length
+                );
+
+
+                closeAvailabilityModal();
+
+
+                const status =
+                    document.querySelector(
+                        ".status-value"
+                    );
+
+
+                status.innerHTML =
+                    '<span class="status-dot"></span> DECLARED';
+
+
+                alert(
+                    "Your availability has been saved successfully."
+                );
+
+            });
+
+
+        /* ---------------------------------------------
+           ESC KEY
+        --------------------------------------------- */
+
+        document.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (event.key === "Escape") {
+
+                    closeAvailabilityModal();
+
+                }
+
+            }
+        );
+
+    </script>
+
+</body>
+</html>
