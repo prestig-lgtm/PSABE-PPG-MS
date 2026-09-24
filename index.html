@@ -8,1787 +8,374 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     >
 
-    <title>PSABE-PPG CSU Chapter Management System</title>
-
-    <!-- Google Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
+    <meta
+        name="theme-color"
+        content="#002d23"
     >
 
-    <style>
+    <meta
+        name="description"
+        content="PSABE-PPG CSU Chapter Management System"
+    >
 
-        /* =========================================================
-           RESET
-        ========================================================= */
+    <title>PSABE-PPG CSU Chapter Management System</title>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            width: 100%;
-            min-height: 100%;
-        }
-
-        body {
-            font-family: "Montserrat", Arial, sans-serif;
-            background: #00251d;
-            color: #f7f3e7;
-            overflow-x: hidden;
-        }
-
-
-        /* =========================================================
-           LOADING SCREEN
-        ========================================================= */
-
-        #loadingScreen {
-            position: fixed;
-            inset: 0;
-            z-index: 99999;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            background: #ffffff;
-
-            opacity: 1;
-            visibility: visible;
-
-            transition:
-                opacity 0.6s ease,
-                visibility 0.6s ease;
-        }
-
-        #loadingScreen.hide {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        .loading-content {
-            width: min(1000px, 90vw);
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            gap: 28px;
-
-            animation: loadingEnter 1s ease forwards;
-        }
-
-        .loading-logo {
-            width: 350px;
-            height: 350px;
-
-            object-fit: contain;
-
-            opacity: 0;
-
-            animation:
-                logoAppear 0.9s ease 0.1s forwards,
-                logoFloat 3s ease-in-out 1s infinite;
-        }
-
-        .loading-divider {
-            width: 4px;
-            height: 330px;
-
-            background: #111111;
-
-            transform: scaleY(0);
-
-            animation: dividerGrow 0.7s ease 0.45s forwards;
-        }
-
-        .loading-text {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-
-            color: #050505;
-
-            overflow: hidden;
-        }
-
-        .loading-title {
-            font-size: clamp(42px, 5vw, 86px);
-            font-weight: 800;
-            letter-spacing: -2px;
-            line-height: 1;
-
-            opacity: 0;
-            transform: translateX(40px);
-
-            animation:
-                textSlide 0.8s ease 0.6s forwards;
-        }
-
-        .loading-chapter {
-            margin-top: 28px;
-
-            font-size: clamp(32px, 4vw, 68px);
-            font-weight: 800;
-            letter-spacing: -2px;
-            line-height: 1;
-
-            opacity: 0;
-            transform: translateX(40px);
-
-            animation:
-                textSlide 0.8s ease 0.8s forwards;
-        }
-
-        .loading-system {
-            margin-top: 32px;
-
-            font-size: clamp(25px, 3vw, 48px);
-            font-weight: 700;
-
-            opacity: 0;
-            transform: translateX(40px);
-
-            animation:
-                textSlide 0.8s ease 1s forwards;
-        }
-
-
-        /* =========================================================
-           LOGIN PAGE
-        ========================================================= */
-
-        #loginPage {
-            position: relative;
-
-            min-height: 100vh;
-            min-height: 100svh;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            padding: 40px 20px;
-
-            isolation: isolate;
-
-            background:
-                #002a20
-                url("assets/management-background.png")
-                center center / cover
-                no-repeat;
-
-            overflow: hidden;
-        }
-
-        /*
-            Dark overlay.
-
-            The background image remains clearly visible,
-            but the login interface remains readable.
-        */
-
-        #loginPage::before {
-            content: "";
-
-            position: absolute;
-            inset: 0;
-
-            z-index: -1;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    rgba(0, 38, 29, 0.40),
-                    rgba(0, 26, 20, 0.25),
-                    rgba(0, 45, 34, 0.42)
-                );
-        }
-
-        /*
-            Very subtle green atmospheric lighting.
-            No circles and no glowing lines.
-        */
-
-        #loginPage::after {
-            content: "";
-
-            position: absolute;
-            inset: 0;
-
-            z-index: -1;
-
-            pointer-events: none;
-
-            background:
-                radial-gradient(
-                    circle at 50% 25%,
-                    rgba(0, 255, 190, 0.08),
-                    transparent 35%
-                );
-        }
-
-
-        /* =========================================================
-           LOGIN CONTAINER
-        ========================================================= */
-
-        .login-wrapper {
-            width: min(560px, 94vw);
-
-            position: relative;
-            z-index: 2;
-
-            animation: loginAppear 0.8s ease forwards;
-        }
-
-        /*
-            TRANSPARENT LOGIN BOX
-        */
-
-        .login-box {
-            width: 100%;
-
-            padding: 42px 44px 38px;
-
-            border: 1.5px solid rgba(0, 235, 180, 0.75);
-
-            border-radius: 28px;
-
-            /*
-                Transparent background instead of solid green.
-            */
-
-            background:
-                rgba(0, 25, 20, 0.18);
-
-            /*
-                Glass effect
-            */
-
-            backdrop-filter: blur(7px);
-            -webkit-backdrop-filter: blur(7px);
-
-            box-shadow:
-                0 20px 70px rgba(0, 0, 0, 0.30),
-                inset 0 0 35px rgba(0, 255, 190, 0.035);
-
-            position: relative;
-        }
-
-
-        /* =========================================================
-           LOGIN HEADING
-        ========================================================= */
-
-        .login-heading {
-            text-align: center;
-
-            margin-bottom: 32px;
-        }
-
-        .login-heading h1 {
-            color: #f7f1df;
-
-            font-size: 38px;
-            font-weight: 800;
-
-            line-height: 1.15;
-
-            margin-bottom: 12px;
-        }
-
-        .login-heading p {
-            color: rgba(218, 245, 236, 0.86);
-
-            font-size: 15px;
-            font-weight: 500;
-
-            line-height: 1.7;
-        }
-
-
-        /* =========================================================
-           FORM
-        ========================================================= */
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        .input-wrapper {
-            position: relative;
-
-            width: 100%;
-        }
-
-        .input-icon {
-            position: absolute;
-
-            left: 22px;
-            top: 50%;
-
-            transform: translateY(-50%);
-
-            width: 25px;
-            height: 25px;
-
-            color: #00efc0;
-
-            pointer-events: none;
-        }
-
-        .input-wrapper input,
-        .position-select {
-            width: 100%;
-
-            height: 70px;
-
-            padding-left: 68px;
-            padding-right: 54px;
-
-            border: 1.5px solid rgba(0, 226, 177, 0.72);
-
-            border-radius: 18px;
-
-            background:
-                rgba(0, 27, 21, 0.28);
-
-            color: #f4f4ed;
-
-            font-family: inherit;
-            font-size: 16px;
-            font-weight: 500;
-
-            outline: none;
-
-            transition:
-                border-color 0.25s ease,
-                background 0.25s ease,
-                box-shadow 0.25s ease;
-        }
-
-        .input-wrapper input::placeholder {
-            color: rgba(225, 245, 239, 0.68);
-        }
-
-        .input-wrapper input:focus,
-        .position-select:focus {
-            border-color: #00f0bd;
-
-            background:
-                rgba(0, 42, 32, 0.40);
-
-            box-shadow:
-                0 0 0 3px rgba(0, 240, 189, 0.10);
-        }
-
-
-        /* =========================================================
-           PASSWORD BUTTON
-        ========================================================= */
-
-        .password-toggle {
-            position: absolute;
-
-            right: 20px;
-            top: 50%;
-
-            transform: translateY(-50%);
-
-            width: 32px;
-            height: 32px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            border: none;
-            background: transparent;
-
-            color: #00efc0;
-
-            cursor: pointer;
-        }
-
-        .password-toggle svg {
-            width: 25px;
-            height: 25px;
-        }
-
-
-        /* =========================================================
-           POSITION SELECT
-        ========================================================= */
-
-        .position-wrapper {
-            position: relative;
-        }
-
-        .position-icon {
-            position: absolute;
-
-            left: 21px;
-            top: 50%;
-
-            transform: translateY(-50%);
-
-            width: 28px;
-            height: 28px;
-
-            color: #00efc0;
-
-            pointer-events: none;
-
-            z-index: 2;
-        }
-
-        .position-select {
-            appearance: none;
-            -webkit-appearance: none;
-
-            cursor: pointer;
-
-            padding-left: 68px;
-            padding-right: 58px;
-        }
-
-        .position-select option {
-            background: #00362a;
-            color: #ffffff;
-        }
-
-        /*
-            FIXED DROPDOWN ICON
-
-            It is vertically centered inside the same
-            70px input body.
-        */
-
-        .select-arrow {
-            position: absolute;
-
-            right: 21px;
-            top: 50%;
-
-            transform: translateY(-50%);
-
-            width: 18px;
-            height: 18px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            pointer-events: none;
-
-            color: #00efc0;
-        }
-
-        .select-arrow svg {
-            width: 18px;
-            height: 18px;
-
-            display: block;
-        }
-
-
-        /* =========================================================
-           OPTIONS
-        ========================================================= */
-
-        .login-options {
-            display: flex;
-
-            align-items: center;
-            justify-content: space-between;
-
-            gap: 15px;
-
-            margin: 8px 2px 25px;
-        }
-
-        .remember {
-            display: flex;
-            align-items: center;
-
-            gap: 12px;
-
-            color: #f4f5ee;
-
-            font-size: 14px;
-            font-weight: 500;
-
-            cursor: pointer;
-        }
-
-        .remember input {
-            appearance: none;
-            -webkit-appearance: none;
-
-            width: 23px;
-            height: 23px;
-
-            border: 2px solid #00efc0;
-
-            border-radius: 6px;
-
-            background: transparent;
-
-            cursor: pointer;
-
-            position: relative;
-        }
-
-        .remember input:checked {
-            background: #00cfa4;
-        }
-
-        .remember input:checked::after {
-            content: "✓";
-
-            position: absolute;
-
-            left: 50%;
-            top: 50%;
-
-            transform: translate(-50%, -55%);
-
-            color: white;
-
-            font-size: 15px;
-            font-weight: 800;
-        }
-
-        .forgot {
-            color: #00efc0;
-
-            font-size: 14px;
-            font-weight: 600;
-
-            text-decoration: none;
-
-            cursor: pointer;
-
-            white-space: nowrap;
-        }
-
-        .forgot:hover {
-            color: #65ffe0;
-        }
-
-
-        /* =========================================================
-           SIGN IN BUTTON
-        ========================================================= */
-
-        .signin-button {
-            width: 100%;
-            height: 66px;
-
-            border: 1px solid rgba(255, 255, 255, 0.16);
-
-            border-radius: 18px;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #00b98c,
-                    #00d8a8
-                );
-
-            color: #ffffff;
-
-            font-family: inherit;
-
-            font-size: 20px;
-            font-weight: 800;
-
-            cursor: pointer;
-
-            box-shadow:
-                0 8px 25px rgba(0, 214, 166, 0.20);
-
-            transition:
-                transform 0.2s ease,
-                box-shadow 0.2s ease,
-                filter 0.2s ease;
-        }
-
-        .signin-button:hover {
-            transform: translateY(-2px);
-
-            filter: brightness(1.06);
-
-            box-shadow:
-                0 12px 30px rgba(0, 214, 166, 0.28);
-        }
-
-        .signin-button:active {
-            transform: translateY(0);
-        }
-
-        .signin-button:disabled {
-            cursor: wait;
-            opacity: 0.7;
-        }
-
-
-        /* =========================================================
-           BOTTOM AUTHORIZATION TEXT
-        ========================================================= */
-
-        .authorized {
-            display: flex;
-
-            align-items: center;
-            justify-content: center;
-
-            gap: 14px;
-
-            margin-top: 27px;
-
-            color: rgba(213, 238, 231, 0.78);
-
-            font-size: 12px;
-            font-weight: 500;
-
-            text-align: center;
-        }
-
-        .authorized::before,
-        .authorized::after {
-            content: "";
-
-            width: 70px;
-            height: 1px;
-
-            background: rgba(0, 239, 192, 0.45);
-        }
-
-
-        /* =========================================================
-           ERROR / STATUS MESSAGE
-        ========================================================= */
-
-        #loginMessage {
-            min-height: 20px;
-
-            margin-top: 15px;
-
-            text-align: center;
-
-            font-size: 13px;
-            font-weight: 600;
-
-            color: #ffb9b9;
-        }
-
-
-        /* =========================================================
-           ANIMATIONS
-        ========================================================= */
-
-        @keyframes loadingEnter {
-
-            from {
-                opacity: 0;
-                transform: scale(0.96);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        @keyframes logoAppear {
-
-            from {
-                opacity: 0;
-                transform: scale(0.85);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        @keyframes logoFloat {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-8px);
-            }
-        }
-
-        @keyframes dividerGrow {
-
-            from {
-                transform: scaleY(0);
-            }
-
-            to {
-                transform: scaleY(1);
-            }
-        }
-
-        @keyframes textSlide {
-
-            from {
-                opacity: 0;
-                transform: translateX(40px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes loginAppear {
-
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-
-        /* =========================================================
-           TABLET
-        ========================================================= */
-
-        @media (max-width: 800px) {
-
-            #loginPage {
-                padding: 28px 18px;
-
-                align-items: center;
-            }
-
-            .login-wrapper {
-                width: min(520px, 94vw);
-            }
-
-            .login-box {
-                padding: 35px 30px 32px;
-
-                border-radius: 24px;
-            }
-
-            .login-heading h1 {
-                font-size: 34px;
-            }
-
-            .input-wrapper input,
-            .position-select {
-                height: 64px;
-            }
-
-            .signin-button {
-                height: 62px;
-            }
-
-            .loading-content {
-                width: 90vw;
-
-                gap: 20px;
-            }
-
-            .loading-logo {
-                width: 260px;
-                height: 260px;
-            }
-
-            .loading-divider {
-                height: 250px;
-            }
-        }
-
-
-        /* =========================================================
-           MOBILE
-        ========================================================= */
-
-        @media (max-width: 600px) {
-
-            /*
-                IMPORTANT:
-
-                The background is fixed to the viewport on mobile.
-                It will not scroll with the login content.
-            */
-
-            #loginPage {
-                min-height: 100svh;
-
-                padding:
-                    24px
-                    14px;
-
-                align-items: center;
-
-                background-position: center center;
-                background-size: cover;
-
-                /*
-                    Prevents the page background from behaving
-                    like a scrolling image.
-                */
-                background-attachment: fixed;
-            }
-
-            /*
-                Some mobile browsers handle fixed backgrounds
-                poorly. We use a pseudo-layer instead.
-            */
-
-            #loginPage {
-                background: #002a20;
-            }
-
-            #loginPage::before {
-                background:
-                    linear-gradient(
-                        rgba(0, 37, 28, 0.45),
-                        rgba(0, 37, 28, 0.45)
-                    ),
-                    url("assets/management-background.png")
-                    center center / cover
-                    no-repeat;
-
-                position: fixed;
-
-                inset: 0;
-
-                z-index: -2;
-            }
-
-            #loginPage::after {
-                position: fixed;
-
-                inset: 0;
-
-                z-index: -1;
-            }
-
-            .login-wrapper {
-                width: 100%;
-                max-width: 430px;
-            }
-
-            .login-box {
-                padding: 28px 20px 26px;
-
-                border-radius: 23px;
-
-                background:
-                    rgba(0, 25, 20, 0.17);
-
-                backdrop-filter: blur(5px);
-                -webkit-backdrop-filter: blur(5px);
-            }
-
-            .login-heading {
-                margin-bottom: 23px;
-            }
-
-            .login-heading h1 {
-                font-size: 30px;
-
-                margin-bottom: 9px;
-            }
-
-            .login-heading p {
-                font-size: 12px;
-
-                line-height: 1.65;
-            }
-
-            .form-group {
-                margin-bottom: 13px;
-            }
-
-            .input-wrapper input,
-            .position-select {
-                height: 57px;
-
-                border-radius: 15px;
-
-                font-size: 13px;
-
-                padding-left: 57px;
-                padding-right: 48px;
-            }
-
-            .input-icon {
-                left: 17px;
-
-                width: 22px;
-                height: 22px;
-            }
-
-            .position-icon {
-                left: 17px;
-
-                width: 23px;
-                height: 23px;
-            }
-
-            .password-toggle {
-                right: 15px;
-
-                width: 28px;
-                height: 28px;
-            }
-
-            .password-toggle svg {
-                width: 22px;
-                height: 22px;
-            }
-
-            .select-arrow {
-                right: 17px;
-
-                width: 17px;
-                height: 17px;
-            }
-
-            .select-arrow svg {
-                width: 17px;
-                height: 17px;
-            }
-
-            .login-options {
-                margin:
-                    5px 1px 20px;
-
-                gap: 8px;
-            }
-
-            .remember {
-                gap: 8px;
-
-                font-size: 11px;
-            }
-
-            .remember input {
-                width: 20px;
-                height: 20px;
-            }
-
-            .forgot {
-                font-size: 11px;
-            }
-
-            .signin-button {
-                height: 56px;
-
-                border-radius: 15px;
-
-                font-size: 17px;
-            }
-
-            .authorized {
-                margin-top: 21px;
-
-                gap: 9px;
-
-                font-size: 9px;
-            }
-
-            .authorized::before,
-            .authorized::after {
-                width: 35px;
-            }
-
-
-            /* ===============================
-               MOBILE LOADING SCREEN
-            =============================== */
-
-            .loading-content {
-                width: 90vw;
-
-                display: flex;
-
-                flex-direction: column;
-
-                gap: 18px;
-
-                text-align: center;
-            }
-
-            .loading-logo {
-                width: 145px;
-                height: 145px;
-            }
-
-            .loading-divider {
-                width: 170px;
-                height: 2px;
-
-                transform: scaleX(0);
-
-                animation:
-                    dividerHorizontal 0.7s ease 0.45s forwards;
-            }
-
-            .loading-text {
-                align-items: center;
-            }
-
-            .loading-title {
-                font-size: 34px;
-
-                letter-spacing: -1px;
-            }
-
-            .loading-chapter {
-                margin-top: 12px;
-
-                font-size: 26px;
-
-                letter-spacing: -1px;
-            }
-
-            .loading-system {
-                margin-top: 15px;
-
-                font-size: 21px;
-            }
-        }
-
-        @keyframes dividerHorizontal {
-
-            from {
-                transform: scaleX(0);
-            }
-
-            to {
-                transform: scaleX(1);
-            }
-        }
-
-
-        /* =========================================================
-           VERY SMALL PHONES
-        ========================================================= */
-
-        @media (max-width: 380px) {
-
-            #loginPage {
-                padding: 18px 10px;
-            }
-
-            .login-box {
-                padding:
-                    24px
-                    16px
-                    22px;
-            }
-
-            .login-heading h1 {
-                font-size: 26px;
-            }
-
-            .login-heading p {
-                font-size: 11px;
-            }
-
-            .input-wrapper input,
-            .position-select {
-                height: 53px;
-
-                font-size: 12px;
-            }
-
-            .signin-button {
-                height: 52px;
-
-                font-size: 16px;
-            }
-        }
-
-
-        /* =========================================================
-           REDUCED MOTION
-        ========================================================= */
-
-        @media (prefers-reduced-motion: reduce) {
-
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 
 <body>
 
-
-    <!-- =========================================================
+    <!-- =====================================================
          LOADING SCREEN
-    ========================================================= -->
+         ===================================================== -->
 
-    <section id="loadingScreen">
+    <div id="loadingScreen">
 
         <div class="loading-content">
 
+            <!-- LOGO -->
             <img
                 src="assets/psabe-ppg-logo.png"
-                alt="PSABE-PPG CSU Chapter"
+                alt="PSABE-PPG CSU Chapter Logo"
                 class="loading-logo"
             >
 
+            <!-- LINE BETWEEN LOGO AND TEXT -->
             <div class="loading-divider"></div>
 
+            <!-- TEXT -->
             <div class="loading-text">
 
                 <div class="loading-title">
                     PSABE-PPG
                 </div>
 
-                <div class="loading-chapter">
+                <div class="loading-subtitle">
                     CSU CHAPTER
                 </div>
 
                 <div class="loading-system">
-                    Management System
+                    MANAGEMENT SYSTEM
                 </div>
 
             </div>
 
         </div>
 
-    </section>
+    </div>
 
 
-
-    <!-- =========================================================
+    <!-- =====================================================
          LOGIN PAGE
-    ========================================================= -->
+         ===================================================== -->
 
-    <main id="loginPage">
+    <main class="login-page">
 
-        <div class="login-wrapper">
+        <section class="login-container">
 
-            <section class="login-box">
+            <!-- LOGIN HEADER -->
+
+            <div class="login-header">
+
+                <h1>
+                    Welcome back!
+                </h1>
+
+                <p>
+                    Sign in to your account to continue
+                    to the management system.
+                </p>
+
+            </div>
 
 
-                <!-- LOGIN HEADER -->
+            <!-- LOGIN FORM -->
 
-                <div class="login-heading">
+            <form
+                id="loginForm"
+                class="login-form"
+                autocomplete="on"
+            >
 
-                    <h1>
-                        Welcome back!
-                    </h1>
 
-                    <p>
-                        Sign in to your account to continue
-                        <br>
-                        to the management system.
-                    </p>
+                <!-- USERNAME -->
+
+                <div class="input-group">
+
+                    <span class="input-icon" aria-hidden="true">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <circle cx="12" cy="8" r="4"></circle>
+                            <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
+                        </svg>
+
+                    </span>
+
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Username or Email"
+                        autocomplete="username"
+                        required
+                    >
 
                 </div>
 
 
-
-                <!-- LOGIN FORM -->
-
-                <form id="loginForm">
-
-
-                    <!-- USERNAME -->
-
-                    <div class="form-group">
-
-                        <div class="input-wrapper">
-
-                            <svg
-                                class="input-icon"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            >
-                                <circle cx="12" cy="7" r="4"></circle>
-                                <path d="M5 21v-1a7 7 0 0 1 14 0v1"></path>
-                            </svg>
-
-                            <input
-                                id="username"
-                                type="text"
-                                placeholder="Username or Email"
-                                autocomplete="username"
-                                required
-                            >
-
-                        </div>
-
-                    </div>
-
-
-
-                    <!-- PASSWORD -->
-
-                    <div class="form-group">
-
-                        <div class="input-wrapper">
-
-                            <svg
-                                class="input-icon"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            >
-                                <rect
-                                    x="4"
-                                    y="10"
-                                    width="16"
-                                    height="11"
-                                    rx="2"
-                                ></rect>
-
-                                <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
-
-                                <circle
-                                    cx="12"
-                                    cy="15.5"
-                                    r="1"
-                                ></circle>
-                            </svg>
-
-
-                            <input
-                                id="password"
-                                type="password"
-                                placeholder="Password"
-                                autocomplete="current-password"
-                                required
-                            >
-
-
-                            <button
-                                type="button"
-                                class="password-toggle"
-                                id="passwordToggle"
-                                aria-label="Show password"
-                            >
-
-                                <svg
-                                    id="eyeIcon"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                >
-
-                                    <path
-                                        d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"
-                                    ></path>
-
-                                    <circle
-                                        cx="12"
-                                        cy="12"
-                                        r="2.5"
-                                    ></circle>
-
-                                </svg>
-
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-
-                    <!-- POSITION -->
-
-                    <div class="form-group">
-
-                        <div class="position-wrapper">
-
-                            <svg
-                                class="position-icon"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                            >
-
-                                <circle
-                                    cx="9"
-                                    cy="7"
-                                    r="4"
-                                ></circle>
-
-                                <path
-                                    d="M2 21a7 7 0 0 1 14 0"
-                                ></path>
-
-                                <circle
-                                    cx="17"
-                                    cy="8"
-                                    r="3"
-                                ></circle>
-
-                                <path
-                                    d="M17 14a5 5 0 0 1 5 5"
-                                ></path>
-
-                            </svg>
-
-
-                            <select
-                                id="position"
-                                class="position-select"
-                                required
-                            >
-
-                                <option value="" selected disabled>
-                                    Select your position
-                                </option>
-
-                                <option value="President">
-                                    President
-                                </option>
-
-                                <option value="Vice President">
-                                    Vice President
-                                </option>
-
-                                <option value="Secretary">
-                                    Secretary
-                                </option>
-
-                                <option value="Treasurer">
-                                    Treasurer
-                                </option>
-
-                                <option value="Auditor">
-                                    Auditor
-                                </option>
-
-                                <option value="PIO">
-                                    Public Information Officer
-                                </option>
-
-                                <option value="Events Head">
-                                    Events Head
-                                </option>
-
-                                <option value="Membership Head">
-                                    Membership Head
-                                </option>
-
-                                <option value="Academic Affairs Head">
-                                    Academic Affairs Head
-                                </option>
-
-                            </select>
-
-
-                            <!-- PROPERLY ALIGNED ARROW -->
-
-                            <span class="select-arrow">
-
-                                <svg
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2.5"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                >
-
-                                    <polyline
-                                        points="6 9 12 15 18 9"
-                                    ></polyline>
-
-                                </svg>
-
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-
-                    <!-- OPTIONS -->
-
-                    <div class="login-options">
-
-                        <label class="remember">
-
-                            <input
-                                type="checkbox"
-                                id="rememberMe"
-                            >
-
-                            <span>
-                                Remember me
-                            </span>
-
-                        </label>
-
-
-                        <a
-                            href="#"
-                            class="forgot"
-                            id="forgotPassword"
+                <!-- PASSWORD -->
+
+                <div class="input-group">
+
+                    <span class="input-icon" aria-hidden="true">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
                         >
-                            Forgot password?
-                        </a>
+                            <rect
+                                x="5"
+                                y="10"
+                                width="14"
+                                height="11"
+                                rx="2"
+                            ></rect>
 
-                    </div>
+                            <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+
+                            <circle
+                                cx="12"
+                                cy="15"
+                                r="1"
+                            ></circle>
+                        </svg>
+
+                    </span>
 
 
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Password"
+                        autocomplete="current-password"
+                        required
+                    >
 
-                    <!-- SIGN IN -->
+
+                    <!-- PASSWORD VISIBILITY -->
 
                     <button
-                        type="submit"
-                        class="signin-button"
-                        id="signinButton"
+                        type="button"
+                        id="passwordToggle"
+                        class="password-toggle"
+                        aria-label="Show password"
                     >
-                        Sign In
+
+                        <svg
+                            id="eyeIcon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+
+                            <path
+                                d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"
+                            ></path>
+
+                            <circle
+                                cx="12"
+                                cy="12"
+                                r="3"
+                            ></circle>
+
+                        </svg>
+
                     </button>
 
-
-                    <!-- MESSAGE -->
-
-                    <div id="loginMessage"></div>
+                </div>
 
 
-                    <!-- AUTHORIZATION -->
+                <!-- POSITION -->
 
-                    <div class="authorized">
+                <div class="input-group position-group">
+
+                    <span class="input-icon" aria-hidden="true">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+
+                            <circle
+                                cx="9"
+                                cy="8"
+                                r="3"
+                            ></circle>
+
+                            <path
+                                d="M3 20c0-3.5 2.5-6 6-6s6 2.5 6 6"
+                            ></path>
+
+                            <circle
+                                cx="17"
+                                cy="9"
+                                r="2.5"
+                            ></circle>
+
+                            <path
+                                d="M16 14c3 0 5 2 5 5"
+                            ></path>
+
+                        </svg>
+
+                    </span>
+
+
+                    <select
+                        id="position"
+                        name="position"
+                        required
+                    >
+
+                        <option value="" selected disabled>
+                            Select your position
+                        </option>
+
+                        <option value="President">
+                            President
+                        </option>
+
+                        <option value="Vice President">
+                            Vice President
+                        </option>
+
+                        <option value="Secretary">
+                            Secretary
+                        </option>
+
+                        <option value="Treasurer">
+                            Treasurer
+                        </option>
+
+                        <option value="Auditor">
+                            Auditor
+                        </option>
+
+                        <option value="Public Information Officer">
+                            Public Information Officer
+                        </option>
+
+                        <option value="Events Head">
+                            Events Head
+                        </option>
+
+                        <option value="Membership Head">
+                            Membership Head
+                        </option>
+
+                        <option value="Academic Affairs Head">
+                            Academic Affairs Head
+                        </option>
+
+                    </select>
+
+
+                    <!-- CUSTOM ARROW -->
+
+                    <span
+                        class="select-arrow"
+                        aria-hidden="true"
+                    ></span>
+
+                </div>
+
+
+                <!-- OPTIONS -->
+
+                <div class="form-options">
+
+                    <label class="remember-me">
+
+                        <input
+                            type="checkbox"
+                            id="rememberMe"
+                        >
 
                         <span>
-                            Authorized organization members only
+                            Remember me
                         </span>
 
-                    </div>
+                    </label>
 
 
-                </form>
+                    <a
+                        href="#"
+                        id="forgotPassword"
+                        class="forgot-password"
+                    >
+                        Forgot password?
+                    </a>
 
-            </section>
+                </div>
 
-        </div>
+
+                <!-- SIGN IN -->
+
+                <button
+                    type="submit"
+                    class="sign-in-button"
+                    id="signInButton"
+                >
+                    Sign In
+                </button>
+
+
+                <!-- MESSAGE -->
+
+                <div
+                    id="loginMessage"
+                    class="login-message"
+                    role="alert"
+                ></div>
+
+
+                <!-- AUTHORIZED -->
+
+                <div class="authorized-message">
+
+                    <span>
+                        Authorized organization members only
+                    </span>
+
+                </div>
+
+            </form>
+
+        </section>
 
     </main>
 
 
-
-    <!-- =========================================================
-         JAVASCRIPT
-    ========================================================= -->
-
-    <script>
-
-        /* =========================================================
-           LOADING SCREEN
-        ========================================================= */
-
-        window.addEventListener("load", function () {
-
-            setTimeout(function () {
-
-                const loadingScreen =
-                    document.getElementById("loadingScreen");
-
-                loadingScreen.classList.add("hide");
-
-            }, 2600);
-
-        });
-
-
-
-        /* =========================================================
-           PASSWORD VISIBILITY
-        ========================================================= */
-
-        const password =
-            document.getElementById("password");
-
-        const passwordToggle =
-            document.getElementById("passwordToggle");
-
-        const eyeIcon =
-            document.getElementById("eyeIcon");
-
-
-        passwordToggle.addEventListener(
-            "click",
-            function () {
-
-                if (password.type === "password") {
-
-                    password.type = "text";
-
-                    passwordToggle.setAttribute(
-                        "aria-label",
-                        "Hide password"
-                    );
-
-                    eyeIcon.innerHTML = `
-
-                        <path
-                            d="M3 3l18 18"
-                        ></path>
-
-                        <path
-                            d="M10.6 10.6
-                               a2 2 0 0 0 2.8 2.8"
-                        ></path>
-
-                        <path
-                            d="M9.9 5.1
-                               A10.7 10.7 0 0 1 12 5
-                               c6.5 0 10 7 10 7
-                               a18.4 18.4 0 0 1-3.2 3.8"
-                        ></path>
-
-                        <path
-                            d="M6.6 6.6
-                               C3.7 8.5 2 12 2 12
-                               s3.5 7 10 7
-                               c1.5 0 2.8-.3 4-.8"
-                        ></path>
-
-                    `;
-
-                } else {
-
-                    password.type = "password";
-
-                    passwordToggle.setAttribute(
-                        "aria-label",
-                        "Show password"
-                    );
-
-                    eyeIcon.innerHTML = `
-
-                        <path
-                            d="M2 12
-                               s3.5-6 10-6
-                               10 6 10 6
-                               -3.5 6-10 6
-                               S2 12 2 12Z"
-                        ></path>
-
-                        <circle
-                            cx="12"
-                            cy="12"
-                            r="2.5"
-                        ></circle>
-
-                    `;
-
-                }
-
-            }
-        );
-
-
-
-        /* =========================================================
-           REMEMBER ME
-        ========================================================= */
-
-        const usernameInput =
-            document.getElementById("username");
-
-        const rememberMe =
-            document.getElementById("rememberMe");
-
-
-        const savedUsername =
-            localStorage.getItem("psabeRememberedUsername");
-
-
-        if (savedUsername) {
-
-            usernameInput.value =
-                savedUsername;
-
-            rememberMe.checked = true;
-
-        }
-
-
-
-        /* =========================================================
-           FORGOT PASSWORD
-        ========================================================= */
-
-        document
-            .getElementById("forgotPassword")
-            .addEventListener(
-                "click",
-                function (event) {
-
-                    event.preventDefault();
-
-                    alert(
-                        "Please contact the PSABE-PPG system administrator to reset your password."
-                    );
-
-                }
-            );
-
-
-
-        /* =========================================================
-           TEMPORARY LOGIN
-           
-           This is ONLY for testing the interface.
-           
-           Username:
-           admin
-
-           Password:
-           admin123
-        ========================================================= */
-
-        const loginForm =
-            document.getElementById("loginForm");
-
-        const loginMessage =
-            document.getElementById("loginMessage");
-
-        const signinButton =
-            document.getElementById("signinButton");
-
-
-        loginForm.addEventListener(
-            "submit",
-            function (event) {
-
-                event.preventDefault();
-
-
-                const username =
-                    usernameInput.value.trim();
-
-                const userPassword =
-                    password.value;
-
-                const position =
-                    document.getElementById("position").value;
-
-
-                loginMessage.textContent = "";
-
-
-                if (!position) {
-
-                    loginMessage.textContent =
-                        "Please select your position.";
-
-                    return;
-
-                }
-
-
-                /*
-                    TEMPORARY DEMO LOGIN
-                */
-
-                if (
-                    username === "admin" &&
-                    userPassword === "admin123"
-                ) {
-
-                    signinButton.disabled = true;
-
-                    signinButton.textContent =
-                        "Signing in...";
-
-
-                    if (rememberMe.checked) {
-
-                        localStorage.setItem(
-                            "psabeRememberedUsername",
-                            username
-                        );
-
-                    } else {
-
-                        localStorage.removeItem(
-                            "psabeRememberedUsername"
-                        );
-
-                    }
-
-
-                    setTimeout(function () {
-
-                        /*
-                            Temporary dashboard redirect.
-
-                            Change this later to:
-                            dashboard.html
-
-                            once we create the actual dashboard.
-                        */
-
-                        window.location.href =
-                            "dashboard.html";
-
-                    }, 700);
-
-
-                } else {
-
-                    loginMessage.textContent =
-                        "Invalid username or password.";
-
-                }
-
-            }
-        );
-
-    </script>
+    <script src="app.js"></script>
 
 </body>
 </html>
