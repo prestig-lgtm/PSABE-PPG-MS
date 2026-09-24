@@ -8,33 +8,34 @@
     padding: 0;
 }
 
-html {
+html,
+body {
     width: 100%;
     min-height: 100%;
+}
+
+html {
     background: #002d24;
 }
 
 body {
-    width: 100%;
     min-height: 100vh;
-    margin: 0;
 
     font-family:
         Arial,
         Helvetica,
         sans-serif;
 
-    background: #002d24;
-
     color: #f8f3df;
+
+    background: #002d24;
 
     overflow-x: hidden;
 }
 
 
 /* =========================================================
-   FIXED BACKGROUND
-   This keeps the background stationary while scrolling.
+   FIXED WEBSITE BACKGROUND
 ========================================================= */
 
 body::before {
@@ -42,12 +43,14 @@ body::before {
 
     position: fixed;
 
-    inset: 0;
+    top: 0;
+    left: 0;
 
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
 
-    z-index: -2;
+    z-index: 0;
 
     background:
         linear-gradient(
@@ -73,9 +76,10 @@ body::before {
 .loading-screen {
     position: fixed;
 
-    inset: 0;
+    top: 0;
+    left: 0;
 
-    width: 100%;
+    width: 100vw;
     height: 100vh;
     height: 100dvh;
 
@@ -88,7 +92,24 @@ body::before {
 
     overflow: hidden;
 
-    background: transparent;
+    /*
+       IMPORTANT:
+       The background is directly attached to the loading
+       screen so it cannot scroll with the page.
+    */
+
+    background:
+        linear-gradient(
+            rgba(0, 45, 36, 0.18),
+            rgba(0, 45, 36, 0.18)
+        ),
+        url("assets/management-background.png");
+
+    background-size: cover;
+
+    background-position: center center;
+
+    background-repeat: no-repeat;
 
     opacity: 1;
 
@@ -118,9 +139,16 @@ body::before {
     align-items: center;
     justify-content: center;
 
-    width: min(1100px, 92vw);
+    /*
+       Let the complete logo + divider + text determine
+       its own width.
+    */
 
-    max-width: 1100px;
+    width: max-content;
+
+    max-width: none;
+
+    flex-shrink: 0;
 
     animation:
         loadingBrandAppear
@@ -179,7 +207,6 @@ body::before {
     flex-shrink: 0;
 
     margin-left: 42px;
-
     margin-right: 42px;
 
     background: #00d8b5;
@@ -212,7 +239,9 @@ body::before {
 
     text-align: left;
 
-    min-width: 0;
+    min-width: max-content;
+
+    flex-shrink: 0;
 }
 
 .loading-title {
@@ -389,16 +418,16 @@ body::before {
 .login-page {
     position: relative;
 
+    z-index: 1;
+
     width: 100%;
 
     min-height: 100vh;
-
     min-height: 100dvh;
 
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
     padding:
@@ -427,10 +456,11 @@ body::before {
 .login-card {
     position: relative;
 
-    width: min(
-        450px,
-        90vw
-    );
+    width:
+        min(
+            450px,
+            90vw
+        );
 
     padding:
         30px
@@ -554,13 +584,11 @@ body::before {
         translateY(-50%);
 
     width: 26px;
-
     height: 26px;
 
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
     pointer-events: none;
@@ -568,7 +596,6 @@ body::before {
 
 .input-icon svg {
     width: 26px;
-
     height: 26px;
 
     fill: none;
@@ -579,7 +606,6 @@ body::before {
     stroke-width: 2;
 
     stroke-linecap: round;
-
     stroke-linejoin: round;
 }
 
@@ -590,11 +616,9 @@ body::before {
 
 .input-group input {
     width: 100%;
-
     height: 100%;
 
     border: none;
-
     outline: none;
 
     background: transparent;
@@ -657,17 +681,14 @@ body::before {
         translateY(-50%);
 
     width: 32px;
-
     height: 32px;
 
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
     border: none;
-
     outline: none;
 
     background: transparent;
@@ -682,7 +703,6 @@ body::before {
 
 .password-toggle svg {
     width: 23px;
-
     height: 23px;
 
     fill: none;
@@ -693,7 +713,6 @@ body::before {
     stroke-width: 2;
 
     stroke-linecap: round;
-
     stroke-linejoin: round;
 }
 
@@ -713,9 +732,7 @@ body::before {
 
 .position-group select {
     appearance: none;
-
     -webkit-appearance: none;
-
     -moz-appearance: none;
 
     position: absolute;
@@ -723,11 +740,9 @@ body::before {
     inset: 0;
 
     width: 100%;
-
     height: 100%;
 
     border: none;
-
     outline: none;
 
     background: transparent;
@@ -779,13 +794,11 @@ body::before {
     top: 50%;
 
     width: 30px;
-
     height: 30px;
 
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
     transform:
@@ -798,7 +811,6 @@ body::before {
     display: block;
 
     width: 21px;
-
     height: 21px;
 
     fill: none;
@@ -809,7 +821,6 @@ body::before {
     stroke-width: 2.2;
 
     stroke-linecap: round;
-
     stroke-linejoin: round;
 }
 
@@ -860,7 +871,6 @@ body::before {
 
 .custom-checkbox {
     width: 25px;
-
     height: 25px;
 
     flex-shrink: 0;
@@ -877,7 +887,6 @@ body::before {
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
     transition:
@@ -898,7 +907,6 @@ body::before {
     content: "";
 
     width: 7px;
-
     height: 12px;
 
     border-right:
@@ -1027,7 +1035,6 @@ body::before {
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
     gap: 10px;
@@ -1097,7 +1104,8 @@ body::before {
 @media (max-width: 800px) {
 
     .loading-brand {
-        width: 94%;
+        transform:
+            scale(0.78);
     }
 
     .loading-logo-container {
@@ -1106,7 +1114,6 @@ body::before {
 
     .loading-logo {
         width: 220px;
-
         max-height: 220px;
     }
 
@@ -1114,7 +1121,6 @@ body::before {
         height: 220px;
 
         margin-left: 28px;
-
         margin-right: 28px;
     }
 
@@ -1160,26 +1166,35 @@ body::before {
     body {
         width: 100%;
 
-        min-height: 100%;
+        min-width: 100%;
 
         overflow-x: hidden;
     }
 
 
     /* -----------------------------------------------
-       FIXED MOBILE BACKGROUND
+       FIXED BACKGROUND
     ----------------------------------------------- */
 
     body::before {
         position: fixed;
 
-        inset: 0;
+        top: 0;
+        left: 0;
 
         width: 100vw;
 
         height: 100vh;
-
         height: 100dvh;
+
+        z-index: 0;
+
+        background:
+            linear-gradient(
+                rgba(0, 45, 36, 0.12),
+                rgba(0, 45, 36, 0.12)
+            ),
+            url("assets/management-background.png");
 
         background-size:
             cover;
@@ -1192,9 +1207,19 @@ body::before {
     }
 
 
+    /* -----------------------------------------------
+       LOGIN PAGE
+    ----------------------------------------------- */
+
     .login-page {
-        min-height:
-            100dvh;
+        position: relative;
+
+        z-index: 1;
+
+        width: 100%;
+
+        min-height: 100vh;
+        min-height: 100dvh;
 
         padding:
             20px
@@ -1218,35 +1243,76 @@ body::before {
     .loading-screen {
         position: fixed;
 
-        inset: 0;
+        top: 0;
+        left: 0;
 
         width: 100vw;
 
         height: 100vh;
-
         height: 100dvh;
 
-        background:
-            transparent;
+        z-index: 99999;
+
+        display: flex;
+
+        align-items:
+            center;
+
+        justify-content:
+            center;
 
         overflow:
             hidden;
+
+        /*
+           Keep the SAME background on mobile.
+           It is fixed because the entire loading screen
+           itself is fixed.
+        */
+
+        background:
+            linear-gradient(
+                rgba(0, 45, 36, 0.18),
+                rgba(0, 45, 36, 0.18)
+            ),
+            url("assets/management-background.png");
+
+        background-size:
+            cover;
+
+        background-position:
+            center center;
+
+        background-repeat:
+            no-repeat;
     }
 
 
     /* -----------------------------------------------
        MOBILE LOADING BRAND
 
-       Keep the horizontal layout, but scale it enough
-       to fit the phone screen.
+       The complete composition is scaled as one unit.
+       This prevents the right side from being cut off.
     ----------------------------------------------- */
 
     .loading-brand {
         width:
-            100%;
+            max-content;
 
         max-width:
-            100%;
+            none;
+
+        flex-shrink:
+            0;
+
+        transform:
+            scale(0.43);
+
+        transform-origin:
+            center center;
+
+        margin:
+            0;
 
         display:
             flex;
@@ -1256,24 +1322,12 @@ body::before {
 
         justify-content:
             center;
-
-        transform:
-            scale(0.58);
-
-        transform-origin:
-            center center;
-
-        margin:
-            0;
-
-        flex-shrink:
-            0;
     }
 
 
     .loading-logo-container {
         width:
-            185px;
+            280px;
 
         flex-shrink:
             0;
@@ -1282,28 +1336,28 @@ body::before {
 
     .loading-logo {
         width:
-            185px;
+            280px;
 
         max-width:
-            185px;
+            280px;
 
         max-height:
-            185px;
+            280px;
     }
 
 
     .loading-divider {
         width:
-            2px;
+            3px;
 
         height:
-            185px;
+            280px;
 
         margin-left:
-            18px;
+            42px;
 
         margin-right:
-            18px;
+            42px;
 
         flex-shrink:
             0;
@@ -1311,6 +1365,9 @@ body::before {
 
 
     .loading-text {
+        width:
+            max-content;
+
         min-width:
             max-content;
 
@@ -1321,34 +1378,34 @@ body::before {
 
     .loading-title {
         font-size:
-            42px;
+            76px;
 
         letter-spacing:
-            1px;
+            2px;
     }
 
 
     .loading-chapter {
         margin-top:
-            13px;
+            20px;
 
         font-size:
-            18px;
+            34px;
 
         letter-spacing:
-            4px;
+            9px;
     }
 
 
     .loading-system {
         margin-top:
-            17px;
+            27px;
 
         font-size:
-            17px;
+            34px;
 
         letter-spacing:
-            2.5px;
+            7px;
     }
 
 
@@ -1587,10 +1644,16 @@ body::before {
 
 
 /* =========================================================
-   VERY SMALL PHONES
+   SMALL PHONES
 ========================================================= */
 
 @media (max-width: 380px) {
+
+    .loading-brand {
+        transform:
+            scale(0.37);
+    }
+
 
     .login-page {
         padding:
@@ -1654,12 +1717,6 @@ body::before {
     .authorized-line {
         width:
             30px;
-    }
-
-
-    .loading-brand {
-        transform:
-            scale(0.50);
     }
 }
 
