@@ -5682,3 +5682,129 @@ body.availability-modal-open {
         width: 700px !important;
     }
 }
+
+
+/* =========================================================
+   DEFINITIVE AVAILABILITY TABLE COLUMN ALIGNMENT
+   Keep TIME and each weekday on one exact column grid.
+   ========================================================= */
+.availability-page .availability-table {
+    width: 100% !important;
+    min-width: 870px !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+}
+
+.availability-page .availability-table col.availability-time-col {
+    width: 20% !important;
+}
+
+.availability-page .availability-table col.availability-day-col {
+    width: 16% !important;
+}
+
+.availability-page .availability-table th,
+.availability-page .availability-table td {
+    box-sizing: border-box !important;
+}
+
+.availability-page .availability-table th:first-child,
+.availability-page .availability-table td:first-child {
+    width: 20% !important;
+}
+
+.availability-page .availability-table th:not(:first-child),
+.availability-page .availability-table td:not(:first-child) {
+    width: 16% !important;
+}
+
+.availability-page .availability-table th,
+.availability-page .availability-table td {
+    border-right: 1px solid rgba(0, 216, 192, 0.10) !important;
+}
+
+.availability-page .availability-table th:last-child,
+.availability-page .availability-table td:last-child {
+    border-right: none !important;
+}
+
+/* =========================================================
+   EDITOR TABLE ALIGNMENT
+   Header and scrolling body use the same grid and reserve
+   the scrollbar width so vertical borders remain identical.
+   ========================================================= */
+.availability-modal .editor-header-container {
+    box-sizing: border-box !important;
+    padding-right: 7px !important;
+    width: calc(100% - 58px) !important;
+}
+
+.availability-modal .editor-container {
+    box-sizing: border-box !important;
+    padding-left: 29px !important;
+    padding-right: 29px !important;
+    scrollbar-gutter: stable !important;
+}
+
+.availability-modal .editor-header-container .editor-table,
+.availability-modal .editor-container .editor-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+}
+
+.availability-modal .editor-header-container .editor-table col.editor-time-col,
+.availability-modal .editor-container .editor-table col.editor-time-col {
+    width: 20% !important;
+}
+
+.availability-modal .editor-header-container .editor-table col:not(.editor-time-col),
+.availability-modal .editor-container .editor-table col:not(.editor-time-col) {
+    width: 16% !important;
+}
+
+.availability-modal .editor-header-container th:first-child,
+.availability-modal .editor-container td:first-child {
+    width: 20% !important;
+    max-width: 20% !important;
+}
+
+.availability-modal .editor-header-container th:not(:first-child),
+.availability-modal .editor-container td:not(:first-child) {
+    width: 16% !important;
+    max-width: 16% !important;
+}
+
+@media (max-width: 700px) {
+    .availability-modal .editor-header-container {
+        width: calc(100% - 32px) !important;
+        margin-left: 16px !important;
+        margin-right: 16px !important;
+        padding-right: 7px !important;
+    }
+
+    .availability-modal .editor-container {
+        width: calc(100% - 32px) !important;
+        margin-left: 16px !important;
+        margin-right: 16px !important;
+        padding-left: 0 !important;
+        padding-right: 7px !important;
+        scrollbar-gutter: stable !important;
+    }
+}
+
+@media (max-width: 380px) {
+    .availability-modal .editor-header-container {
+        width: calc(100% - 28px) !important;
+        margin-left: 14px !important;
+        margin-right: 14px !important;
+    }
+
+    .availability-modal .editor-container {
+        width: calc(100% - 28px) !important;
+        margin-left: 14px !important;
+        margin-right: 14px !important;
+    }
+}
