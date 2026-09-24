@@ -512,6 +512,15 @@
 
 
                 /* =================================================
+                   GOOGLE APPS SCRIPT WEB APP
+                ================================================= */
+
+                const WEB_APP_URL =
+                    "YOUR_WEB_APP_URL";
+
+
+
+                /* =================================================
                    BACKGROUND PRELOAD
                 ================================================= */
 
@@ -723,7 +732,7 @@
 
                 loginForm.addEventListener(
                     "submit",
-                    function (event) {
+                    async function (event) {
 
                         event.preventDefault();
 
@@ -754,74 +763,245 @@
                         }
 
 
-                        /*
-                            TEMPORARY LOGIN
-                        */
 
-                        const validUsername =
-                            "admin";
-
-                        const validPassword =
-                            "psabe123";
-
+                        /* =================================================
+                           CHECK WEB APP URL
+                        ================================================= */
 
                         if (
-                            enteredUsername ===
-                            validUsername &&
-
-                            enteredPassword ===
-                            validPassword
+                            WEB_APP_URL ===
+                            "YOUR_WEB_APP_URL"
                         ) {
 
+                            showMessage(
+                                "The Google Sheets login connection has not been configured yet.",
+                                "error"
+                            );
+
+                            return;
+
+                        }
+
+
+
+                        /* =================================================
+                           CONNECTING
+                        ================================================= */
+
+                        showMessage(
+                            "Connecting to the PSABE-PPG system...",
+                            "info"
+                        );
+
+
+
+                        try {
+
+
+                            /* =================================================
+                               SEND LOGIN REQUEST
+                            ================================================= */
+
+                            const response =
+                                await fetch(
+                                    WEB_APP_URL,
+                                    {
+
+                                        method:
+                                            "POST",
+
+                                        headers: {
+
+                                            "Content-Type":
+                                                "text/plain;charset=utf-8"
+
+                                        },
+
+                                        body:
+                                            JSON.stringify({
+
+                                                action:
+                                                    "login",
+
+                                                data: {
+
+                                                    username:
+                                                        enteredUsername,
+
+                                                    password:
+                                                        enteredPassword,
+
+                                                    position:
+                                                        selectedPosition
+
+                                                }
+
+                                            })
+
+                                    }
+                                );
+
+
+
+                            /* =================================================
+                               READ GOOGLE APPS SCRIPT RESPONSE
+                            ================================================= */
+
+                            const result =
+                                await response.json();
+
+
+                            console.log(
+                                "PSABE-PPG login response:",
+                                result
+                            );
+
+
+
+                            /* =================================================
+                               SUCCESSFUL LOGIN
+                            ================================================= */
 
                             if (
-                                rememberMe.checked
+                                result &&
+                                result.success
                             ) {
 
-                                localStorage.setItem(
-                                    "psabeRememberedUsername",
-                                    enteredUsername
+
+                                /*
+                                    Save authenticated officer
+                                    information for the dashboard.
+                                */
+
+                                sessionStorage.setItem(
+                                    "psabeLoggedIn",
+                                    "true"
                                 );
 
-                                localStorage.setItem(
-                                    "psabeRememberedPosition",
-                                    selectedPosition
+
+                                sessionStorage.setItem(
+                                    "psabeUsername",
+                                    result.user.username
                                 );
 
-                            } else {
 
-                                localStorage.removeItem(
-                                    "psabeRememberedUsername"
+                                sessionStorage.setItem(
+                                    "psabeName",
+                                    result.user.name
                                 );
 
-                                localStorage.removeItem(
-                                    "psabeRememberedPosition"
+
+                                sessionStorage.setItem(
+                                    "psabePosition",
+                                    result.user.position
+                                );
+
+
+                                sessionStorage.setItem(
+                                    "psabeStatus",
+                                    result.user.status
+                                );
+
+
+
+                                /*
+                                    Remember username and position
+                                    only when Remember Me is checked.
+
+                                    The password is NEVER stored.
+                                */
+
+                                if (
+                                    rememberMe.checked
+                                ) {
+
+                                    localStorage.setItem(
+                                        "psabeRememberedUsername",
+                                        enteredUsername
+                                    );
+
+                                    localStorage.setItem(
+                                        "psabeRememberedPosition",
+                                        selectedPosition
+                                    );
+
+                                } else {
+
+                                    localStorage.removeItem(
+                                        "psabeRememberedUsername"
+                                    );
+
+                                    localStorage.removeItem(
+                                        "psabeRememberedPosition"
+                                    );
+
+                                }
+
+
+
+                                /* =================================================
+                                   SUCCESS MESSAGE
+                                ================================================== */
+
+                                showMessage(
+                                    "Login successful. Opening management system...",
+                                    "success"
+                                );
+
+
+
+                                /* =================================================
+                                   OPEN DASHBOARD
+                                ================================================== */
+
+                                setTimeout(
+                                    function () {
+
+                                        window.location.href =
+                                            "dashboard.html";
+
+                                    },
+                                    900
+                                );
+
+
+                            }
+
+
+                            /* =================================================
+                               FAILED LOGIN
+                            ================================================= */
+
+                            else {
+
+                                showMessage(
+                                    result &&
+                                    result.message
+                                        ? result.message
+                                        : "Incorrect username or password.",
+                                    "error"
                                 );
 
                             }
 
 
-                            showMessage(
-                                "Login successful. Opening management system...",
-                                "success"
+                        }
+
+
+                        /* =================================================
+                           CONNECTION ERROR
+                        ================================================= */
+
+                        catch (error) {
+
+                            console.error(
+                                "Login connection error:",
+                                error
                             );
 
 
-                            setTimeout(
-                                function () {
-
-                                    window.location.href =
-                                        "dashboard.html";
-
-                                },
-                                900
-                            );
-
-
-                        } else {
-
                             showMessage(
-                                "Incorrect username or password.",
+                                "Unable to connect to the PSABE-PPG Management System.",
                                 "error"
                             );
 
