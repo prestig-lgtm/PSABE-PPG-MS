@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -14,16 +15,9 @@
         content="#002d24"
     >
 
-    <title>
-        PSABE-PPG CSU Chapter Management System
-    </title>
+    <title>PSABE-PPG CSU Chapter Management System</title>
 
-    <!--
-        PRELOAD THE BACKGROUND FIRST
-
-        This tells the browser to prioritize the background
-        image before displaying the loading branding.
-    -->
+    <!-- Preload background BEFORE the loading screen appears -->
     <link
         rel="preload"
         as="image"
@@ -34,10 +28,23 @@
         rel="stylesheet"
         href="style.css"
     >
+
 </head>
 
 
-<body>
+<body class="loading-active">
+
+
+    <!-- =====================================================
+         FIXED BACKGROUND
+    ====================================================== -->
+
+    <div
+        id="backgroundLayer"
+        class="background-layer"
+    ></div>
+
+
 
     <!-- =====================================================
          LOADING SCREEN
@@ -107,7 +114,7 @@
         <section class="login-card">
 
 
-            <!-- LOGIN HEADER -->
+            <!-- HEADER -->
 
             <div class="login-header">
 
@@ -124,7 +131,7 @@
 
 
 
-            <!-- LOGIN FORM -->
+            <!-- FORM -->
 
             <form
                 id="loginForm"
@@ -249,9 +256,7 @@
 
                 <!-- POSITION -->
 
-                <div
-                    class="input-group position-group"
-                >
+                <div class="input-group position-group">
 
                     <div class="input-icon">
 
@@ -338,10 +343,7 @@
                     </select>
 
 
-                    <div
-                        class="select-arrow"
-                        aria-hidden="true"
-                    >
+                    <div class="select-arrow">
 
                         <svg
                             viewBox="0 0 24 24"
@@ -363,9 +365,6 @@
 
                 <div class="form-options">
 
-
-                    <!-- REMEMBER ME -->
-
                     <label class="remember-option">
 
                         <input
@@ -373,9 +372,7 @@
                             id="rememberMe"
                         >
 
-                        <span
-                            class="custom-checkbox"
-                        ></span>
+                        <span class="custom-checkbox"></span>
 
                         <span class="remember-text">
                             Remember me
@@ -383,9 +380,6 @@
 
                     </label>
 
-
-
-                    <!-- FORGOT PASSWORD -->
 
                     <button
                         type="button"
@@ -414,7 +408,7 @@
 
 
 
-                <!-- AUTHORIZED MESSAGE -->
+                <!-- AUTHORIZED -->
 
                 <div class="authorized-message">
 
@@ -429,8 +423,7 @@
                 </div>
 
 
-
-                <!-- LOGIN MESSAGE -->
+                <!-- MESSAGE -->
 
                 <div
                     id="loginMessage"
@@ -456,10 +449,6 @@
             function () {
 
 
-                /* =================================================
-                   ELEMENTS
-                ================================================= */
-
                 const loadingScreen =
                     document.getElementById(
                         "loadingScreen"
@@ -468,6 +457,11 @@
                 const loadingBrand =
                     document.getElementById(
                         "loadingBrand"
+                    );
+
+                const backgroundLayer =
+                    document.getElementById(
+                        "backgroundLayer"
                     );
 
                 const loginPage =
@@ -516,16 +510,14 @@
                     );
 
 
-                /* =================================================
-                   BACKGROUND PRELOADING
 
-                   The logo and loading animation remain hidden
-                   until management-background.png is completely
-                   loaded.
+                /* =================================================
+                   BACKGROUND PRELOAD
                 ================================================= */
 
                 const backgroundImage =
                     new Image();
+
 
                 backgroundImage.src =
                     "assets/management-background.png";
@@ -534,17 +526,18 @@
                 function startLoadingAnimation() {
 
                     /*
-                        Tell CSS that the background is ready.
+                        First make the background visible.
+                        The logo does NOT appear yet.
                     */
 
-                    loadingScreen.classList.add(
-                        "background-ready"
+                    backgroundLayer.classList.add(
+                        "background-loaded"
                     );
 
 
                     /*
-                        Small delay so the browser can paint
-                        the background before the logo appears.
+                        Wait for the browser to paint the
+                        background before showing the logo.
                     */
 
                     requestAnimationFrame(
@@ -565,7 +558,7 @@
 
 
                     /*
-                        Loading duration.
+                        Loading screen duration
                     */
 
                     setTimeout(
@@ -576,15 +569,15 @@
                             );
 
 
-                            /*
-                                Give the fade-out time to finish.
-                            */
-
                             setTimeout(
                                 function () {
 
                                     loadingScreen.style.display =
                                         "none";
+
+                                    document.body.classList.remove(
+                                        "loading-active"
+                                    );
 
                                     loginPage.classList.add(
                                         "login-visible"
@@ -601,11 +594,9 @@
                 }
 
 
-                /*
-                    If the image is already cached,
-                    complete immediately.
 
-                    Otherwise wait for onload.
+                /*
+                    Wait for the background to load.
                 */
 
                 if (
@@ -618,24 +609,10 @@
                 } else {
 
                     backgroundImage.onload =
-                        function () {
-
-                            startLoadingAnimation();
-
-                        };
-
-
-                    /*
-                        Fallback in case the browser
-                        fails to report the event.
-                    */
+                        startLoadingAnimation;
 
                     backgroundImage.onerror =
-                        function () {
-
-                            startLoadingAnimation();
-
-                        };
+                        startLoadingAnimation;
 
                 }
 
@@ -677,7 +654,7 @@
 
 
                 /* =================================================
-                   PASSWORD SHOW / HIDE
+                   PASSWORD TOGGLE
                 ================================================= */
 
                 togglePassword.addEventListener(
@@ -779,12 +756,6 @@
 
                         /*
                             TEMPORARY LOGIN
-
-                            Username:
-                            admin
-
-                            Password:
-                            psabe123
                         */
 
                         const validUsername =
