@@ -4675,9 +4675,11 @@ body {
         100%
     );
 
+    height: min(90vh, 760px);
+
     max-height: 90vh;
 
-    overflow-y: auto;
+    overflow: hidden;
 
     background:
         rgba(0, 50, 41, 0.98);
@@ -4768,7 +4770,12 @@ body {
 }.modal-close svg{
     width: 19px;
     height: 19px;
-}.modal-description{
+}.modal-header,
+.modal-description,
+.modal-footer{
+    flex-shrink: 0;
+}
+.modal-description{
     padding:
         19px 29px;
 
@@ -4781,7 +4788,11 @@ body {
 }.editor-container{
     overflow: auto;
 
-    max-height: 430px;
+    max-height: none;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
 
     padding:
         0 29px;
@@ -4794,6 +4805,10 @@ body {
 
     border-collapse: collapse;
 }.editor-table th{
+    position: sticky;
+    top: 0;
+    z-index: 5;
+
     height: 43px;
 
     background:
@@ -5058,6 +5073,7 @@ body {
 
 
     .availability-modal{
+        height: 94vh;
         max-height: 94vh;
 
         border-radius: 14px;
@@ -5143,3 +5159,57 @@ body {
 
 .modal-overlay.show + * {}
 body.availability-modal-open { overflow: hidden; }
+
+/* =========================================================
+   AVAILABILITY EDITOR SCROLLBAR
+   Matches the centralized Officer Availability table
+   ========================================================= */
+.availability-modal{
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.editor-container{
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    overflow: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 216, 192, 0.35) transparent;
+    overscroll-behavior: contain;
+}
+
+.editor-container::-webkit-scrollbar{
+    width: 7px;
+    height: 7px;
+}
+
+.editor-container::-webkit-scrollbar-track{
+    background: transparent;
+}
+
+.editor-container::-webkit-scrollbar-thumb{
+    background: rgba(0, 216, 192, 0.30);
+    border-radius: 10px;
+}
+
+.editor-container::-webkit-scrollbar-thumb:hover{
+    background: rgba(0, 216, 192, 0.45);
+}
+
+.editor-container::-webkit-scrollbar-corner{
+    background: transparent;
+}
+
+@media (max-width: 600px){
+    .editor-container{
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 216, 192, 0.35) transparent;
+    }
+
+    .editor-container::-webkit-scrollbar{
+        width: 6px;
+        height: 6px;
+    }
+}
