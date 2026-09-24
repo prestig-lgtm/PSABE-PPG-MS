@@ -5,22 +5,17 @@
 
     <meta charset="UTF-8">
 
+    <title>
+        PSABE-PPG Management System
+    </title>
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
 
-    <meta
-        name="theme-color"
-        content="#002d24"
-    >
 
-    <title>
-        PSABE-PPG Management System
-    </title>
-
-
-    <!-- Roboto Condensed -->
+    <!-- Roboto Condensed Font -->
 
     <link
         rel="preconnect"
@@ -39,7 +34,7 @@
     >
 
 
-    <!-- Existing login styling -->
+    <!-- Your existing CSS -->
 
     <link
         rel="stylesheet"
@@ -60,18 +55,15 @@
 
 
 
-    <!-- =====================================================
-         PAGE WRAPPER
-    ====================================================== -->
-
     <div class="page-wrapper">
 
 
         <!-- =================================================
-             BRANDING
+             HEADER / BRANDING
         ================================================== -->
 
         <header class="branding">
+
 
             <img
                 src="assets/psabe-ppg-logo.png"
@@ -102,6 +94,7 @@
                 Caraga State University Chapter
 
             </p>
+
 
         </header>
 
@@ -145,6 +138,7 @@
 
                     <div class="input-field">
 
+
                         <i class="icon user">
 
                             <svg
@@ -172,11 +166,10 @@
                         <input
                             type="text"
                             id="username"
-                            name="username"
                             placeholder="Username or Email"
-                            autocomplete="username"
                             required
                         >
+
 
                     </div>
 
@@ -189,6 +182,7 @@
                 <div class="field">
 
                     <div class="input-field">
+
 
                         <i class="icon lock">
 
@@ -225,9 +219,7 @@
                         <input
                             type="password"
                             id="password"
-                            name="password"
                             placeholder="Password"
-                            autocomplete="current-password"
                             required
                         >
 
@@ -236,7 +228,6 @@
                             type="button"
                             class="toggle-password"
                             id="togglePassword"
-                            aria-label="Show password"
                         >
 
                             <svg
@@ -261,6 +252,7 @@
 
                         </button>
 
+
                     </div>
 
                 </div>
@@ -272,6 +264,7 @@
                 <div class="field">
 
                     <div class="input-field position-box">
+
 
                         <i class="icon position">
 
@@ -292,14 +285,14 @@
                                     d="M3.5 20c.5-3.5 2.5-5.5 5.5-5.5s5 2 5.5 5.5"
                                 />
 
-                                <path
-                                    d="M15 11c2.8 0 5 1.8 5.5 5"
-                                />
-
                                 <circle
                                     cx="17"
-                                    cy="7"
-                                    r="2"
+                                    cy="9"
+                                    r="2.5"
+                                />
+
+                                <path
+                                    d="M15 14.5c3.5-.2 5.2 1.7 5.5 4.5"
                                 />
 
                             </svg>
@@ -309,47 +302,62 @@
 
                         <select
                             id="position"
-                            name="position"
+                            required
                         >
 
                             <option
                                 value=""
+                                disabled
                                 selected
                             >
-                                Select Position
+                                Select your position
                             </option>
+
 
                             <option value="President">
                                 President
                             </option>
 
+
                             <option value="Vice President">
                                 Vice President
                             </option>
+
 
                             <option value="Secretary">
                                 Secretary
                             </option>
 
+
                             <option value="Treasurer">
                                 Treasurer
                             </option>
+
 
                             <option value="Auditor">
                                 Auditor
                             </option>
 
-                            <option value="Public Information Officer">
+
+                            <option value="PIO">
                                 Public Information Officer
                             </option>
 
-                            <option value="Business Manager">
-                                Business Manager
+
+                            <option value="Events Head">
+                                Events Head
                             </option>
 
-                            <option value="Representative">
-                                Representative
+
+                            <option value="Membership Head">
+                                Membership Head
                             </option>
+
+
+                            <option value="Academic Affairs Head">
+                                Academic Affairs Head
+                            </option>
+
 
                         </select>
 
@@ -371,6 +379,7 @@
 
                         </span>
 
+
                     </div>
 
                 </div>
@@ -384,18 +393,23 @@
 
                     <label class="remember-me">
 
+
                         <input
                             type="checkbox"
                             id="rememberMe"
                         >
 
+
                         <span class="custom-checkbox"></span>
+
 
                         <span>
                             Remember me
                         </span>
 
+
                     </label>
+
 
 
                     <button
@@ -416,16 +430,16 @@
                 <button
                     type="submit"
                     class="signin-btn"
-                    id="signInButton"
+                    id="signinButton"
                 >
 
-                    <span id="signInText">
+                    <span id="signinText">
                         Sign In
                     </span>
 
                     <span
                         class="arrow"
-                        id="signInArrow"
+                        id="signinArrow"
                     >
                         →
                     </span>
@@ -460,6 +474,7 @@
 
             </form>
 
+
         </section>
 
 
@@ -479,34 +494,17 @@
         ================================================== */
 
         const WEB_APP_URL =
-            "https://script.google.com/macros/s/AKfycbzTZORNDMsHLxoPeOLNAHurKurC14whoFKxT10RVPyCxP-z9H03slRLTUyhVx7tkyMW/exec";
+            "YOUR_WEB_APP_URL";
+
 
 
         /* =================================================
-           ELEMENTS
+           PASSWORD TOGGLE
         ================================================== */
 
-        const loginForm =
-            document.getElementById(
-                "loginForm"
-            );
-
-
-        const usernameInput =
-            document.getElementById(
-                "username"
-            );
-
-
-        const passwordInput =
+        const password =
             document.getElementById(
                 "password"
-            );
-
-
-        const positionInput =
-            document.getElementById(
-                "position"
             );
 
 
@@ -522,50 +520,17 @@
             );
 
 
-        const loginMessage =
-            document.getElementById(
-                "loginMessage"
-            );
-
-
-        const signInButton =
-            document.getElementById(
-                "signInButton"
-            );
-
-
-        const signInText =
-            document.getElementById(
-                "signInText"
-            );
-
-
-        const signInArrow =
-            document.getElementById(
-                "signInArrow"
-            );
-
-
-        const rememberMe =
-            document.getElementById(
-                "rememberMe"
-            );
-
-
-        /* =================================================
-           PASSWORD VISIBILITY
-        ================================================== */
-
         togglePassword.addEventListener(
             "click",
-            function() {
+            () => {
+
 
                 if (
-                    passwordInput.type ===
+                    password.type ===
                     "password"
                 ) {
 
-                    passwordInput.type =
+                    password.type =
                         "text";
 
 
@@ -578,17 +543,11 @@
                         "active"
                     );
 
-
-                    togglePassword.setAttribute(
-                        "aria-label",
-                        "Hide password"
-                    );
-
                 }
 
                 else {
 
-                    passwordInput.type =
+                    password.type =
                         "password";
 
 
@@ -602,53 +561,8 @@
                         "active"
                     );
 
-
-                    togglePassword.setAttribute(
-                        "aria-label",
-                        "Show password"
-                    );
-
                 }
 
-            }
-        );
-
-
-
-        /* =================================================
-           REMEMBER ME
-        ================================================== */
-
-        const savedUsername =
-            localStorage.getItem(
-                "psabeRememberUsername"
-            );
-
-
-        if (savedUsername) {
-
-            usernameInput.value =
-                savedUsername;
-
-            rememberMe.checked =
-                true;
-
-        }
-
-
-        rememberMe.addEventListener(
-            "change",
-            function() {
-
-                if (
-                    !this.checked
-                ) {
-
-                    localStorage.removeItem(
-                        "psabeRememberUsername"
-                    );
-
-                }
 
             }
         );
@@ -659,6 +573,37 @@
            LOGIN FORM
         ================================================== */
 
+        const loginForm =
+            document.getElementById(
+                "loginForm"
+            );
+
+
+        const loginMessage =
+            document.getElementById(
+                "loginMessage"
+            );
+
+
+        const signinButton =
+            document.getElementById(
+                "signinButton"
+            );
+
+
+        const signinText =
+            document.getElementById(
+                "signinText"
+            );
+
+
+        const signinArrow =
+            document.getElementById(
+                "signinArrow"
+            );
+
+
+
         loginForm.addEventListener(
             "submit",
             async function(event) {
@@ -667,29 +612,42 @@
 
 
                 const username =
-                    usernameInput.value.trim();
+                    document
+                        .getElementById(
+                            "username"
+                        )
+                        .value
+                        .trim();
 
 
-                const password =
-                    passwordInput.value;
+                const passwordValue =
+                    document
+                        .getElementById(
+                            "password"
+                        )
+                        .value;
 
 
-                /*
-                   Position is intentionally NOT
-                   used for authentication.
+                const position =
+                    document
+                        .getElementById(
+                            "position"
+                        )
+                        .value;
 
-                   The correct position is retrieved
-                   automatically from the OFFICERS sheet.
-                */
 
+                /* -----------------------------------------
+                   BASIC VALIDATION
+                ----------------------------------------- */
 
                 if (
                     !username ||
-                    !password
+                    !passwordValue ||
+                    !position
                 ) {
 
                     showMessage(
-                        "Please enter your username and password.",
+                        "Please complete all required fields.",
                         "error"
                     );
 
@@ -698,8 +656,12 @@
                 }
 
 
+
+                /* -----------------------------------------
+                   CHECK WEB APP URL
+                ----------------------------------------- */
+
                 if (
-                    !WEB_APP_URL ||
                     WEB_APP_URL ===
                     "YOUR_WEB_APP_URL"
                 ) {
@@ -714,19 +676,36 @@
                 }
 
 
-                setLoading(
-                    true
-                );
+
+                /* -----------------------------------------
+                   LOADING
+                ----------------------------------------- */
+
+                signinButton.disabled =
+                    true;
+
+
+                signinText.textContent =
+                    "Signing In";
+
+
+                signinArrow.textContent =
+                    "⋯";
 
 
                 showMessage(
-                    "Signing in...",
+                    "Connecting to the PSABE-PPG system...",
                     "success"
                 );
 
 
+
                 try {
 
+
+                    /* -------------------------------------
+                       SEND LOGIN REQUEST
+                    ------------------------------------- */
 
                     const response =
                         await fetch(
@@ -755,7 +734,7 @@
                                                 username,
 
                                             password:
-                                                password
+                                                passwordValue
 
                                         }
 
@@ -765,15 +744,26 @@
                         );
 
 
+
+                    /* -------------------------------------
+                       READ RESPONSE
+                    ------------------------------------- */
+
                     const result =
                         await response.json();
 
 
+
                     console.log(
-                        "Login response:",
+                        "PSABE login response:",
                         result
                     );
 
+
+
+                    /* -------------------------------------
+                       SUCCESSFUL LOGIN
+                    ------------------------------------- */
 
                     if (
                         result &&
@@ -782,32 +772,7 @@
 
 
                         /*
-                           Save username only if
-                           Remember Me is checked.
-                        */
-
-                        if (
-                            rememberMe.checked
-                        ) {
-
-                            localStorage.setItem(
-                                "psabeRememberUsername",
-                                username
-                            );
-
-                        }
-
-                        else {
-
-                            localStorage.removeItem(
-                                "psabeRememberUsername"
-                            );
-
-                        }
-
-
-                        /*
-                           Store current logged-in
+                           Save the authenticated
                            officer information.
                         */
 
@@ -841,20 +806,52 @@
                         );
 
 
+
+                        /*
+                           Remember username only.
+                           The password is NOT saved.
+                        */
+
+                        const rememberMe =
+                            document.getElementById(
+                                "rememberMe"
+                            );
+
+
+                        if (
+                            rememberMe.checked
+                        ) {
+
+                            localStorage.setItem(
+                                "psabeRememberUsername",
+                                username
+                            );
+
+                        }
+
+                        else {
+
+                            localStorage.removeItem(
+                                "psabeRememberUsername"
+                            );
+
+                        }
+
+
+
                         showMessage(
-                            "Login successful. Opening Management System...",
+                            "Login successful.",
                             "success"
                         );
 
 
+
                         /*
-                           Small delay so the
-                           success message can
-                           appear before redirect.
+                           Open dashboard.
                         */
 
                         setTimeout(
-                            function() {
+                            () => {
 
                                 window.location.href =
                                     "dashboard.html";
@@ -869,9 +866,10 @@
                     }
 
 
-                    /*
-                       Failed login
-                    */
+
+                    /* -------------------------------------
+                       FAILED LOGIN
+                    ------------------------------------- */
 
                     showMessage(
                         result &&
@@ -882,13 +880,13 @@
                     );
 
 
-                    setLoading(
-                        false
-                    );
+                    resetSignInButton();
+
 
                 }
 
                 catch (error) {
+
 
                     console.error(
                         "Login error:",
@@ -897,16 +895,15 @@
 
 
                     showMessage(
-                        "Unable to connect to the PSABE-PPG Management System. Please check the system connection.",
+                        "Unable to connect to the PSABE-PPG Management System.",
                         "error"
                     );
 
 
-                    setLoading(
-                        false
-                    );
+                    resetSignInButton();
 
                 }
+
 
             }
         );
@@ -936,7 +933,40 @@
 
 
         /* =================================================
-           MESSAGE
+           REMEMBERED USERNAME
+        ================================================== */
+
+        const rememberedUsername =
+            localStorage.getItem(
+                "psabeRememberUsername"
+            );
+
+
+        if (
+            rememberedUsername
+        ) {
+
+            document
+                .getElementById(
+                    "username"
+                )
+                .value =
+                rememberedUsername;
+
+
+            document
+                .getElementById(
+                    "rememberMe"
+                )
+                .checked =
+                true;
+
+        }
+
+
+
+        /* =================================================
+           MESSAGE FUNCTION
         ================================================== */
 
         function showMessage(
@@ -957,38 +987,21 @@
 
 
         /* =================================================
-           LOADING STATE
+           RESET SIGN IN BUTTON
         ================================================== */
 
-        function setLoading(
-            loading
-        ) {
+        function resetSignInButton() {
 
-            signInButton.disabled =
-                loading;
+            signinButton.disabled =
+                false;
 
 
-            if (loading) {
-
-                signInText.textContent =
-                    "Signing In";
+            signinText.textContent =
+                "Sign In";
 
 
-                signInArrow.textContent =
-                    "⋯";
-
-            }
-
-            else {
-
-                signInText.textContent =
-                    "Sign In";
-
-
-                signInArrow.textContent =
-                    "→";
-
-            }
+            signinArrow.textContent =
+                "→";
 
         }
 
@@ -998,4 +1011,4 @@
 
 </body>
 
-</html>f
+</html>
