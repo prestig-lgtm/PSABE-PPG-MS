@@ -3224,11 +3224,23 @@
 (function () {
 
     /* =====================================================
+       LOGIN SESSION
+    ===================================================== */
+
+    if (sessionStorage.getItem("psabeLoggedIn") !== "true") {
+        window.location.replace("index.html");
+        return;
+    }
+
+
+    /* =====================================================
        GOOGLE APPS SCRIPT SETTINGS
     ===================================================== */
 
-    const API_URL = "PASTE_YOUR_WEB_APP_URL_HERE";
-    const CURRENT_USERNAME = "Mac";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzTZORNDMsHLxoPeOLNAHurKurC14whoFKxT10RVPyCxP-z9H03slRLTUyhVx7tkyMW/exec";
+
+    const CURRENT_USERNAME =
+        sessionStorage.getItem("psabeUsername") || "Mac";
 
 
     /* =====================================================
@@ -3236,16 +3248,16 @@
     ===================================================== */
 
     const timeSlots = [
-        "7:00–8:00",
-        "8:00–9:00",
-        "9:00–10:00",
-        "10:00–11:00",
-        "11:00–12:00",
-        "12:00–1:00",
-        "1:00–2:00",
-        "3:00–4:00",
-        "4:00–5:00",
-        "5:00–6:00"
+        "7:00–8:00AM",
+        "8:00–9:00AM",
+        "9:00–10:00AM",
+        "10:00–11:00AM",
+        "11:00–12:00NN",
+        "12:00–1:00PM",
+        "1:00–2:00PM",
+        "3:00–4:00PM",
+        "4:00–5:00PM",
+        "5:00–6:00PM"
     ];
 
     const days = [
@@ -3266,9 +3278,15 @@
     let officersData = [];
     let currentOfficer = {
         Username: CURRENT_USERNAME,
-        Name: "MC RJ Escote",
-        Position: "Vice President",
-        Status: "Active"
+        Name:
+            sessionStorage.getItem("psabeName") ||
+            "MC RJ Escote",
+        Position:
+            sessionStorage.getItem("psabePosition") ||
+            "Vice President",
+        Status:
+            sessionStorage.getItem("psabeStatus") ||
+            "Active"
     };
 
     let myAvailability = {};
@@ -3293,7 +3311,7 @@
     function isApiConfigured() {
         return (
             API_URL &&
-            API_URL !== "PASTE_YOUR_WEB_APP_URL_HERE"
+            API_URL !== "https://script.google.com/macros/s/AKfycbzTZORNDMsHLxoPeOLNAHurKurC14whoFKxT10RVPyCxP-z9H03slRLTUyhVx7tkyMW/exec"
         );
     }
 
@@ -3386,6 +3404,22 @@
             .forEach(function (element) {
                 element.textContent = initials || "MC";
             });
+
+
+        const greetingName =
+            document.querySelector(
+                ".welcome-section h1 span"
+            );
+
+        if (greetingName) {
+            const firstName =
+                name.split(/\s+/).filter(Boolean)[0] || "MC RJ";
+
+            greetingName.textContent =
+                firstName === "MC"
+                    ? name.split(/\s+/).slice(0, 2).join(" ")
+                    : firstName;
+        }
 
 
         const modal =
