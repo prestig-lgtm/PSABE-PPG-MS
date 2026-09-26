@@ -46,6 +46,10 @@
 
     <script src="https://unpkg.com/lucide@latest"></script>
 
+
+<style>
+.tasks-page-header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:28px}.tasks-page-header h1{margin:6px 0 8px}.tasks-page-header p{margin:0;max-width:720px}.steering-control-group{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.steering-badge{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border:1px solid rgba(202,166,84,.45);border-radius:999px;color:#e3c878;background:rgba(202,166,84,.08);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.steering-badge::before{content:"";width:7px;height:7px;border-radius:50%;background:#d8b95f;box-shadow:0 0 0 3px rgba(216,185,95,.12)}.steering-action-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid rgba(202,166,84,.55);background:#caa654;color:#173f35;border-radius:10px;padding:12px 16px;font-size:12px;font-weight:900;letter-spacing:.04em;cursor:pointer;transition:.2s ease}.steering-action-button:hover{filter:brightness(1.06);transform:translateY(-1px)}.steering-action-button svg{width:16px;height:16px;stroke-width:2.4}.tasks-panel{padding:0;overflow:hidden}.tasks-toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 22px;border-bottom:1px solid rgba(255,255,255,.08)}.tasks-toolbar-title{display:flex;align-items:center;gap:10px}.tasks-toolbar-title span{font-size:11px;letter-spacing:.1em;color:rgba(255,255,255,.58);font-weight:800}.tasks-toolbar-title strong{font-size:14px;color:#fff}.tasks-list{display:grid;gap:0}.task-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:18px;align-items:center;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.06)}.task-row:last-child{border-bottom:0}.task-main{min-width:0}.task-main h3{margin:0 0 6px;color:#fff;font-size:15px}.task-main p{margin:0;color:rgba(255,255,255,.58);font-size:12px;line-height:1.55}.task-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}.task-chip{display:inline-flex;align-items:center;padding:5px 8px;border-radius:6px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.68);font-size:10px;font-weight:800;letter-spacing:.04em}.task-status{font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:7px 9px;border-radius:7px;white-space:nowrap}.task-status.pending{color:#e3c878;background:rgba(202,166,84,.12);border:1px solid rgba(202,166,84,.25)}.task-status.in-progress{color:#9ed2c1;background:rgba(73,139,115,.14);border:1px solid rgba(73,139,115,.25)}.task-status.completed{color:#a9d9b2;background:rgba(82,150,94,.14);border:1px solid rgba(82,150,94,.25)}.task-status.overdue{color:#e59b9b;background:rgba(164,68,68,.14);border:1px solid rgba(164,68,68,.25)}.tasks-empty{padding:48px 24px;text-align:center;color:rgba(255,255,255,.48)}.tasks-empty strong{display:block;color:#fff;margin-bottom:7px;font-size:14px}.tasks-empty span{font-size:12px}.task-modal-overlay{position:fixed;inset:0;background:rgba(4,20,17,.78);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;padding:20px;z-index:1000}.task-modal-overlay.show{display:flex}.task-modal{width:min(620px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#123f35;border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:0 20px 70px rgba(0,0,0,.35)}.task-modal-header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding:22px;border-bottom:1px solid rgba(255,255,255,.08)}.task-modal-header .modal-label{color:#caa654;font-size:10px;font-weight:900;letter-spacing:.12em}.task-modal-header h2{margin:5px 0 4px;color:#fff;font-size:21px}.task-modal-header p{margin:0;color:rgba(255,255,255,.58);font-size:12px}.task-modal-close{width:40px;height:40px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#fff;border-radius:9px;cursor:pointer;display:grid;place-items:center}.task-modal-close svg{width:18px;height:18px}.task-form{padding:22px;display:grid;gap:16px}.task-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.task-field{display:grid;gap:7px}.task-field.full{grid-column:1/-1}.task-field label{font-size:10px;color:rgba(255,255,255,.62);font-weight:900;letter-spacing:.08em;text-transform:uppercase}.task-field input,.task-field select,.task-field textarea{width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.13);background:#0d342c;color:#fff;border-radius:9px;padding:12px 13px;font:inherit;font-size:13px;outline:none}.task-field textarea{min-height:105px;resize:vertical}.task-field input:focus,.task-field select:focus,.task-field textarea:focus{border-color:rgba(202,166,84,.7);box-shadow:0 0 0 3px rgba(202,166,84,.08)}.task-form-status{min-height:18px;color:#e3c878;font-size:11px}.task-form-actions{display:flex;justify-content:flex-end;gap:10px;padding-top:4px}.task-cancel-button{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#fff;border-radius:9px;padding:11px 15px;font-size:11px;font-weight:900;cursor:pointer}@media(max-width:720px){.tasks-page-header{align-items:flex-start;flex-direction:column}.task-row{grid-template-columns:1fr;gap:10px}.task-form-grid{grid-template-columns:1fr}.task-field.full{grid-column:auto}.tasks-toolbar{align-items:flex-start;flex-direction:column}}
+</style>
 </head>
 
 
@@ -1631,7 +1635,36 @@
             </div>
 
 
-                <!-- =================================================
+    
+            <!-- =================================================
+                 MY TASKS PAGE
+            ================================================== -->
+            <div id="tasksPage" class="page-section">
+                <div class="tasks-page-header">
+                    <div>
+                        <p class="eyebrow">WORK MANAGEMENT</p>
+                        <h1>My Tasks</h1>
+                        <p>View your assigned tasks and monitor task progress.</p>
+                    </div>
+                    <div class="steering-control-group" id="steeringTaskControls" style="display:none;">
+                        <span class="steering-badge">Steering Access</span>
+                        <button type="button" class="steering-action-button" id="openAssignTaskButton">
+                            <i data-lucide="plus"></i> ASSIGN TASK
+                        </button>
+                    </div>
+                </div>
+                <section class="dashboard-panel tasks-panel">
+                    <div class="tasks-toolbar">
+                        <div class="tasks-toolbar-title"><span id="tasksScopeLabel">MY TASKS</span><strong id="tasksCountLabel">0</strong></div>
+                        <button type="button" class="text-button" id="refreshTasksButton">Refresh</button>
+                    </div>
+                    <div class="tasks-list" id="tasksList">
+                        <div class="tasks-empty"><strong>Loading tasks...</strong><span>Please wait while your task list is loaded.</span></div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- =================================================
                  PLACEHOLDER PAGE
             ================================================== -->
 
@@ -1671,6 +1704,32 @@
     </main>
 
 
+
+
+<!-- STEERING ASSIGN TASK MODAL -->
+<div class="task-modal-overlay" id="assignTaskModal">
+    <div class="task-modal" role="dialog" aria-modal="true" aria-labelledby="assignTaskTitle">
+        <div class="task-modal-header">
+            <div><div class="modal-label">STEERING CONTROL</div><h2 id="assignTaskTitle">Assign Task</h2><p>Create and assign a task to an active officer.</p></div>
+            <button type="button" class="task-modal-close" id="closeAssignTaskButton" aria-label="Close"><i data-lucide="x"></i></button>
+        </div>
+        <form class="task-form" id="assignTaskForm">
+            <div class="task-form-grid">
+                <div class="task-field full"><label for="taskTitleInput">Task Title</label><input id="taskTitleInput" type="text" maxlength="120" required placeholder="Enter task title"></div>
+                <div class="task-field full"><label for="taskDescriptionInput">Description</label><textarea id="taskDescriptionInput" maxlength="1000" placeholder="Describe the task"></textarea></div>
+                <div class="task-field"><label for="taskAssignedToInput">Assign To</label><select id="taskAssignedToInput" required><option value="">Select officer</option></select></div>
+                <div class="task-field"><label for="taskDueDateInput">Due Date</label><input id="taskDueDateInput" type="date" required></div>
+                <div class="task-field"><label for="taskPriorityInput">Priority</label><select id="taskPriorityInput"><option value="Normal">Normal</option><option value="High">High</option><option value="Urgent">Urgent</option></select></div>
+                <div class="task-field"><label for="taskStatusInput">Status</label><select id="taskStatusInput"><option value="Pending">Pending</option><option value="In Progress">In Progress</option></select></div>
+            </div>
+            <div class="task-form-status" id="taskFormStatus" aria-live="polite"></div>
+            <div class="task-form-actions">
+                <button type="button" class="task-cancel-button" id="cancelAssignTaskButton">CANCEL</button>
+                <button type="submit" class="steering-action-button" id="saveAssignedTaskButton"><i data-lucide="send"></i> ASSIGN TASK</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <!-- AVAILABILITY MODAL -->
 <div
@@ -2085,6 +2144,12 @@
                     );
 
 
+                const tasksPage =
+                    document.getElementById(
+                        "tasksPage"
+                    );
+
+
                 const placeholderPage =
                     document.getElementById(
                         "placeholderPage"
@@ -2155,6 +2220,12 @@
                         "active-page"
                     );
 
+                    if (tasksPage) {
+                        tasksPage.classList.remove(
+                            "active-page"
+                        );
+                    }
+
                     placeholderPage.classList.remove(
                         "active-page"
                     );
@@ -2206,6 +2277,27 @@
 
                         if (typeof window.renderAvailabilityTable === "function") {
                             window.renderAvailabilityTable();
+                        }
+
+                    }
+
+
+                    else if (
+                        page === "tasks"
+                    ) {
+
+                        if (tasksPage) {
+                            tasksPage.classList.add(
+                                "active-page"
+                            );
+                        }
+
+                        setActiveNavigation(
+                            "tasks"
+                        );
+
+                        if (typeof window.loadTasks === "function") {
+                            window.loadTasks();
                         }
 
                     }
@@ -3416,6 +3508,158 @@
     }
 
 
+
+    /* =====================================================
+       TASK MANAGEMENT
+       Steering-only assignment controls
+    ===================================================== */
+    let tasksData = [];
+
+    function escapeHtml(value) {
+        return String(value == null ? "" : value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+    function normalizeTaskStatus(value) { return normalize(value).toLowerCase().replace(/\s+/g, "-"); }
+    function initializeSteeringControls() {
+        const controls = document.getElementById("steeringTaskControls");
+        if (controls) controls.style.display = IS_STEERING ? "flex" : "none";
+        const scope = document.getElementById("tasksScopeLabel");
+        if (scope) scope.textContent = IS_STEERING ? "ALL TASKS" : "MY TASKS";
+    }
+    async function loadTasks() {
+        const list = document.getElementById("tasksList");
+        const count = document.getElementById("tasksCountLabel");
+        if (!list) return;
+        list.innerHTML = '<div class="tasks-empty"><strong>Loading tasks...</strong><span>Retrieving task records.</span></div>';
+        try {
+            const result = await fetchJson("getTasks");
+            tasksData = Array.isArray(result.data) ? result.data : [];
+            const visibleTasks = IS_STEERING ? tasksData : tasksData.filter(function(task) {
+                return normalizeUsername(getRecordValue(task, "Assigned To")) === normalizeUsername(CURRENT_USERNAME);
+            });
+            renderTasks(visibleTasks);
+        } catch (error) {
+            console.error("Task loading error:", error);
+            list.innerHTML = '<div class="tasks-empty"><strong>Unable to load tasks</strong><span>' + escapeHtml(error.message || "Please try again.") + '</span></div>';
+            if (count) count.textContent = "0";
+        }
+    }
+    function renderTasks(tasks) {
+        const list = document.getElementById("tasksList");
+        const count = document.getElementById("tasksCountLabel");
+        if (!list) return;
+        if (count) count.textContent = String(tasks.length);
+        if (!tasks.length) {
+            list.innerHTML = '<div class="tasks-empty"><strong>No tasks yet</strong><span>' + (IS_STEERING ? "No task records have been created." : "You currently have no assigned tasks.") + '</span></div>';
+            return;
+        }
+        list.innerHTML = tasks.map(function(task) {
+            const title = getRecordValue(task, "Task Title");
+            const description = getRecordValue(task, "Description");
+            const assignedTo = getRecordValue(task, "Assigned To");
+            const assignedBy = getRecordValue(task, "Assigned By");
+            const dueDate = getRecordValue(task, "Due Date");
+            const priority = getRecordValue(task, "Priority") || "Normal";
+            const status = getRecordValue(task, "Status") || "Pending";
+            const statusClass = normalizeTaskStatus(status);
+            return '<article class="task-row"><div class="task-main"><h3>' + escapeHtml(title || "Untitled task") + '</h3><p>' + escapeHtml(description || "No description provided.") + '</p><div class="task-meta">' + (IS_STEERING ? '<span class="task-chip">TO: ' + escapeHtml(assignedTo || "Unassigned") + '</span>' : '') + '<span class="task-chip">DUE: ' + escapeHtml(dueDate || "No due date") + '</span><span class="task-chip">PRIORITY: ' + escapeHtml(priority) + '</span>' + (IS_STEERING && assignedBy ? '<span class="task-chip">BY: ' + escapeHtml(assignedBy) + '</span>' : '') + '</div></div><span class="task-status ' + escapeHtml(statusClass) + '">' + escapeHtml(status) + '</span><span class="task-chip">' + escapeHtml(getRecordValue(task, "Task ID")) + '</span></article>';
+        }).join("");
+    }
+    async function loadTaskAssignees() {
+        const select = document.getElementById("taskAssignedToInput");
+        if (!select) return;
+        select.innerHTML = '<option value="">Loading officers...</option>';
+        try {
+            const result = await fetchJson("getOfficers");
+            officersData = Array.isArray(result.data) ? result.data : [];
+            const activeOfficers = officersData.filter(function(officer) {
+                const status = normalize(getRecordValue(officer, "Status"));
+                return !status || status.toLowerCase() === "active";
+            });
+            select.innerHTML = '<option value="">Select officer</option>';
+            activeOfficers.forEach(function(officer) {
+                const username = getRecordValue(officer, "Username");
+                const name = getRecordValue(officer, "Name");
+                const position = getRecordValue(officer, "Position");
+                if (!username) return;
+                const option = document.createElement("option");
+                option.value = username;
+                option.textContent = name + (position ? " · " + position : "");
+                option.dataset.name = name;
+                option.dataset.position = position;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error("Officer loading error:", error);
+            select.innerHTML = '<option value="">Unable to load officers</option>';
+        }
+    }
+    function openAssignTaskModal() {
+        if (!IS_STEERING) return;
+        const modal = document.getElementById("assignTaskModal");
+        const form = document.getElementById("assignTaskForm");
+        const status = document.getElementById("taskFormStatus");
+        const dueDate = document.getElementById("taskDueDateInput");
+        if (!modal) return;
+        if (form) form.reset();
+        if (status) status.textContent = "";
+        if (dueDate) {
+            const now = new Date();
+            dueDate.value = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+        }
+        modal.classList.add("show");
+        document.body.classList.add("task-modal-open");
+        loadTaskAssignees();
+        if (window.lucide) lucide.createIcons();
+    }
+    function closeAssignTaskModal() {
+        const modal = document.getElementById("assignTaskModal");
+        if (modal) modal.classList.remove("show");
+        document.body.classList.remove("task-modal-open");
+    }
+    async function submitAssignedTask(event) {
+        event.preventDefault();
+        if (!IS_STEERING) return;
+        const status = document.getElementById("taskFormStatus");
+        const saveButton = document.getElementById("saveAssignedTaskButton");
+        const assignedSelect = document.getElementById("taskAssignedToInput");
+        const selected = assignedSelect && assignedSelect.options[assignedSelect.selectedIndex];
+        const payload = { action: "createTask", data: {
+            title: normalize(document.getElementById("taskTitleInput")?.value),
+            description: normalize(document.getElementById("taskDescriptionInput")?.value),
+            assignedTo: normalize(assignedSelect?.value),
+            assignedToName: normalize(selected?.dataset?.name),
+            assignedBy: CURRENT_USERNAME,
+            dueDate: normalize(document.getElementById("taskDueDateInput")?.value),
+            priority: normalize(document.getElementById("taskPriorityInput")?.value) || "Normal",
+            status: normalize(document.getElementById("taskStatusInput")?.value) || "Pending"
+        }};
+        if (!payload.data.title || !payload.data.assignedTo || !payload.data.dueDate) {
+            if (status) status.textContent = "Task title, assigned officer, and due date are required.";
+            return;
+        }
+        if (!isApiConfigured()) {
+            if (status) status.textContent = "Google Apps Script Web App URL is not configured.";
+            return;
+        }
+        if (saveButton) saveButton.disabled = true;
+        if (status) status.textContent = "Assigning task...";
+        try {
+            const response = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
+            if (!response.ok) throw new Error("Task request failed with status " + response.status + ".");
+            const result = await response.json();
+            if (!result.success) throw new Error(result.message || "The task could not be created.");
+            if (status) status.textContent = "Task assigned successfully.";
+            await loadTasks();
+            setTimeout(closeAssignTaskModal, 500);
+        } catch (error) {
+            console.error("Task assignment error:", error);
+            if (status) status.textContent = error.message || "The task could not be created.";
+        } finally {
+            if (saveButton) saveButton.disabled = false;
+        }
+    }
+    window.loadTasks = loadTasks;
+
     /* =====================================================
        LOAD OFFICER PROFILE
     ===================================================== */
@@ -4217,6 +4461,43 @@
             );
         }
 
+
+
+        initializeSteeringControls();
+
+        const openAssignTaskButton = document.getElementById("openAssignTaskButton");
+        const closeAssignTaskButton = document.getElementById("closeAssignTaskButton");
+        const cancelAssignTaskButton = document.getElementById("cancelAssignTaskButton");
+        const assignTaskModal = document.getElementById("assignTaskModal");
+        const assignTaskForm = document.getElementById("assignTaskForm");
+        const refreshTasksButton = document.getElementById("refreshTasksButton");
+
+        if (openAssignTaskButton && !openAssignTaskButton.dataset.taskBound) {
+            openAssignTaskButton.addEventListener("click", openAssignTaskModal);
+            openAssignTaskButton.dataset.taskBound = "true";
+        }
+        if (closeAssignTaskButton && !closeAssignTaskButton.dataset.taskBound) {
+            closeAssignTaskButton.addEventListener("click", closeAssignTaskModal);
+            closeAssignTaskButton.dataset.taskBound = "true";
+        }
+        if (cancelAssignTaskButton && !cancelAssignTaskButton.dataset.taskBound) {
+            cancelAssignTaskButton.addEventListener("click", closeAssignTaskModal);
+            cancelAssignTaskButton.dataset.taskBound = "true";
+        }
+        if (assignTaskModal && !assignTaskModal.dataset.taskBound) {
+            assignTaskModal.addEventListener("click", function(event) {
+                if (event.target === assignTaskModal) closeAssignTaskModal();
+            });
+            assignTaskModal.dataset.taskBound = "true";
+        }
+        if (assignTaskForm && !assignTaskForm.dataset.taskBound) {
+            assignTaskForm.addEventListener("submit", submitAssignedTask);
+            assignTaskForm.dataset.taskBound = "true";
+        }
+        if (refreshTasksButton && !refreshTasksButton.dataset.taskBound) {
+            refreshTasksButton.addEventListener("click", loadTasks);
+            refreshTasksButton.dataset.taskBound = "true";
+        }
 
         updateOfficerProfile();
         rebuildAvailabilityTableData();
