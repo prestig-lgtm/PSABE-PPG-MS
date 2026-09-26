@@ -5884,3 +5884,40 @@ body.availability-modal-open {
     appearance: auto !important;
     -webkit-appearance: checkbox !important;
 }
+
+
+/* =========================================================
+   FINAL MY AVAILABILITY SCROLLBAR MATCH
+   Match the centralized Officer Availability scrollbar exactly.
+   This override changes only the scrollbar presentation/position.
+========================================================= */
+.availability-modal .editor-container {
+    overflow: auto !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(0, 216, 192, 0.35) transparent !important;
+    scrollbar-gutter: auto !important;
+    padding-right: 0 !important;
+}
+
+.availability-modal .editor-container::-webkit-scrollbar {
+    width: 7px !important;
+    height: 7px !important;
+}
+
+.availability-modal .editor-container::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+.availability-modal .editor-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 216, 192, 0.30) !important;
+    border-radius: 10px !important;
+    border: none !important;
+}
+
+.availability-modal .editor-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 216, 192, 0.45) !important;
+}
+
+.availability-modal .editor-container::-webkit-scrollbar-corner {
+    background: transparent !important;
+}
