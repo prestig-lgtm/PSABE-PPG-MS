@@ -3823,22 +3823,31 @@
             if (IS_STEERING) {
                 statusControl =
                     '<span class="task-status ' + escapeHtml(normalizedStatus || "pending") + '">' +
-                    escapeHtml(normalizedStatus === "completed" ? "Completed" : (rawStatus || "Pending")) +
+                    escapeHtml(rawStatus || "Pending") +
                     '</span>';
             } else {
                 /*
-                   Officers own the task progress.
-                   Steering only assigns it. The task starts as Pending and
-                   officers can move it to In Progress or Completed.
+                   Assigned officers own the task progress.
+                   Pending is assigned automatically by Steering.
+                   Officers may move the task through In Progress, For Checking,
+                   and Completed from My Tasks.
                 */
                 statusControl =
                     '<select class="task-status-select" data-task-id="' + escapeHtml(taskId) +
                     '" aria-label="Update task status">' +
                     '<option value="Pending" disabled' + (normalizedStatus === "pending" ? " selected" : "") + '>Pending</option>' +
                     '<option value="In Progress"' + (normalizedStatus === "in-progress" ? " selected" : "") + '>In Progress</option>' +
+                    '<option value="For Checking"' + (normalizedStatus === "for-checking" ? " selected" : "") + '>For Checking</option>' +
                     '<option value="Completed"' + (normalizedStatus === "completed" ? " selected" : "") + '>Completed</option>' +
                     '</select>';
             }
+
+            const canDelete = IS_STEERING &&
+                normalizeUsername(assignedBy) === normalizeUsername(CURRENT_USERNAME);
+
+            const deleteControl = canDelete
+                ? '<button type="button" class="task-delete-button" data-task-id="' + escapeHtml(taskId) + '" aria-label="Delete task" title="Delete task"><i data-lucide="trash-2"></i></button>'
+                : '';
 
             return '<article class="task-row">' +
                 '<div class="task-main">' +
@@ -3852,7 +3861,10 @@
                     '</div>' +
                 '</div>' +
                 statusControl +
-                '<span class="task-chip">' + escapeHtml(taskId) + '</span>' +
+                '<div class="task-actions">' +
+                    '<span class="task-chip task-id-chip">' + escapeHtml(taskId) + '</span>' +
+                    deleteControl +
+                '</div>' +
             '</article>';
         }).join("");
     }
@@ -3998,6 +4010,47 @@
             await loadCalendarData();
             await loadDashboardData();
         } catch (error) { console.error("Task status update error:",error); alert(error.message || "Task status could not be updated."); await loadTasks(); }
+    }
+
+    async function deleteAssignedTask(taskId) {
+        if (!IS_STEERING || !taskId) return;
+
+        const task = tasksData.find(function(item) {
+            return normalize(String(getRecordValue(item, "Task ID"))) === normalize(String(taskId));
+        });
+
+        if (!task) {
+            alert("The task could not be found.");
+            return;
+        }
+
+        const assignedBy = getRecordValue(task, "Assigned By");
+        if (normalizeUsername(assignedBy) !== normalizeUsername(CURRENT_USERNAME)) {
+            alert("Only the officer who assigned this task can delete it.");
+            return;
+        }
+
+        const title = getRecordValue(task, "Task Title") || "this task";
+        if (!window.confirm('Delete "' + title + '"? This action cannot be undone.')) return;
+
+        try {
+            const response = await fetch(API_URL, {
+                method:"POST",
+                headers:{"Content-Type":"text/plain;charset=utf-8"},
+                body:JSON.stringify({action:"deleteTask",data:{taskId:taskId,username:CURRENT_USERNAME}})
+            });
+            if (!response.ok) throw new Error("Task deletion request failed.");
+            const result = await response.json();
+            if (!result.success) throw new Error(result.message || "Task could not be deleted.");
+
+            await loadTasks();
+            await loadCalendarData();
+            await loadDashboardData();
+        } catch (error) {
+            console.error("Task deletion error:", error);
+            alert(error.message || "Task could not be deleted.");
+            await loadTasks();
+        }
     }
 
     function openScheduleEventModal() {
@@ -4859,7 +4912,17 @@
             refreshTasksButton.dataset.taskBound = "true";
         }
         const tasksList = document.getElementById("tasksList");
-        if (tasksList && !tasksList.dataset.statusBound) { tasksList.addEventListener("change", function(event){ const control=event.target.closest(".task-status-select"); if(control) updateAssignedTaskStatus(control.dataset.taskId,control.value); }); tasksList.dataset.statusBound="true"; }
+        if (tasksList && !tasksList.dataset.statusBound) {
+            tasksList.addEventListener("change", function(event){
+                const control=event.target.closest(".task-status-select");
+                if(control) updateAssignedTaskStatus(control.dataset.taskId,control.value);
+            });
+            tasksList.addEventListener("click", function(event){
+                const button = event.target.closest(".task-delete-button");
+                if(button) deleteAssignedTask(button.dataset.taskId);
+            });
+            tasksList.dataset.statusBound="true";
+        }
         const openScheduleEventButton=document.getElementById("openScheduleEventButton");
         const closeScheduleEventButton=document.getElementById("closeScheduleEventButton");
         const cancelScheduleEventButton=document.getElementById("cancelScheduleEventButton");
