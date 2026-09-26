@@ -5762,3 +5762,12 @@ body.availability-modal-open {
         margin-right: 14px !important;
     }
 }
+
+
+/* Match the Officer Availability scrollbar */
+.event-modal{scrollbar-width:thin;scrollbar-color:rgba(0,216,192,.35) transparent;overscroll-behavior:contain}
+.event-modal::-webkit-scrollbar{width:7px;height:7px}
+.event-modal::-webkit-scrollbar-track{background:transparent}
+.event-modal::-webkit-scrollbar-thumb{background:rgba(0,216,192,.30);border-radius:10px}
+.event-modal::-webkit-scrollbar-thumb:hover{background:rgba(0,216,192,.45)}
+.event-modal::-webkit-scrollbar-corner{background:transparent}
