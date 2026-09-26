@@ -119,21 +119,37 @@
 
                     <select id="position" name="position" required>
                         <option value="" selected disabled>Select your position</option>
+
                         <option value="President">President</option>
+
                         <option value="Vice President">Vice President</option>
+
                         <option value="Secretary">Secretary</option>
+
                         <option value="Associate Secretary">Associate Secretary</option>
+
                         <option value="Treasurer">Treasurer</option>
+
                         <option value="Associate Treasurer">Associate Treasurer</option>
+
                         <option value="Auditor">Auditor</option>
+
                         <option value="Business Manager">Business Manager</option>
+
                         <option value="PIO for Communications">PIO for Communications</option>
+
                         <option value="PIO for Graphics">PIO for Graphics</option>
+
                         <option value="PIO for Publications">PIO for Publications</option>
+
                         <option value="1st Year Representative">1st Year Representative</option>
-                        <option value="2nd Year Representative">2ndYear Representative</option>
+
+                        <option value="2nd Year Representative">2nd Year Representative</option>
+
                         <option value="3rd Year Representative">3rd Year Representative</option>
+
                         <option value="4th Year Representative">4th Year Representative</option>
+
                         <option value="Committee Head">Committee Head</option>
                     </select>
 
@@ -262,7 +278,7 @@
             ===================================================== */
 
             const WEB_APP_URL =
-                "YOUR_GOOGLE_APPS_SCRIPT_EXEC_URL";
+                "https://script.google.com/macros/s/AKfycbzTZORNDMsHLxoPeOLNAHurKurC14whoFKxT10RVPyCxP-z9H03slRLTUyhVx7tkyMW/exec";
 
             loginForm.addEventListener("submit", async function (event) {
                 event.preventDefault();
@@ -309,11 +325,14 @@
                         WEB_APP_URL,
                         {
                             method: "POST",
+
                             headers: {
                                 "Content-Type": "text/plain;charset=utf-8"
                             },
+
                             body: JSON.stringify({
                                 action: "login",
+
                                 data: {
                                     username: enteredUsername,
                                     password: enteredPassword,
@@ -326,7 +345,8 @@
                     if (!response.ok) {
                         throw new Error(
                             "Server returned status " +
-                            response.status + "."
+                            response.status +
+                            "."
                         );
                     }
 
@@ -344,6 +364,7 @@
                     const user = result.user || {};
 
                     if (rememberMe.checked) {
+
                         localStorage.setItem(
                             "psabeRememberedUsername",
                             enteredUsername
@@ -353,7 +374,9 @@
                             "psabeRememberedPosition",
                             user.position || selectedPosition
                         );
+
                     } else {
+
                         localStorage.removeItem(
                             "psabeRememberedUsername"
                         );
@@ -361,6 +384,7 @@
                         localStorage.removeItem(
                             "psabeRememberedPosition"
                         );
+
                     }
 
                     /* =================================================
