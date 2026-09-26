@@ -50,6 +50,13 @@
 
 
 <body>
+<script>
+    (function () {
+        if (sessionStorage.getItem("psabeLoggedIn") !== "true") {
+            window.location.replace("index.html");
+        }
+    })();
+</script>
 
 
     <!-- =====================================================
@@ -3239,6 +3246,25 @@
 
     const API_URL = "https://script.google.com/macros/s/AKfycbzTZORNDMsHLxoPeOLNAHurKurC14whoFKxT10RVPyCxP-z9H03slRLTUyhVx7tkyMW/exec";
 
+    /* =====================================================
+       ROLE / ACCESS LEVEL
+       Steering       = management access
+       Committee Head = regular access for now
+       Officer        = regular access
+    ===================================================== */
+
+    const CURRENT_ACCESS_LEVEL =
+        (sessionStorage.getItem("psabeAccessLevel") || "Officer").trim();
+
+    const IS_STEERING =
+        CURRENT_ACCESS_LEVEL.toLowerCase() === "steering";
+
+    const IS_COMMITTEE_HEAD =
+        CURRENT_ACCESS_LEVEL.toLowerCase() === "committee head";
+
+    const IS_OFFICER =
+        CURRENT_ACCESS_LEVEL.toLowerCase() === "officer";
+
     const CURRENT_USERNAME =
         sessionStorage.getItem("psabeUsername") || "Mac";
 
@@ -3311,7 +3337,7 @@
     function isApiConfigured() {
         return (
             API_URL &&
-            API_URL !== "YOUR_GOOGLE_APPS_SCRIPT_EXEC_URL"
+            API_URL !== "https://script.google.com/macros/s/AKfycbzTZORNDMsHLxoPeOLNAHurKurC14whoFKxT10RVPyCxP-z9H03slRLTUyhVx7tkyMW/exec"
         );
     }
 
@@ -3367,15 +3393,43 @@
        LOAD OFFICER PROFILE
     ===================================================== */
 
+    function updateAccessLevelUI() {
+        const profileArea = document.querySelector(".profile-area");
+        if (!profileArea) return;
+
+        let roleBadge = document.getElementById("currentAccessLevel");
+
+        if (!roleBadge) {
+            roleBadge = document.createElement("small");
+            roleBadge.id = "currentAccessLevel";
+            roleBadge.style.display = "block";
+            roleBadge.style.marginTop = "2px";
+            roleBadge.style.fontSize = "11px";
+            roleBadge.style.fontWeight = "600";
+            roleBadge.style.letterSpacing = "0.04em";
+            roleBadge.style.opacity = "0.78";
+
+            const profileText =
+                profileArea.querySelector(".profile-text");
+
+            if (profileText) {
+                profileText.appendChild(roleBadge);
+            }
+        }
+
+        roleBadge.textContent = CURRENT_ACCESS_LEVEL;
+    }
+
+
     function updateOfficerProfile() {
 
         const name =
             normalize(currentOfficer.Name) ||
-            "MC RJ Escote";
+            "Officer";
 
         const position =
             normalize(currentOfficer.Position) ||
-            "Vice President";
+            "Officer";
 
         const initials = name
             .split(/\s+/)
@@ -3404,6 +3458,8 @@
             .forEach(function (element) {
                 element.textContent = initials || "MC";
             });
+
+        updateAccessLevelUI();
 
 
         const greetingName =
@@ -3851,6 +3907,10 @@
                 "saveStatus"
             );
 
+        /* =================================================
+           CHECK API CONFIGURATION
+        ================================================== */
+
         if (!isApiConfigured()) {
 
             if (status) {
@@ -3866,25 +3926,47 @@
         }
 
 
+        /* =================================================
+           COLLECT SELECTED AVAILABILITY
+        ================================================== */
+
         const records = [];
 
         timeSlots.forEach(function (time) {
 
             days.forEach(function (day) {
 
-                if (myAvailability[time][day]) {
+                if (
+                    myAvailability[time] &&
+                    myAvailability[time][day]
+                ) {
 
                     records.push({
                         day: day,
                         time: time
                     });
+
                 }
+
             });
+
         });
 
 
+        /* =================================================
+           DISABLE SAVE BUTTON
+        ================================================== */
+
         if (saveButton) {
+
             saveButton.disabled = true;
+
+            saveButton.dataset.originalText =
+                saveButton.textContent;
+
+            saveButton.textContent =
+                "Saving...";
+
         }
 
         if (status) {
@@ -3893,6 +3975,13 @@
         }
 
 
+        /* =================================================
+           SAVE TO GOOGLE APPS SCRIPT
+
+           Only ONE network request is made here.
+           We do not call getAvailability() afterward.
+        ================================================== */
+
         try {
 
             const payload = {
@@ -3900,15 +3989,22 @@
                 action: "saveAvailability",
 
                 data: {
-                    username: CURRENT_USERNAME,
+
+                    username:
+                        CURRENT_USERNAME,
+
                     officerName:
                         normalize(currentOfficer.Name) ||
                         "MC RJ Escote",
+
                     position:
                         normalize(currentOfficer.Position) ||
                         "Vice President",
+
                     records: records
+
                 }
+
             };
 
 
@@ -3921,49 +4017,165 @@
                             "Content-Type":
                                 "text/plain;charset=utf-8"
                         },
-                        body: JSON.stringify(payload)
+                        body:
+                            JSON.stringify(payload),
+                        cache: "no-store"
                     }
                 );
 
 
+            /* =================================================
+               CHECK HTTP RESPONSE
+            ================================================== */
+
             if (!response.ok) {
+
                 throw new Error(
                     "Save request failed with status " +
                     response.status + "."
                 );
+
             }
 
 
-            const result =
-                await response.json();
+            /* =================================================
+               READ GOOGLE APPS SCRIPT RESPONSE
+            ================================================== */
 
+            let result;
 
-            if (!result.success) {
+            try {
+
+                result =
+                    await response.json();
+
+            } catch (parseError) {
+
                 throw new Error(
-                    result.message ||
-                    "The availability could not be saved."
+                    "The Web App returned an invalid response."
                 );
+
             }
 
 
-            /*
-               Reload the saved data from Google Sheets so the
-               centralized table and editor always reflect the
-               actual database rather than temporary browser data.
-            */
+            if (
+                !result ||
+                result.success !== true
+            ) {
 
-            const availabilityResult =
-                await fetchJson("getAvailability");
+                throw new Error(
+                    result && result.message
+                        ? result.message
+                        : "The availability could not be saved."
+                );
+
+            }
+
+
+            /* =================================================
+               UPDATE LOCAL AVAILABILITY DATA
+
+               The old code performed another GET request here:
+
+                   fetchJson("getAvailability")
+
+               That second request has been removed.
+               The table is updated immediately from the records
+               that were just successfully saved.
+            ================================================== */
 
             availabilityRecords =
-                Array.isArray(availabilityResult.data)
-                    ? availabilityResult.data
-                    : [];
+                availabilityRecords.filter(
+                    function (record) {
+
+                        return normalizeUsername(
+                            getRecordValue(
+                                record,
+                                "Username"
+                            )
+                        ) !== normalizeUsername(
+                            CURRENT_USERNAME
+                        );
+
+                    }
+                );
+
+
+            /* =================================================
+               ADD NEWLY SAVED RECORDS LOCALLY
+            ================================================== */
+
+            records.forEach(function (record) {
+
+                availabilityRecords.push({
+
+                    Username:
+                        CURRENT_USERNAME,
+
+                    "Officer Name":
+                        normalize(
+                            currentOfficer.Name
+                        ) ||
+                        "MC RJ Escote",
+
+                    Position:
+                        normalize(
+                            currentOfficer.Position
+                        ) ||
+                        "Vice President",
+
+                    Day:
+                        record.day,
+
+                    Time:
+                        record.time,
+
+                    Status:
+                        "Available"
+
+                });
+
+            });
+
+
+            /* =================================================
+               REFRESH TABLE LOCALLY
+            ================================================== */
 
             rebuildAvailabilityTableData();
+
             renderAvailabilityTable();
 
-            closeAvailabilityModal();
+            initializeMyAvailability();
+
+            renderEditorTable();
+
+
+            /* =================================================
+               SUCCESS MESSAGE
+            ================================================== */
+
+            if (status) {
+
+                status.textContent =
+                    "Availability saved successfully.";
+
+            }
+
+
+            /* =================================================
+               CLOSE MODAL
+            ================================================== */
+
+            setTimeout(
+                function () {
+
+                    closeAvailabilityModal();
+
+                },
+                300
+            );
+
 
         } catch (error) {
 
@@ -3973,20 +4185,41 @@
             );
 
             if (status) {
+
                 status.textContent =
-                    "Unable to save. Please check your connection and Web App URL.";
+                    error && error.message
+                        ? error.message
+                        : "Unable to save. Please check your connection and try again.";
+
             }
 
         } finally {
 
+            /* =================================================
+               RESTORE SAVE BUTTON
+            ================================================== */
+
             if (saveButton) {
+
                 saveButton.disabled = false;
+
+                if (
+                    saveButton.dataset.originalText
+                ) {
+
+                    saveButton.textContent =
+                        saveButton.dataset.originalText;
+
+                }
+
             }
+
         }
+
     }
 
-
-    window.renderAvailabilityTable =
+    
+window.renderAvailabilityTable =
         renderAvailabilityTable;
 
 
