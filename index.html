@@ -262,7 +262,7 @@
             ===================================================== */
 
             const WEB_APP_URL =
-                "https://script.google.com/macros/s/AKfycbzTZORNDMsHLxoPeOLNAHurKurC14whoFKxT10RVPyCxP-z9H03slRLTUyhVx7tkyMW/exec";
+                "YOUR_GOOGLE_APPS_SCRIPT_EXEC_URL";
 
             loginForm.addEventListener("submit", async function (event) {
                 event.preventDefault();
@@ -279,7 +279,10 @@
                     return;
                 }
 
-                if (!WEB_APP_URL || WEB_APP_URL.trim() === "") {
+                if (
+                    !WEB_APP_URL ||
+                    WEB_APP_URL === "YOUR_GOOGLE_APPS_SCRIPT_EXEC_URL"
+                ) {
                     showMessage(
                         "The Google Sheets login connection has not been configured yet.",
                         "error"
@@ -387,6 +390,11 @@
                     sessionStorage.setItem(
                         "psabeStatus",
                         user.status || ""
+                    );
+
+                    sessionStorage.setItem(
+                        "psabeAccessLevel",
+                        user.accessLevel || "Officer"
                     );
 
                     showMessage(
