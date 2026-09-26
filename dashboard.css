@@ -5834,3 +5834,81 @@ body.availability-modal-open {
         flex-direction: column;
     }
 }
+
+/* =========================================================
+   TASK ACTIONS / STATUS CONTROLS
+========================================================= */
+.task-status-select{
+    min-width:128px;
+}
+.task-status-select option{
+    background:#0d342c;
+    color:#fff;
+}
+.task-status.for-checking{
+    color:#c8b8ff;
+    background:rgba(139,112,214,.14);
+    border:1px solid rgba(139,112,214,.28);
+}
+.task-actions{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:8px;
+}
+.task-id-chip{
+    max-width:150px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+.task-delete-button{
+    width:34px;
+    height:34px;
+    display:grid;
+    place-items:center;
+    flex:0 0 34px;
+    border:1px solid rgba(229,155,155,.28);
+    border-radius:8px;
+    background:rgba(164,68,68,.10);
+    color:#e59b9b;
+    cursor:pointer;
+    transition:.2s ease;
+}
+.task-delete-button:hover{
+    background:rgba(164,68,68,.20);
+    border-color:rgba(229,155,155,.50);
+    transform:translateY(-1px);
+}
+.task-delete-button svg{
+    width:16px;
+    height:16px;
+    stroke-width:2;
+}
+.task-initial-status{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    min-height:43px;
+    padding:11px 13px;
+    border:1px solid rgba(202,166,84,.25);
+    border-radius:9px;
+    background:rgba(202,166,84,.08);
+    color:#e3c878;
+    font-size:11px;
+    font-weight:900;
+}
+.task-initial-status span{
+    color:rgba(255,255,255,.48);
+    font-size:9px;
+    font-weight:600;
+}
+@media(max-width:720px){
+    .task-actions{
+        justify-content:flex-start;
+    }
+    .task-id-chip{
+        max-width:none;
+    }
+}
