@@ -5591,264 +5591,53 @@ body.availability-modal-open {
 }
 
 /* =========================================================
-   DEFINITIVE AVAILABILITY EDITOR ALIGNMENT FIX
-   Keep header and scrolling rows on exactly the same grid.
-   ========================================================= */
+   FINAL AVAILABILITY EDITOR SCROLLBAR / GRID FIX
+
+   The editor has two separate tables:
+   1. .editor-header-container  -> header
+   2. .editor-container         -> scrollable body
+
+   Both containers reserve the same scrollbar width. The header
+   scrollbar is invisible, while the body scrollbar is visible.
+   This keeps every column aligned without changing the table
+   proportions or the number of visible rows.
+========================================================= */
+
 .availability-modal .editor-header-container,
 .availability-modal .editor-container {
     box-sizing: border-box !important;
-}
-
-.availability-modal .editor-header-container {
-    overflow: hidden !important;
-}
-
-.availability-modal .editor-header-container .editor-table,
-.availability-modal .editor-container .editor-table {
     width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    table-layout: fixed !important;
-    border-collapse: collapse !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
 }
 
-.availability-modal .editor-header-container .editor-table {
-    table-layout: fixed !important;
+/* Header reserves the scrollbar width but does not show one. */
+.availability-modal .editor-header-container {
+    overflow-x: hidden !important;
+    overflow-y: scroll !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: transparent transparent !important;
 }
 
-.availability-modal .editor-header-container .editor-table col.editor-time-col,
-.availability-modal .editor-container .editor-table col.editor-time-col {
-    width: 20% !important;
+.availability-modal .editor-header-container::-webkit-scrollbar {
+    width: 7px !important;
+    height: 0 !important;
 }
 
-.availability-modal .editor-header-container .editor-table col:not(.editor-time-col),
-.availability-modal .editor-container .editor-table col:not(.editor-time-col) {
-    width: 16% !important;
+.availability-modal .editor-header-container::-webkit-scrollbar-track {
+    background: transparent !important;
 }
 
-.availability-modal .editor-header-container th,
-.availability-modal .editor-container td {
-    box-sizing: border-box !important;
-    width: auto !important;
+.availability-modal .editor-header-container::-webkit-scrollbar-thumb {
+    background: transparent !important;
 }
 
-.availability-modal .editor-header-container th:first-child,
-.availability-modal .editor-container td:first-child {
-    width: 20% !important;
-    max-width: 20% !important;
-}
-
-.availability-modal .editor-header-container th:not(:first-child),
-.availability-modal .editor-container td:not(:first-child) {
-    width: 16% !important;
-    max-width: 16% !important;
-}
-
-.availability-modal .editor-header-container th {
-    overflow: hidden !important;
-    white-space: nowrap !important;
-}
-
+/* Body has the actual visible scrollbar. */
 .availability-modal .editor-container {
     overflow-x: hidden !important;
-    overflow-y: auto !important;
-}
-
-.availability-modal .editor-container .editor-table {
-    margin: 0 !important;
-}
-
-@media (max-width: 700px) {
-    .availability-modal .editor-header-container,
-    .availability-modal .editor-container {
-        width: calc(100% - 32px) !important;
-        margin-left: 16px !important;
-        margin-right: 16px !important;
-    }
-
-    .availability-modal .editor-container {
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        overflow-x: auto !important;
-    }
-
-    .availability-modal .editor-header-container {
-        overflow-x: hidden !important;
-    }
-
-    .availability-modal .editor-header-container .editor-table,
-    .availability-modal .editor-container .editor-table {
-        min-width: 700px !important;
-        width: 700px !important;
-    }
-}
-
-
-/* =========================================================
-   DEFINITIVE AVAILABILITY TABLE COLUMN ALIGNMENT
-   Keep TIME and each weekday on one exact column grid.
-   ========================================================= */
-.availability-page .availability-table {
-    width: 100% !important;
-    min-width: 870px !important;
-    table-layout: fixed !important;
-    border-collapse: collapse !important;
-}
-
-.availability-page .availability-table col.availability-time-col {
-    width: 20% !important;
-}
-
-.availability-page .availability-table col.availability-day-col {
-    width: 16% !important;
-}
-
-.availability-page .availability-table th,
-.availability-page .availability-table td {
-    box-sizing: border-box !important;
-}
-
-.availability-page .availability-table th:first-child,
-.availability-page .availability-table td:first-child {
-    width: 20% !important;
-}
-
-.availability-page .availability-table th:not(:first-child),
-.availability-page .availability-table td:not(:first-child) {
-    width: 16% !important;
-}
-
-.availability-page .availability-table th,
-.availability-page .availability-table td {
-    border-right: 1px solid rgba(0, 216, 192, 0.10) !important;
-}
-
-.availability-page .availability-table th:last-child,
-.availability-page .availability-table td:last-child {
-    border-right: none !important;
-}
-
-/* =========================================================
-   EDITOR TABLE ALIGNMENT
-   Header and scrolling body use the same grid and reserve
-   the scrollbar width so vertical borders remain identical.
-   ========================================================= */
-.availability-modal .editor-header-container {
-    box-sizing: border-box !important;
-    padding-right: 7px !important;
-    width: calc(100% - 58px) !important;
-}
-
-.availability-modal .editor-container {
-    box-sizing: border-box !important;
-    padding-left: 29px !important;
-    padding-right: 29px !important;
-    scrollbar-gutter: stable !important;
-}
-
-.availability-modal .editor-header-container .editor-table,
-.availability-modal .editor-container .editor-table {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    table-layout: fixed !important;
-    border-collapse: collapse !important;
-}
-
-.availability-modal .editor-header-container .editor-table col.editor-time-col,
-.availability-modal .editor-container .editor-table col.editor-time-col {
-    width: 20% !important;
-}
-
-.availability-modal .editor-header-container .editor-table col:not(.editor-time-col),
-.availability-modal .editor-container .editor-table col:not(.editor-time-col) {
-    width: 16% !important;
-}
-
-.availability-modal .editor-header-container th:first-child,
-.availability-modal .editor-container td:first-child {
-    width: 20% !important;
-    max-width: 20% !important;
-}
-
-.availability-modal .editor-header-container th:not(:first-child),
-.availability-modal .editor-container td:not(:first-child) {
-    width: 16% !important;
-    max-width: 16% !important;
-}
-
-@media (max-width: 700px) {
-    .availability-modal .editor-header-container {
-        width: calc(100% - 32px) !important;
-        margin-left: 16px !important;
-        margin-right: 16px !important;
-        padding-right: 7px !important;
-    }
-
-    .availability-modal .editor-container {
-        width: calc(100% - 32px) !important;
-        margin-left: 16px !important;
-        margin-right: 16px !important;
-        padding-left: 0 !important;
-        padding-right: 7px !important;
-        scrollbar-gutter: stable !important;
-    }
-}
-
-@media (max-width: 380px) {
-    .availability-modal .editor-header-container {
-        width: calc(100% - 28px) !important;
-        margin-left: 14px !important;
-        margin-right: 14px !important;
-    }
-
-    .availability-modal .editor-container {
-        width: calc(100% - 28px) !important;
-        margin-left: 14px !important;
-        margin-right: 14px !important;
-    }
-}
-
-
-
-
-/* =========================================================
-   MY AVAILABILITY EDITOR ONLY
-   Keep the centralized Officer Availability table unchanged.
-   The editable My Availability grid is borderless.
-========================================================= */
-
-.availability-modal .editor-header-container .editor-table,
-.availability-modal .editor-container .editor-table {
-    border: none !important;
-    border-collapse: collapse !important;
-    border-spacing: 0 !important;
-}
-
-.availability-modal .editor-header-container .editor-table th,
-.availability-modal .editor-container .editor-table td {
-    border: none !important;
-    box-shadow: none !important;
-}
-
-.availability-modal .editor-header-container .editor-table th:not(:first-child),
-.availability-modal .editor-container .editor-table td:not(:first-child) {
-    border-left: none !important;
-}
-
-.availability-modal .editor-container .editor-table tr {
-    border: none !important;
-}
-
-/* =========================================================
-   MY AVAILABILITY SCROLLBAR - MATCH OFFICER AVAILABILITY
-   Design only. Checkbox behavior is unchanged.
-   The scrollbar stays directly along the right edge of
-   the editable table's scrolling area.
-========================================================= */
-.availability-modal .editor-container {
-    overflow-y: auto !important;
-    overflow-x: auto !important;
+    overflow-y: scroll !important;
     scrollbar-width: thin !important;
     scrollbar-color: rgba(0, 216, 192, 0.35) transparent !important;
     scrollbar-gutter: auto !important;
@@ -5879,74 +5668,7 @@ body.availability-modal-open {
     background: transparent !important;
 }
 
-/* Keep the editable table itself unchanged, including checkboxes. */
-.availability-modal .editor-container input[type="checkbox"] {
-    appearance: auto !important;
-    -webkit-appearance: checkbox !important;
-}
-
-
-/* =========================================================
-   FINAL MY AVAILABILITY SCROLLBAR MATCH
-   Match the centralized Officer Availability scrollbar exactly.
-   This override changes only the scrollbar presentation/position.
-========================================================= */
-.availability-modal .editor-container {
-    overflow: auto !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: rgba(0, 216, 192, 0.35) transparent !important;
-    scrollbar-gutter: auto !important;
-    padding-right: 0 !important;
-}
-
-.availability-modal .editor-container::-webkit-scrollbar {
-    width: 7px !important;
-    height: 7px !important;
-}
-
-.availability-modal .editor-container::-webkit-scrollbar-track {
-    background: transparent !important;
-}
-
-.availability-modal .editor-container::-webkit-scrollbar-thumb {
-    background: rgba(0, 216, 192, 0.30) !important;
-    border-radius: 10px !important;
-    border: none !important;
-}
-
-.availability-modal .editor-container::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 216, 192, 0.45) !important;
-}
-
-.availability-modal .editor-container::-webkit-scrollbar-corner {
-    background: transparent !important;
-}
-
-/* =========================================================
-   FINAL MY AVAILABILITY SCROLLBAR / GRID ALIGNMENT FIX
-   Reference behavior:
-   - scrollbar stays at the far right edge of the scrolling area
-   - header and body reserve the same 7px scrollbar space
-   - no extra scrollbar gutter
-   - no change to column proportions
-   - centralized Officer Availability table is untouched
-========================================================= */
-
-.availability-modal .editor-header-container {
-    box-sizing: border-box !important;
-    padding-right: 7px !important;
-    overflow: hidden !important;
-}
-
-.availability-modal .editor-container {
-    box-sizing: border-box !important;
-    padding-right: 0 !important;
-    padding-left: 29px !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-    scrollbar-gutter: auto !important;
-}
-
+/* Header and body tables must share one exact grid. */
 .availability-modal .editor-header-container .editor-table,
 .availability-modal .editor-container .editor-table {
     width: 100% !important;
@@ -5954,9 +5676,11 @@ body.availability-modal-open {
     max-width: none !important;
     table-layout: fixed !important;
     border-collapse: collapse !important;
+    border-spacing: 0 !important;
     margin: 0 !important;
 }
 
+/* TIME = 20%, each weekday = 16%. */
 .availability-modal .editor-header-container .editor-table col.editor-time-col,
 .availability-modal .editor-container .editor-table col.editor-time-col {
     width: 20% !important;
@@ -5965,6 +5689,11 @@ body.availability-modal-open {
 .availability-modal .editor-header-container .editor-table col:not(.editor-time-col),
 .availability-modal .editor-container .editor-table col:not(.editor-time-col) {
     width: 16% !important;
+}
+
+.availability-modal .editor-header-container th,
+.availability-modal .editor-container td {
+    box-sizing: border-box !important;
 }
 
 .availability-modal .editor-header-container th:first-child,
@@ -5979,73 +5708,57 @@ body.availability-modal-open {
     max-width: 16% !important;
 }
 
-.availability-modal .editor-container::-webkit-scrollbar {
-    width: 7px !important;
-    height: 7px !important;
+.availability-modal .editor-header-container th {
+    overflow: hidden !important;
+    white-space: nowrap !important;
 }
 
-.availability-modal .editor-container::-webkit-scrollbar-track {
-    background: transparent !important;
-}
-
-.availability-modal .editor-container::-webkit-scrollbar-thumb {
-    background: rgba(0, 216, 192, 0.30) !important;
-    border-radius: 10px !important;
+/* Keep the editable grid borderless. */
+.availability-modal .editor-header-container .editor-table,
+.availability-modal .editor-container .editor-table,
+.availability-modal .editor-header-container .editor-table th,
+.availability-modal .editor-container .editor-table td {
     border: none !important;
+    box-shadow: none !important;
 }
 
-.availability-modal .editor-container::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 216, 192, 0.45) !important;
+/* Do not alter checkbox appearance or behavior. */
+.availability-modal .editor-container input[type=checkbox] {
+    appearance: auto !important;
+    -webkit-appearance: checkbox !important;
 }
 
-.availability-modal .editor-container::-webkit-scrollbar-corner {
-    background: transparent !important;
-}
-
-.availability-modal .editor-container {
-    scrollbar-width: thin !important;
-    scrollbar-color: rgba(0, 216, 192, 0.30) transparent !important;
-}
-
+/* Mobile: keep the same two-table grid and scrollbar alignment. */
 @media (max-width: 700px) {
-    .availability-modal .editor-header-container {
-        width: calc(100% - 32px) !important;
-        margin-left: 16px !important;
-        margin-right: 16px !important;
-        padding-right: 7px !important;
-    }
-
+    .availability-modal .editor-header-container,
     .availability-modal .editor-container {
         width: calc(100% - 32px) !important;
         margin-left: 16px !important;
         margin-right: 16px !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        overflow-x: auto !important;
-        overflow-y: auto !important;
-        scrollbar-gutter: auto !important;
     }
 
     .availability-modal .editor-header-container .editor-table,
     .availability-modal .editor-container .editor-table {
         min-width: 700px !important;
-        width: 100% !important;
+        width: 700px !important;
+    }
+
+    .availability-modal .editor-container {
+        overflow-x: auto !important;
+        overflow-y: scroll !important;
+    }
+
+    .availability-modal .editor-header-container {
+        overflow-x: hidden !important;
+        overflow-y: scroll !important;
     }
 }
 
 @media (max-width: 380px) {
-    .availability-modal .editor-header-container {
-        width: calc(100% - 28px) !important;
-        margin-left: 14px !important;
-        margin-right: 14px !important;
-        padding-right: 7px !important;
-    }
-
+    .availability-modal .editor-header-container,
     .availability-modal .editor-container {
         width: calc(100% - 28px) !important;
         margin-left: 14px !important;
         margin-right: 14px !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
     }
 }
