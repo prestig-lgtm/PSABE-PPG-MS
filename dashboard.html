@@ -3327,15 +3327,42 @@
     }
 
 
+    function normalizeUsername(value) {
+        return normalize(value).toLowerCase();
+    }
+
+
+    function normalizeDay(value) {
+        return normalize(value).toLowerCase();
+    }
+
+
     function normalizeTime(value) {
         return normalize(value)
-            .replace(/-/g, "–")
-            .replace(/\s+/g, "");
+            .replace(/[–—−-]/g, "–")
+            .replace(/\s+/g, "")
+            .toUpperCase();
+    }
+
+
+    function getRecordValue(record, key) {
+        if (!record || typeof record !== "object") return "";
+
+        if (Object.prototype.hasOwnProperty.call(record, key)) {
+            return record[key];
+        }
+
+        const target = String(key).trim().toLowerCase();
+        const foundKey = Object.keys(record).find(function (item) {
+            return String(item).trim().toLowerCase() === target;
+        });
+
+        return foundKey ? record[foundKey] : "";
     }
 
 
     function isApiConfigured() {
-        return (
+        return Boolean(
             API_URL &&
             API_URL !== "YOUR_GOOGLE_APPS_SCRIPT_EXEC_URL"
         );
@@ -3729,11 +3756,15 @@
                 myAvailability[time][day] =
                     availabilityRecords.some(function (record) {
 
+                        const username = getRecordValue(record, "Username");
+                        const recordDay = getRecordValue(record, "Day");
+                        const recordTime = getRecordValue(record, "Time");
+
                         return (
-                            normalize(record.Username).toLowerCase() ===
-                            CURRENT_USERNAME.toLowerCase() &&
-                            normalize(record.Day).toLowerCase() === day &&
-                            normalizeTime(record.Time) === normalizeTime(time)
+                            normalizeUsername(username) ===
+                            normalizeUsername(CURRENT_USERNAME) &&
+                            normalizeDay(recordDay) === normalizeDay(day) &&
+                            normalizeTime(recordTime) === normalizeTime(time)
                         );
                     });
             });
@@ -3911,7 +3942,7 @@
 
             if (status) {
                 status.textContent =
-                    "Google Apps Script Web App URL is not configured.";
+                    "Add your Google Apps Script Web App URL first.";
             }
 
             console.error(
@@ -3928,10 +3959,7 @@
 
             days.forEach(function (day) {
 
-                if (
-                    myAvailability[time] &&
-                    myAvailability[time][day]
-                ) {
+                if (myAvailability[time][day]) {
 
                     records.push({
                         day: day,
@@ -3944,9 +3972,6 @@
 
         if (saveButton) {
             saveButton.disabled = true;
-            saveButton.dataset.originalText =
-                saveButton.textContent;
-            saveButton.textContent = "Saving...";
         }
 
         if (status) {
@@ -3983,8 +4008,7 @@
                             "Content-Type":
                                 "text/plain;charset=utf-8"
                         },
-                        body: JSON.stringify(payload),
-                        cache: "no-store"
+                        body: JSON.stringify(payload)
                     }
                 );
 
@@ -4001,90 +4025,47 @@
                 await response.json();
 
 
-            if (!result || result.success !== true) {
+            if (!result.success) {
                 throw new Error(
-                    result && result.message
-                        ? result.message
-                        : "The availability could not be saved."
+                    result.message ||
+                    "The availability could not be saved."
                 );
             }
 
 
             /*
-               The save request succeeded. Update the local copy
-               immediately instead of making a second GET request
-               to Google Apps Script. This makes the Save button
-               considerably faster while keeping the displayed
-               table synchronized with the data just submitted.
+               Update the local availability records immediately.
+               The next page refresh will read the same records from
+               Google Sheets again.
             */
 
-            availabilityRecords =
-                availabilityRecords.filter(
-                    function (record) {
-
-                        return (
-                            normalize(
-                                getRecordValue(
-                                    record,
-                                    "Username"
-                                )
-                            ).toLowerCase() !==
-                            normalize(
-                                CURRENT_USERNAME
-                            ).toLowerCase()
-                        );
-                    }
-                );
-
+            availabilityRecords = availabilityRecords.filter(function (record) {
+                return normalizeUsername(getRecordValue(record, "Username")) !==
+                    normalizeUsername(CURRENT_USERNAME);
+            });
 
             records.forEach(function (record) {
-
                 availabilityRecords.push({
-
-                    Username:
-                        CURRENT_USERNAME,
-
+                    Username: CURRENT_USERNAME,
                     "Officer Name":
-                        normalize(currentOfficer.Name) ||
-                        "MC RJ Escote",
-
+                        normalize(currentOfficer.Name) || "MC RJ Escote",
                     Position:
-                        normalize(currentOfficer.Position) ||
-                        "Vice President",
-
-                    Day:
-                        record.day,
-
-                    Time:
-                        record.time,
-
-                    Status:
-                        "Available"
-
+                        normalize(currentOfficer.Position) || "Vice President",
+                    Day: record.day,
+                    Time: record.time,
+                    Status: "Available"
                 });
             });
 
-
             rebuildAvailabilityTableData();
             renderAvailabilityTable();
-
             initializeMyAvailability();
-            renderEditorTable();
-
 
             if (status) {
-                status.textContent =
-                    "Availability saved successfully.";
+                status.textContent = "Availability saved successfully.";
             }
 
-
-            setTimeout(
-                function () {
-                    closeAvailabilityModal();
-                },
-                300
-            );
-
+            closeAvailabilityModal();
 
         } catch (error) {
 
@@ -4095,24 +4076,16 @@
 
             if (status) {
                 status.textContent =
-                    error && error.message
-                        ? error.message
-                        : "Unable to save. Please check your connection and Web App URL.";
+                    "Unable to save. Please check your connection and Web App URL.";
             }
 
         } finally {
 
             if (saveButton) {
                 saveButton.disabled = false;
-
-                if (saveButton.dataset.originalText) {
-                    saveButton.textContent =
-                        saveButton.dataset.originalText;
-                }
             }
         }
     }
-
 
 
     window.renderAvailabilityTable =
