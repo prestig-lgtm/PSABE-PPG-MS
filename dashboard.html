@@ -49,6 +49,8 @@
 
 <style>
 .tasks-page-header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:28px}.tasks-page-header h1{margin:6px 0 8px}.tasks-page-header p{margin:0;max-width:720px}.steering-control-group{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.steering-badge{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border:1px solid rgba(202,166,84,.45);border-radius:999px;color:#e3c878;background:rgba(202,166,84,.08);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.steering-badge::before{content:"";width:7px;height:7px;border-radius:50%;background:#d8b95f;box-shadow:0 0 0 3px rgba(216,185,95,.12)}.steering-action-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid rgba(202,166,84,.55);background:#caa654;color:#173f35;border-radius:10px;padding:12px 16px;font-size:12px;font-weight:900;letter-spacing:.04em;cursor:pointer;transition:.2s ease}.steering-action-button:hover{filter:brightness(1.06);transform:translateY(-1px)}.steering-action-button svg{width:16px;height:16px;stroke-width:2.4}.tasks-panel{padding:0;overflow:hidden}.tasks-toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 22px;border-bottom:1px solid rgba(255,255,255,.08)}.tasks-toolbar-title{display:flex;align-items:center;gap:10px}.tasks-toolbar-title span{font-size:11px;letter-spacing:.1em;color:rgba(255,255,255,.58);font-weight:800}.tasks-toolbar-title strong{font-size:14px;color:#fff}.tasks-list{display:grid;gap:0}.task-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:18px;align-items:center;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.06)}.task-row:last-child{border-bottom:0}.task-main{min-width:0}.task-main h3{margin:0 0 6px;color:#fff;font-size:15px}.task-main p{margin:0;color:rgba(255,255,255,.58);font-size:12px;line-height:1.55}.task-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}.task-chip{display:inline-flex;align-items:center;padding:5px 8px;border-radius:6px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.68);font-size:10px;font-weight:800;letter-spacing:.04em}.task-status{font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:7px 9px;border-radius:7px;white-space:nowrap}.task-status.pending{color:#e3c878;background:rgba(202,166,84,.12);border:1px solid rgba(202,166,84,.25)}.task-status.in-progress{color:#9ed2c1;background:rgba(73,139,115,.14);border:1px solid rgba(73,139,115,.25)}.task-status.completed{color:#a9d9b2;background:rgba(82,150,94,.14);border:1px solid rgba(82,150,94,.25)}.task-status.overdue{color:#e59b9b;background:rgba(164,68,68,.14);border:1px solid rgba(164,68,68,.25)}.tasks-empty{padding:48px 24px;text-align:center;color:rgba(255,255,255,.48)}.tasks-empty strong{display:block;color:#fff;margin-bottom:7px;font-size:14px}.tasks-empty span{font-size:12px}.task-modal-overlay{position:fixed;inset:0;background:rgba(4,20,17,.78);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;padding:20px;z-index:1000}.task-modal-overlay.show{display:flex}.task-modal{width:min(620px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#123f35;border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:0 20px 70px rgba(0,0,0,.35)}.task-modal-header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding:22px;border-bottom:1px solid rgba(255,255,255,.08)}.task-modal-header .modal-label{color:#caa654;font-size:10px;font-weight:900;letter-spacing:.12em}.task-modal-header h2{margin:5px 0 4px;color:#fff;font-size:21px}.task-modal-header p{margin:0;color:rgba(255,255,255,.58);font-size:12px}.task-modal-close{width:40px;height:40px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#fff;border-radius:9px;cursor:pointer;display:grid;place-items:center}.task-modal-close svg{width:18px;height:18px}.task-form{padding:22px;display:grid;gap:16px}.task-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.task-field{display:grid;gap:7px}.task-field.full{grid-column:1/-1}.task-field label{font-size:10px;color:rgba(255,255,255,.62);font-weight:900;letter-spacing:.08em;text-transform:uppercase}.task-field input,.task-field select,.task-field textarea{width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.13);background:#0d342c;color:#fff;border-radius:9px;padding:12px 13px;font:inherit;font-size:13px;outline:none}.task-field textarea{min-height:105px;resize:vertical}.task-field input:focus,.task-field select:focus,.task-field textarea:focus{border-color:rgba(202,166,84,.7);box-shadow:0 0 0 3px rgba(202,166,84,.08)}.task-form-status{min-height:18px;color:#e3c878;font-size:11px}.task-form-actions{display:flex;justify-content:flex-end;gap:10px;padding-top:4px}.task-cancel-button{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#fff;border-radius:9px;padding:11px 15px;font-size:11px;font-weight:900;cursor:pointer}@media(max-width:720px){.tasks-page-header{align-items:flex-start;flex-direction:column}.task-row{grid-template-columns:1fr;gap:10px}.task-form-grid{grid-template-columns:1fr}.task-field.full{grid-column:auto}.tasks-toolbar{align-items:flex-start;flex-direction:column}}
+
+.task-status-select{border:1px solid rgba(255,255,255,.12);background:#0d342c;color:#fff;border-radius:7px;padding:8px 10px;font:inherit;font-size:10px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;outline:none;cursor:pointer}.task-status-select:focus{border-color:rgba(202,166,84,.7)}.event-modal-overlay{position:fixed;inset:0;background:rgba(4,20,17,.78);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;padding:20px;z-index:1001}.event-modal-overlay.show{display:flex}.event-modal{width:min(650px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#123f35;border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:0 20px 70px rgba(0,0,0,.35)}.event-modal-header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding:22px;border-bottom:1px solid rgba(255,255,255,.08)}.event-modal-header .modal-label{color:#caa654;font-size:10px;font-weight:900;letter-spacing:.12em}.event-modal-header h2{margin:5px 0 4px;color:#fff;font-size:21px}.event-modal-header p{margin:0;color:rgba(255,255,255,.58);font-size:12px}.event-modal-close{width:40px;height:40px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#fff;border-radius:9px;cursor:pointer;display:grid;place-items:center}.event-form{padding:22px;display:grid;gap:16px}.event-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.event-field{display:grid;gap:7px}.event-field.full{grid-column:1/-1}.event-field label{font-size:10px;color:rgba(255,255,255,.62);font-weight:900;letter-spacing:.08em;text-transform:uppercase}.event-field input,.event-field select,.event-field textarea{width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.13);background:#0d342c;color:#fff;border-radius:9px;padding:12px 13px;font:inherit;font-size:13px;outline:none}.event-field textarea{min-height:95px;resize:vertical}.event-form-status{min-height:18px;color:#e3c878;font-size:11px}.event-form-actions{display:flex;justify-content:flex-end;gap:10px;padding-top:4px}.calendar-steering-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.calendar-add-event-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid rgba(202,166,84,.55);background:#caa654;color:#173f35;border-radius:10px;padding:11px 15px;font-size:11px;font-weight:900;letter-spacing:.04em;cursor:pointer}.calendar-add-event-button svg{width:16px;height:16px}@media(max-width:720px){.event-form-grid{grid-template-columns:1fr}.event-field.full{grid-column:auto}.calendar-steering-controls{width:100%}}
 </style>
 </head>
 
@@ -1188,12 +1190,12 @@
                     </div>
 
 
-                    <button
-                        id="calendarTodayButton"
-                        class="calendar-today-button"
-                    >
-                        Today
-                    </button>
+                    <div class="calendar-steering-controls">
+                        <button id="calendarTodayButton" class="calendar-today-button">Today</button>
+                        <button id="openScheduleEventButton" class="calendar-add-event-button" type="button" style="display:none;">
+                            <i data-lucide="calendar-plus"></i> SCHEDULE ACTIVITY
+                        </button>
+                    </div>
 
                 </div>
 
@@ -1706,6 +1708,20 @@
 
 
 
+<!-- STEERING SCHEDULE ACTIVITY MODAL -->
+<div class="event-modal-overlay" id="scheduleEventModal">
+<div class="event-modal" role="dialog" aria-modal="true" aria-labelledby="scheduleEventTitle">
+<div class="event-modal-header"><div><div class="modal-label">STEERING CONTROL</div><h2 id="scheduleEventTitle">Schedule Activity</h2><p>Create an organization activity that will appear on the calendar.</p></div><button type="button" class="event-modal-close" id="closeScheduleEventButton" aria-label="Close"><i data-lucide="x"></i></button></div>
+<form class="event-form" id="scheduleEventForm"><div class="event-form-grid">
+<div class="event-field full"><label for="eventTitleInput">Activity Title</label><input id="eventTitleInput" type="text" maxlength="120" required placeholder="Enter activity title"></div>
+<div class="event-field full"><label for="eventDescriptionInput">Description</label><textarea id="eventDescriptionInput" maxlength="1000" placeholder="Describe the activity"></textarea></div>
+<div class="event-field"><label for="eventDateInput">Date</label><input id="eventDateInput" type="date" required></div>
+<div class="event-field"><label for="eventTypeInput">Type</label><select id="eventTypeInput"><option value="Event">Event</option><option value="Activity">Activity</option></select></div>
+<div class="event-field"><label for="eventStartTimeInput">Start Time</label><input id="eventStartTimeInput" type="time"></div>
+<div class="event-field"><label for="eventEndTimeInput">End Time</label><input id="eventEndTimeInput" type="time"></div>
+<div class="event-field full"><label for="eventLocationInput">Location</label><input id="eventLocationInput" type="text" maxlength="180" placeholder="Location"></div></div>
+<div class="event-form-status" id="eventFormStatus"></div><div class="event-form-actions"><button type="button" class="task-cancel-button" id="cancelScheduleEventButton">Cancel</button><button type="submit" class="steering-action-button" id="saveScheduleEventButton"><i data-lucide="calendar-plus"></i> SCHEDULE ACTIVITY</button></div></form></div></div>
+
 <!-- STEERING ASSIGN TASK MODAL -->
 <div class="task-modal-overlay" id="assignTaskModal">
     <div class="task-modal" role="dialog" aria-modal="true" aria-labelledby="assignTaskTitle">
@@ -1876,110 +1892,7 @@
            SAMPLE CALENDAR DATA
         ===================================================== */
 
-        const calendarActivities = {
-
-
-            "2026-09-24": [
-
-                {
-                    type: "task",
-                    title: "Prepare attendance materials",
-                    description:
-                        "Prepare and organize the attendance materials for the upcoming activity.",
-                    time:
-                        "Due at 2:00 PM"
-                },
-
-                {
-                    type: "event",
-                    title: "General Assembly",
-                    description:
-                        "PSABE-PPG CSU Chapter General Assembly.",
-                    time:
-                        "4:00 PM – 6:00 PM"
-                },
-
-                {
-                    type: "meeting",
-                    title: "Executive Committee Meeting",
-                    description:
-                        "Executive Committee coordination meeting.",
-                    time:
-                        "7:00 PM – 8:00 PM"
-                }
-
-            ],
-
-
-
-            "2026-09-25": [
-
-                {
-                    type: "meeting",
-                    title: "Officer Coordination",
-                    description:
-                        "Executive officers' coordination session.",
-                    time:
-                        "9:00 AM – 10:00 AM"
-                },
-
-                {
-                    type: "task",
-                    title: "Submit committee updates",
-                    description:
-                        "Submit the latest committee progress updates.",
-                    time:
-                        "Due at 2:00 PM"
-                }
-
-            ],
-
-
-
-            "2026-09-26": [
-
-                {
-                    type: "event",
-                    title: "Membership Engagement Activity",
-                    description:
-                        "Member engagement and organizational activity.",
-                    time:
-                        "10:00 AM – 12:00 PM"
-                }
-
-            ],
-
-
-
-            "2026-09-29": [
-
-                {
-                    type: "task",
-                    title: "Finalize October work plan",
-                    description:
-                        "Review and finalize the upcoming organizational work plan.",
-                    time:
-                        "Due at 5:00 PM"
-                }
-
-            ],
-
-
-
-            "2026-09-30": [
-
-                {
-                    type: "meeting",
-                    title: "Steering Committee Meeting",
-                    description:
-                        "Planning and task coordination meeting.",
-                    time:
-                        "6:00 PM – 7:00 PM"
-                }
-
-            ]
-
-        };
+        let calendarActivities = {};
 
 
 
@@ -2510,16 +2423,22 @@
 
 
 
+                const calendarNow = new Date();
+
                 let calendarDate =
                     new Date(
-                        2026,
-                        8,
+                        calendarNow.getFullYear(),
+                        calendarNow.getMonth(),
                         1
                     );
 
 
                 let selectedDate =
-                    "2026-09-24";
+                    makeDateKey(
+                        calendarNow.getFullYear(),
+                        calendarNow.getMonth(),
+                        calendarNow.getDate()
+                    );
 
 
 
@@ -2731,6 +2650,12 @@
 
                 }
 
+
+
+                window.renderCalendar = renderCalendar;
+                window.getSelectedCalendarDate = function () {
+                    return selectedDate;
+                };
 
 
                 /* =================================================
@@ -3518,7 +3443,10 @@
     function escapeHtml(value) {
         return String(value == null ? "" : value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
-    function normalizeTaskStatus(value) { return normalize(value).toLowerCase().replace(/\s+/g, "-"); }
+    function normalizeTaskStatus(value) {
+        const normalized = normalize(value).toLowerCase().replace(/\s+/g, "-");
+        return normalized === "complete" ? "completed" : normalized;
+    }
     function initializeSteeringControls() {
         const controls = document.getElementById("steeringTaskControls");
         if (controls) controls.style.display = IS_STEERING ? "flex" : "none";
@@ -3561,7 +3489,10 @@
             const priority = getRecordValue(task, "Priority") || "Normal";
             const status = getRecordValue(task, "Status") || "Pending";
             const statusClass = normalizeTaskStatus(status);
-            return '<article class="task-row"><div class="task-main"><h3>' + escapeHtml(title || "Untitled task") + '</h3><p>' + escapeHtml(description || "No description provided.") + '</p><div class="task-meta">' + (IS_STEERING ? '<span class="task-chip">TO: ' + escapeHtml(assignedTo || "Unassigned") + '</span>' : '') + '<span class="task-chip">DUE: ' + escapeHtml(dueDate || "No due date") + '</span><span class="task-chip">PRIORITY: ' + escapeHtml(priority) + '</span>' + (IS_STEERING && assignedBy ? '<span class="task-chip">BY: ' + escapeHtml(assignedBy) + '</span>' : '') + '</div></div><span class="task-status ' + escapeHtml(statusClass) + '">' + escapeHtml(status) + '</span><span class="task-chip">' + escapeHtml(getRecordValue(task, "Task ID")) + '</span></article>';
+            const taskId = getRecordValue(task, "Task ID");
+            const normalizedStatus = status.toLowerCase();
+            const statusControl = !IS_STEERING ? '<select class="task-status-select" data-task-id="' + escapeHtml(taskId) + '" aria-label="Update task status"><option value="Pending"' + (normalizedStatus === "pending" ? " selected" : "") + '>Pending</option><option value="In Progress"' + (normalizedStatus === "in progress" ? " selected" : "") + '>In Progress</option><option value="Complete"' + ((normalizedStatus === "complete" || normalizedStatus === "completed") ? " selected" : "") + '>Complete</option></select>' : '<span class="task-status ' + escapeHtml(statusClass) + '">' + escapeHtml(status) + '</span>';
+            return '<article class="task-row"><div class="task-main"><h3>' + escapeHtml(title || "Untitled task") + '</h3><p>' + escapeHtml(description || "No description provided.") + '</p><div class="task-meta">' + (IS_STEERING ? '<span class="task-chip">TO: ' + escapeHtml(assignedTo || "Unassigned") + '</span>' : '') + '<span class="task-chip">DUE: ' + escapeHtml(dueDate || "No due date") + '</span><span class="task-chip">PRIORITY: ' + escapeHtml(priority) + '</span>' + (IS_STEERING && assignedBy ? '<span class="task-chip">BY: ' + escapeHtml(assignedBy) + '</span>' : '') + '</div></div>' + statusControl + '<span class="task-chip">' + escapeHtml(taskId) + '</span></article>';
         }).join("");
     }
     async function loadTaskAssignees() {
@@ -3659,6 +3590,73 @@
         }
     }
     window.loadTasks = loadTasks;
+
+    /* =====================================================
+       CALENDAR DATA
+    ===================================================== */
+    function addCalendarActivity(date, activity) {
+        if (!date) return;
+        if (!calendarActivities[date]) calendarActivities[date] = [];
+        calendarActivities[date].push(activity);
+    }
+
+    async function loadCalendarData() {
+        try {
+            const [eventsResult, tasksResult] = await Promise.all([fetchJson("getEvents"), fetchJson("getTasks")]);
+            calendarActivities = {};
+            const events = Array.isArray(eventsResult.data) ? eventsResult.data : [];
+            const tasks = Array.isArray(tasksResult.data) ? tasksResult.data : [];
+            events.forEach(function(event) {
+                const status = normalize(getRecordValue(event, "Status")).toLowerCase();
+                if (status && status !== "active") return;
+                const start = normalize(getRecordValue(event, "Start Time"));
+                const end = normalize(getRecordValue(event, "End Time"));
+                addCalendarActivity(getRecordValue(event, "Date"), {type:"event", title:getRecordValue(event,"Title"), description:getRecordValue(event,"Description") || getRecordValue(event,"Location"), time:start && end ? start + " – " + end : (start || "Scheduled activity")});
+            });
+            tasks.forEach(function(task) {
+                const assignedTo = normalizeUsername(getRecordValue(task,"Assigned To"));
+                if (!IS_STEERING && assignedTo !== normalizeUsername(CURRENT_USERNAME)) return;
+                const status = normalize(getRecordValue(task,"Status")).toLowerCase();
+                if (status === "complete" || status === "completed") return;
+                const dueDate = getRecordValue(task,"Due Date");
+                if (!dueDate) return;
+                addCalendarActivity(dueDate, {type:"task", title:getRecordValue(task,"Task Title") || "Task", description:getRecordValue(task,"Description") || "Assigned task", time:"Due date"});
+            });
+            renderCalendar();
+        } catch (error) { console.error("Calendar data loading error:", error); }
+    }
+
+    async function updateAssignedTaskStatus(taskId, statusValue) {
+        if (IS_STEERING || !taskId) return;
+        try {
+            const response = await fetch(API_URL, {method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"updateTaskStatus",data:{taskId:taskId,username:CURRENT_USERNAME,status:statusValue}})});
+            if (!response.ok) throw new Error("Task status request failed.");
+            const result = await response.json();
+            if (!result.success) throw new Error(result.message || "Task status could not be updated.");
+            await loadTasks();
+            await loadCalendarData();
+        } catch (error) { console.error("Task status update error:",error); alert(error.message || "Task status could not be updated."); await loadTasks(); }
+    }
+
+    function openScheduleEventModal() {
+        if (!IS_STEERING) return;
+        const modal=document.getElementById("scheduleEventModal"), form=document.getElementById("scheduleEventForm"), status=document.getElementById("eventFormStatus");
+        if (!modal) return;
+        if (form) form.reset(); if (status) status.textContent="";
+        const dateInput=document.getElementById("eventDateInput");
+        const selected = typeof window.getSelectedCalendarDate === "function" ? window.getSelectedCalendarDate() : "";
+        if (dateInput) dateInput.value = selected || new Date().toISOString().slice(0, 10);
+        modal.classList.add("show"); if (window.lucide) lucide.createIcons();
+    }
+    function closeScheduleEventModal(){const modal=document.getElementById("scheduleEventModal");if(modal)modal.classList.remove("show");}
+    async function submitScheduledEvent(event){
+        event.preventDefault(); if(!IS_STEERING)return;
+        const status=document.getElementById("eventFormStatus"), saveButton=document.getElementById("saveScheduleEventButton");
+        const payload={action:"saveEvent",data:{title:normalize(document.getElementById("eventTitleInput")?.value),description:normalize(document.getElementById("eventDescriptionInput")?.value),date:normalize(document.getElementById("eventDateInput")?.value),startTime:normalize(document.getElementById("eventStartTimeInput")?.value),endTime:normalize(document.getElementById("eventEndTimeInput")?.value),location:normalize(document.getElementById("eventLocationInput")?.value),type:normalize(document.getElementById("eventTypeInput")?.value)||"Event",createdBy:CURRENT_USERNAME}};
+        if(!payload.data.title||!payload.data.date){if(status)status.textContent="Activity title and date are required.";return;}
+        if(saveButton)saveButton.disabled=true;if(status)status.textContent="Scheduling activity...";
+        try{const response=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});if(!response.ok)throw new Error("Activity request failed.");const result=await response.json();if(!result.success)throw new Error(result.message||"The activity could not be scheduled.");if(status)status.textContent="Activity scheduled successfully.";await loadCalendarData();setTimeout(closeScheduleEventModal,500);}catch(error){console.error("Activity scheduling error:",error);if(status)status.textContent=error.message||"The activity could not be scheduled.";}finally{if(saveButton)saveButton.disabled=false;}
+    }
 
     /* =====================================================
        LOAD OFFICER PROFILE
@@ -4498,6 +4496,18 @@
             refreshTasksButton.addEventListener("click", loadTasks);
             refreshTasksButton.dataset.taskBound = "true";
         }
+        const tasksList = document.getElementById("tasksList");
+        if (tasksList && !tasksList.dataset.statusBound) { tasksList.addEventListener("change", function(event){ const control=event.target.closest(".task-status-select"); if(control) updateAssignedTaskStatus(control.dataset.taskId,control.value); }); tasksList.dataset.statusBound="true"; }
+        const openScheduleEventButton=document.getElementById("openScheduleEventButton");
+        const closeScheduleEventButton=document.getElementById("closeScheduleEventButton");
+        const cancelScheduleEventButton=document.getElementById("cancelScheduleEventButton");
+        const scheduleEventModal=document.getElementById("scheduleEventModal");
+        const scheduleEventForm=document.getElementById("scheduleEventForm");
+        if(openScheduleEventButton){openScheduleEventButton.style.display=IS_STEERING?"inline-flex":"none";if(!openScheduleEventButton.dataset.bound){openScheduleEventButton.addEventListener("click",openScheduleEventModal);openScheduleEventButton.dataset.bound="true";}}
+        if(closeScheduleEventButton&&!closeScheduleEventButton.dataset.bound){closeScheduleEventButton.addEventListener("click",closeScheduleEventModal);closeScheduleEventButton.dataset.bound="true";}
+        if(cancelScheduleEventButton&&!cancelScheduleEventButton.dataset.bound){cancelScheduleEventButton.addEventListener("click",closeScheduleEventModal);cancelScheduleEventButton.dataset.bound="true";}
+        if(scheduleEventModal&&!scheduleEventModal.dataset.bound){scheduleEventModal.addEventListener("click",function(event){if(event.target===scheduleEventModal)closeScheduleEventModal();});scheduleEventModal.dataset.bound="true";}
+        if(scheduleEventForm&&!scheduleEventForm.dataset.bound){scheduleEventForm.addEventListener("submit",submitScheduledEvent);scheduleEventForm.dataset.bound="true";}
 
         updateOfficerProfile();
         rebuildAvailabilityTableData();
@@ -4515,7 +4525,9 @@
 
         Promise.all([
             loadOfficerProfile(),
-            loadAvailability()
+            loadAvailability(),
+            loadTasks(),
+            loadCalendarData()
         ]).then(function () {
 
             updateOfficerProfile();
