@@ -5811,95 +5811,248 @@ body.availability-modal-open {
 
 
 /* =========================================================
-   AVAILABILITY SCROLL BEHAVIOR
-   Keep the dashboard/page normally scrollable. Only the
-   availability table gets its own vertical scroll area.
-========================================================= */
+   FINAL SCROLL FIX
+   ========================================================= */
 
 html,
 body {
     width: 100%;
     min-height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
+    margin: 0;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
 }
 
 .dashboard-main {
+    width: 100%;
     min-height: 100vh;
     min-height: 100svh;
-    overflow: visible;
+    overflow: visible !important;
 }
 
 .dashboard-content {
-    width: min(1450px, 100%);
-    height: auto;
+    width: 100%;
     min-height: calc(100vh - 78px);
     min-height: calc(100svh - 78px);
-    overflow: visible;
+    height: auto !important;
+    overflow: visible !important;
 }
 
 .page-section {
-    min-height: 0;
+    min-height: 100%;
     height: auto;
-    overflow: visible;
+    overflow: visible !important;
 }
 
-.availability-page .page-content {
-    height: auto;
-    min-height: 0;
-    overflow: visible;
+/* Availability only: lock page, scroll table */
+body:has(#availabilityPage.active-page) {
+    overflow: hidden !important;
 }
 
-.availability-page .availability-card {
-    overflow: hidden;
+.dashboard-content:has(#availabilityPage.active-page) {
+    height: calc(100vh - 78px) !important;
+    height: calc(100svh - 78px) !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
 }
 
-.availability-page .table-container {
-    max-height: 520px;
-    overflow-x: auto;
-    overflow-y: auto;
+#availabilityPage.availability-page {
+    width: 100%;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+}
+
+#availabilityPage.availability-page .page-content {
+    width: 100%;
+    height: 100% !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+}
+
+#availabilityPage.availability-page .page-heading {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+}
+
+#availabilityPage.availability-page .availability-card {
+    width: 100%;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+}
+
+#availabilityPage.availability-page .availability-card-header {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+}
+
+#availabilityPage.availability-page .table-container {
+    width: 100% !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
     overscroll-behavior: contain;
     scrollbar-width: thin;
     scrollbar-color: rgba(0, 216, 192, 0.35) transparent;
 }
 
-.availability-page .availability-table thead th {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: #004b3d;
+#availabilityPage.availability-page .availability-table {
+    width: 100% !important;
+    min-width: 870px !important;
+    border-collapse: collapse;
+    table-layout: fixed;
 }
 
-.availability-page .table-container::-webkit-scrollbar {
+#availabilityPage.availability-page .availability-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+#availabilityPage.availability-page .availability-table thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 21 !important;
+    background: #004b3d !important;
+}
+
+#availabilityPage.availability-page .availability-table tbody tr {
+    height: 67px;
+}
+
+#availabilityPage.availability-page .availability-table tbody td {
+    height: 67px;
+}
+
+#availabilityPage.availability-page .legend,
+#availabilityPage.availability-page .availability-information {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+}
+
+#availabilityPage.availability-page .table-container::-webkit-scrollbar {
     width: 7px;
     height: 7px;
 }
 
-.availability-page .table-container::-webkit-scrollbar-track {
+#availabilityPage.availability-page .table-container::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.availability-page .table-container::-webkit-scrollbar-thumb {
+#availabilityPage.availability-page .table-container::-webkit-scrollbar-thumb {
     background: rgba(0, 216, 192, 0.30);
     border-radius: 10px;
 }
 
-.availability-page .table-container::-webkit-scrollbar-thumb:hover {
+#availabilityPage.availability-page .table-container::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 216, 192, 0.50);
 }
 
 @media (max-width: 800px) {
-    .dashboard-content {
-        min-height: calc(100vh - 68px);
-        min-height: calc(100svh - 68px);
-        height: auto;
+    html,
+    body {
+        overflow-x: hidden !important;
     }
 
-    .availability-page .table-container {
-        max-height: 440px;
+    body:has(#availabilityPage.active-page) {
+        overflow: hidden !important;
+    }
+
+    .dashboard-content:has(#availabilityPage.active-page) {
+        height: calc(100vh - 68px) !important;
+        height: calc(100svh - 68px) !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+    }
+
+    #availabilityPage.availability-page {
+        height: 100% !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+    }
+
+    #availabilityPage.availability-page .page-content {
+        height: 100% !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+    }
+
+    #availabilityPage.availability-page .availability-card {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+    }
+
+    #availabilityPage.availability-page .table-container {
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow-x: auto !important;
+        overflow-y: auto !important;
     }
 }
 
 body.availability-modal-open {
-    overflow: hidden;
+    overflow: hidden !important;
+}
+
+/* =========================================================
+   FINAL BORDERLESS AVAILABILITY EDITOR
+   Restore the borderless table design.
+   The modal/card border remains unchanged.
+   ========================================================= */
+
+.availability-modal .editor-header-container,
+.availability-modal .editor-header-container .editor-table,
+.availability-modal .editor-container .editor-table {
+    border: none !important;
+    outline: none !important;
+}
+
+.availability-modal .editor-table,
+.availability-modal .editor-table-header,
+.availability-modal .editor-table-body {
+    border: none !important;
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+}
+
+.availability-modal .editor-table th,
+.availability-modal .editor-table td,
+.availability-modal .editor-table-header th,
+.availability-modal .editor-table-body td {
+    border: none !important;
+    border-top: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    box-shadow: none !important;
+}
+
+.availability-modal .editor-header-container {
+    background: #004b3d !important;
+}
+
+.availability-modal .editor-table-header th {
+    background: #004b3d !important;
+}
+
+.availability-modal .editor-table-body td {
+    background: #00382f !important;
+}
+
+/* Keep the scrolling area visually continuous with no cell grid. */
+.availability-modal .editor-container {
+    border: none !important;
+    outline: none !important;
 }
