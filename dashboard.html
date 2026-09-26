@@ -3337,7 +3337,7 @@
     function isApiConfigured() {
         return (
             API_URL &&
-            API_URL !== "https://script.google.com/macros/s/AKfycbzTZORNDMsHLxoPeOLNAHurKurC14whoFKxT10RVPyCxP-z9H03slRLTUyhVx7tkyMW/exec"
+            API_URL !== "YOUR_GOOGLE_APPS_SCRIPT_EXEC_URL"
         );
     }
 
@@ -3907,15 +3907,11 @@
                 "saveStatus"
             );
 
-        /* =================================================
-           CHECK API CONFIGURATION
-        ================================================== */
-
         if (!isApiConfigured()) {
 
             if (status) {
                 status.textContent =
-                    "Add your Google Apps Script Web App URL first.";
+                    "Google Apps Script Web App URL is not configured.";
             }
 
             console.error(
@@ -3925,10 +3921,6 @@
             return;
         }
 
-
-        /* =================================================
-           COLLECT SELECTED AVAILABILITY
-        ================================================== */
 
         const records = [];
 
@@ -3945,28 +3937,16 @@
                         day: day,
                         time: time
                     });
-
                 }
-
             });
-
         });
 
 
-        /* =================================================
-           DISABLE SAVE BUTTON
-        ================================================== */
-
         if (saveButton) {
-
             saveButton.disabled = true;
-
             saveButton.dataset.originalText =
                 saveButton.textContent;
-
-            saveButton.textContent =
-                "Saving...";
-
+            saveButton.textContent = "Saving...";
         }
 
         if (status) {
@@ -3975,13 +3955,6 @@
         }
 
 
-        /* =================================================
-           SAVE TO GOOGLE APPS SCRIPT
-
-           Only ONE network request is made here.
-           We do not call getAvailability() afterward.
-        ================================================== */
-
         try {
 
             const payload = {
@@ -3989,22 +3962,15 @@
                 action: "saveAvailability",
 
                 data: {
-
-                    username:
-                        CURRENT_USERNAME,
-
+                    username: CURRENT_USERNAME,
                     officerName:
                         normalize(currentOfficer.Name) ||
                         "MC RJ Escote",
-
                     position:
                         normalize(currentOfficer.Position) ||
                         "Vice President",
-
                     records: records
-
                 }
-
             };
 
 
@@ -4017,93 +3983,59 @@
                             "Content-Type":
                                 "text/plain;charset=utf-8"
                         },
-                        body:
-                            JSON.stringify(payload),
+                        body: JSON.stringify(payload),
                         cache: "no-store"
                     }
                 );
 
 
-            /* =================================================
-               CHECK HTTP RESPONSE
-            ================================================== */
-
             if (!response.ok) {
-
                 throw new Error(
                     "Save request failed with status " +
                     response.status + "."
                 );
-
             }
 
 
-            /* =================================================
-               READ GOOGLE APPS SCRIPT RESPONSE
-            ================================================== */
-
-            let result;
-
-            try {
-
-                result =
-                    await response.json();
-
-            } catch (parseError) {
-
-                throw new Error(
-                    "The Web App returned an invalid response."
-                );
-
-            }
+            const result =
+                await response.json();
 
 
-            if (
-                !result ||
-                result.success !== true
-            ) {
-
+            if (!result || result.success !== true) {
                 throw new Error(
                     result && result.message
                         ? result.message
                         : "The availability could not be saved."
                 );
-
             }
 
 
-            /* =================================================
-               UPDATE LOCAL AVAILABILITY DATA
-
-               The old code performed another GET request here:
-
-                   fetchJson("getAvailability")
-
-               That second request has been removed.
-               The table is updated immediately from the records
-               that were just successfully saved.
-            ================================================== */
+            /*
+               The save request succeeded. Update the local copy
+               immediately instead of making a second GET request
+               to Google Apps Script. This makes the Save button
+               considerably faster while keeping the displayed
+               table synchronized with the data just submitted.
+            */
 
             availabilityRecords =
                 availabilityRecords.filter(
                     function (record) {
 
-                        return normalizeUsername(
-                            getRecordValue(
-                                record,
-                                "Username"
-                            )
-                        ) !== normalizeUsername(
-                            CURRENT_USERNAME
+                        return (
+                            normalize(
+                                getRecordValue(
+                                    record,
+                                    "Username"
+                                )
+                            ).toLowerCase() !==
+                            normalize(
+                                CURRENT_USERNAME
+                            ).toLowerCase()
                         );
-
                     }
                 );
 
-
-            /* =================================================
-               ADD NEWLY SAVED RECORDS LOCALLY
-            ================================================== */
 
             records.forEach(function (record) {
 
@@ -4113,15 +4045,11 @@
                         CURRENT_USERNAME,
 
                     "Officer Name":
-                        normalize(
-                            currentOfficer.Name
-                        ) ||
+                        normalize(currentOfficer.Name) ||
                         "MC RJ Escote",
 
                     Position:
-                        normalize(
-                            currentOfficer.Position
-                        ) ||
+                        normalize(currentOfficer.Position) ||
                         "Vice President",
 
                     Day:
@@ -4134,44 +4062,25 @@
                         "Available"
 
                 });
-
             });
 
 
-            /* =================================================
-               REFRESH TABLE LOCALLY
-            ================================================== */
-
             rebuildAvailabilityTableData();
-
             renderAvailabilityTable();
 
             initializeMyAvailability();
-
             renderEditorTable();
 
 
-            /* =================================================
-               SUCCESS MESSAGE
-            ================================================== */
-
             if (status) {
-
                 status.textContent =
                     "Availability saved successfully.";
-
             }
 
 
-            /* =================================================
-               CLOSE MODAL
-            ================================================== */
-
             setTimeout(
                 function () {
-
                     closeAvailabilityModal();
-
                 },
                 300
             );
@@ -4185,41 +4094,28 @@
             );
 
             if (status) {
-
                 status.textContent =
                     error && error.message
                         ? error.message
-                        : "Unable to save. Please check your connection and try again.";
-
+                        : "Unable to save. Please check your connection and Web App URL.";
             }
 
         } finally {
 
-            /* =================================================
-               RESTORE SAVE BUTTON
-            ================================================== */
-
             if (saveButton) {
-
                 saveButton.disabled = false;
 
-                if (
-                    saveButton.dataset.originalText
-                ) {
-
+                if (saveButton.dataset.originalText) {
                     saveButton.textContent =
                         saveButton.dataset.originalText;
-
                 }
-
             }
-
         }
-
     }
 
-    
-window.renderAvailabilityTable =
+
+
+    window.renderAvailabilityTable =
         renderAvailabilityTable;
 
 
