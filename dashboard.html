@@ -573,8 +573,8 @@
                             TODAY
                         </p>
 
-                        <h1>
-                            Good evening,
+                        <h1 id="welcomeGreeting">
+                            Hello,
                             <span>MC RJ</span>.
                         </h1>
 
@@ -652,11 +652,11 @@
                                 MY TASKS
                             </span>
 
-                            <strong>
-                                3
+                            <strong id="dashboardTasksCount">
+                                0
                             </strong>
 
-                            <small>
+                            <small id="dashboardTasksLabel">
                                 Active tasks
                             </small>
 
@@ -711,11 +711,11 @@
                                 EVENTS
                             </span>
 
-                            <strong>
-                                2
+                            <strong id="dashboardEventsCount">
+                                0
                             </strong>
 
-                            <small>
+                            <small id="dashboardEventsLabel">
                                 Upcoming
                             </small>
 
@@ -761,11 +761,11 @@
                                 MEETINGS
                             </span>
 
-                            <strong>
-                                1
+                            <strong id="dashboardMeetingsCount">
+                                0
                             </strong>
 
-                            <small>
+                            <small id="dashboardMeetingsLabel">
                                 This week
                             </small>
 
@@ -801,11 +801,11 @@
                                 AVAILABILITY
                             </span>
 
-                            <strong>
-                                Available
+                            <strong id="dashboardAvailabilityValue">
+                                —
                             </strong>
 
-                            <small>
+                            <small id="dashboardAvailabilityLabel">
                                 Today
                             </small>
 
@@ -851,7 +851,7 @@
 
 
 
-                        <div class="activity-list">
+                        <div class="activity-list" id="dashboardActivityList">
 
 
                             <div class="activity-item">
@@ -997,7 +997,7 @@
 
 
 
-                        <div class="next-event-card">
+                        <div class="next-event-card" id="dashboardNextEventCard">
 
                             <div class="next-event-date">
 
@@ -1736,7 +1736,10 @@
                 <div class="task-field"><label for="taskAssignedToInput">Assign To</label><select id="taskAssignedToInput" required><option value="">Select officer</option></select></div>
                 <div class="task-field"><label for="taskDueDateInput">Due Date</label><input id="taskDueDateInput" type="date" required></div>
                 <div class="task-field"><label for="taskPriorityInput">Priority</label><select id="taskPriorityInput"><option value="Normal">Normal</option><option value="High">High</option><option value="Urgent">Urgent</option></select></div>
-                <div class="task-field"><label for="taskStatusInput">Status</label><select id="taskStatusInput"><option value="Pending">Pending</option><option value="In Progress">In Progress</option></select></div>
+                <div class="task-field">
+                    <label>Initial Status</label>
+                    <div class="task-initial-status">PENDING <span>Automatically assigned</span></div>
+                </div>
             </div>
             <div class="task-form-status" id="taskFormStatus" aria-live="polite"></div>
             <div class="task-form-actions">
@@ -3434,6 +3437,325 @@
 
 
 
+
+    /* =====================================================
+       LIVE DASHBOARD
+       Dashboard values are read from Google Sheets so the
+       home page does not stay on the original sample data.
+    ===================================================== */
+
+    function dashboardDateKey(value) {
+        const text = normalize(value);
+        if (!text) return "";
+
+        const direct = text.match(/^(\d{4}-\d{2}-\d{2})/);
+        if (direct) return direct[1];
+
+        const parsed = new Date(text);
+        if (isNaN(parsed.getTime())) return "";
+
+        const year = parsed.getFullYear();
+        const month = String(parsed.getMonth() + 1).padStart(2, "0");
+        const day = String(parsed.getDate()).padStart(2, "0");
+        return year + "-" + month + "-" + day;
+    }
+
+    function dashboardTodayKey() {
+        const now = new Date();
+        return now.getFullYear() + "-" +
+            String(now.getMonth() + 1).padStart(2, "0") + "-" +
+            String(now.getDate()).padStart(2, "0");
+    }
+
+    function dashboardWeekStart(date) {
+        const d = new Date(date);
+        const day = d.getDay();
+        const diff = day === 0 ? -6 : 1 - day;
+        d.setDate(d.getDate() + diff);
+        d.setHours(0, 0, 0, 0);
+        return d;
+    }
+
+    function dashboardTimeMinutes(value) {
+        const text = normalize(value).toUpperCase();
+        if (!text) return 9999;
+
+        const match = text.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/);
+        if (!match) return 9999;
+
+        let hour = Number(match[1]);
+        const minute = Number(match[2]);
+        const meridiem = match[3];
+
+        if (meridiem === "AM" && hour === 12) hour = 0;
+        if (meridiem === "PM" && hour !== 12) hour += 12;
+
+        return hour * 60 + minute;
+    }
+
+    function dashboardFormatTime(value) {
+        const text = normalize(value);
+        if (!text) return "";
+
+        if (/^\d{1,2}:\d{2}\s*(AM|PM)$/i.test(text)) {
+            return text.toUpperCase();
+        }
+
+        const match = text.match(/^(\d{1,2}):(\d{2})$/);
+        if (match) {
+            let hour = Number(match[1]);
+            const minute = Number(match[2]);
+            const suffix = hour >= 12 ? "PM" : "AM";
+            hour = hour % 12 || 12;
+            return hour + ":" + String(minute).padStart(2, "0") + " " + suffix;
+        }
+
+        return text;
+    }
+
+    function dashboardTaskStatus(task) {
+        return normalizeTaskStatus(getRecordValue(task, "Status") || "Pending");
+    }
+
+    function dashboardIsOpenTask(task) {
+        return dashboardTaskStatus(task) !== "completed";
+    }
+
+    function dashboardGreeting() {
+        const now = new Date();
+        const hour = now.getHours();
+
+        if (hour >= 5 && hour < 12) return "Good morning";
+        if (hour >= 12 && hour < 18) return "Good afternoon";
+        if (hour >= 18 && hour < 22) return "Good evening";
+        return "Good night";
+    }
+
+    function updateDashboardGreeting() {
+        const greeting = document.getElementById("welcomeGreeting");
+        const nameSpan = greeting ? greeting.querySelector("span") : null;
+        if (!greeting || !nameSpan) return;
+
+        const firstName = normalize(currentOfficer.Name || sessionStorage.getItem("psabeName") || CURRENT_USERNAME)
+            .split(/\s+/)[0] || "Officer";
+
+        const prefix = document.createTextNode(dashboardGreeting() + ", ");
+        greeting.innerHTML = "";
+        greeting.appendChild(prefix);
+
+        nameSpan.textContent = firstName;
+        greeting.appendChild(nameSpan);
+        greeting.appendChild(document.createTextNode("."));
+    }
+
+    function dashboardActivityHtml(item) {
+        const type = item.type || "event";
+        const typeLabel = type === "task" ? "TASK" : (type === "meeting" ? "MEETING" : "EVENT");
+        const lineClass = type === "task" ? "task-line" : (type === "meeting" ? "meeting-line" : "event-line");
+        const typeClass = type === "task" ? "task-type" : (type === "meeting" ? "meeting-type" : "event-type");
+
+        return '<div class="activity-item">' +
+            '<div class="activity-time">' +
+                '<strong>' + escapeHtml(item.time || "ALL DAY") + '</strong>' +
+                '<span>' + escapeHtml(item.timeLabel || "") + '</span>' +
+            '</div>' +
+            '<div class="activity-line ' + lineClass + '"></div>' +
+            '<div class="activity-details">' +
+                '<span class="activity-type ' + typeClass + '">' + typeLabel + '</span>' +
+                '<h3>' + escapeHtml(item.title || "Untitled activity") + '</h3>' +
+                '<p>' + escapeHtml(item.description || "") + '</p>' +
+            '</div>' +
+        '</div>';
+    }
+
+    function renderLiveDashboard(tasks, events) {
+        const todayKey = dashboardTodayKey();
+        const now = new Date();
+        const weekStart = dashboardWeekStart(now);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        weekEnd.setHours(23, 59, 59, 999);
+
+        const visibleTasks = IS_STEERING
+            ? tasks
+            : tasks.filter(function(task) {
+                return normalizeUsername(getRecordValue(task, "Assigned To")) === normalizeUsername(CURRENT_USERNAME);
+            });
+
+        const activeTasks = visibleTasks.filter(dashboardIsOpenTask);
+
+        const upcomingEvents = events.filter(function(event) {
+            const status = normalize(getRecordValue(event, "Status")).toLowerCase();
+            if (status && status !== "active") return false;
+
+            const key = dashboardDateKey(getRecordValue(event, "Date"));
+            if (!key) return false;
+
+            return key >= todayKey;
+        });
+
+        const weekMeetings = events.filter(function(event) {
+            const status = normalize(getRecordValue(event, "Status")).toLowerCase();
+            if (status && status !== "active") return false;
+
+            const key = dashboardDateKey(getRecordValue(event, "Date"));
+            if (!key) return false;
+
+            const date = new Date(key + "T00:00:00");
+            return date >= weekStart && date <= weekEnd &&
+                normalize(getRecordValue(event, "Type")).toLowerCase() === "meeting";
+        });
+
+        const todayTasks = visibleTasks.filter(function(task) {
+            return dashboardDateKey(getRecordValue(task, "Due Date")) === todayKey &&
+                dashboardIsOpenTask(task);
+        });
+
+        const todayEvents = events.filter(function(event) {
+            const status = normalize(getRecordValue(event, "Status")).toLowerCase();
+            return (!status || status === "active") &&
+                dashboardDateKey(getRecordValue(event, "Date")) === todayKey;
+        });
+
+        const activities = [];
+
+        todayTasks.forEach(function(task) {
+            activities.push({
+                type: "task",
+                title: getRecordValue(task, "Task Title") || "Task",
+                description: getRecordValue(task, "Description") || "Assigned task",
+                time: "DUE",
+                timeLabel: getRecordValue(task, "Priority") ? getRecordValue(task, "Priority") + " priority" : ""
+            });
+        });
+
+        todayEvents.forEach(function(event) {
+            const typeText = normalize(getRecordValue(event, "Type")).toLowerCase();
+            const isMeeting = typeText === "meeting";
+            const start = dashboardFormatTime(getRecordValue(event, "Start Time"));
+            const end = dashboardFormatTime(getRecordValue(event, "End Time"));
+
+            activities.push({
+                type: isMeeting ? "meeting" : "event",
+                title: getRecordValue(event, "Title") || "Activity",
+                description: getRecordValue(event, "Description") || getRecordValue(event, "Location") || "Scheduled activity",
+                time: start || "ALL DAY",
+                timeLabel: end ? "TO " + end : (getRecordValue(event, "Location") || "")
+            });
+        });
+
+        activities.sort(function(a, b) {
+            return dashboardTimeMinutes(a.time) - dashboardTimeMinutes(b.time);
+        });
+
+        const tasksCount = document.getElementById("dashboardTasksCount");
+        const eventsCount = document.getElementById("dashboardEventsCount");
+        const meetingsCount = document.getElementById("dashboardMeetingsCount");
+        const activityList = document.getElementById("dashboardActivityList");
+        const nextCard = document.getElementById("dashboardNextEventCard");
+
+        if (tasksCount) tasksCount.textContent = String(activeTasks.length);
+        if (eventsCount) eventsCount.textContent = String(upcomingEvents.length);
+        if (meetingsCount) meetingsCount.textContent = String(weekMeetings.length);
+
+        const taskLabel = document.getElementById("dashboardTasksLabel");
+        const eventLabel = document.getElementById("dashboardEventsLabel");
+        const meetingLabel = document.getElementById("dashboardMeetingsLabel");
+        if (taskLabel) taskLabel.textContent = "Active tasks";
+        if (eventLabel) eventLabel.textContent = "Upcoming";
+        if (meetingLabel) meetingLabel.textContent = "This week";
+
+        if (activityList) {
+            if (!activities.length) {
+                activityList.innerHTML =
+                    '<div class="dashboard-empty-activity">' +
+                    '<strong>No activities scheduled for today.</strong>' +
+                    '<span>Your dashboard will update automatically when tasks or activities are added.</span>' +
+                    '</div>';
+            } else {
+                activityList.innerHTML = activities.slice(0, 6).map(dashboardActivityHtml).join("");
+            }
+        }
+
+        const upcomingItems = [];
+
+        upcomingEvents.forEach(function(event) {
+            const key = dashboardDateKey(getRecordValue(event, "Date"));
+            if (!key) return;
+
+            upcomingItems.push({
+                date: key,
+                title: getRecordValue(event, "Title") || "Activity",
+                description: getRecordValue(event, "Description") || getRecordValue(event, "Location") || "Scheduled activity",
+                type: normalize(getRecordValue(event, "Type")) || "Event",
+                time: dashboardFormatTime(getRecordValue(event, "Start Time"))
+            });
+        });
+
+        visibleTasks.filter(dashboardIsOpenTask).forEach(function(task) {
+            const key = dashboardDateKey(getRecordValue(task, "Due Date"));
+            if (!key || key < todayKey) return;
+
+            upcomingItems.push({
+                date: key,
+                title: getRecordValue(task, "Task Title") || "Task",
+                description: getRecordValue(task, "Description") || "Assigned task",
+                type: "Task",
+                time: "Due date"
+            });
+        });
+
+        upcomingItems.sort(function(a, b) {
+            return a.date.localeCompare(b.date);
+        });
+
+        if (nextCard) {
+            const next = upcomingItems[0];
+
+            if (!next) {
+                nextCard.innerHTML =
+                    '<div class="next-event-info">' +
+                        '<span>UPCOMING</span>' +
+                        '<h3>No upcoming activities</h3>' +
+                        '<p>There are no scheduled events or open task due dates.</p>' +
+                    '</div>';
+            } else {
+                const date = new Date(next.date + "T00:00:00");
+                const month = date.toLocaleDateString("en-PH", {month:"short"}).toUpperCase();
+                const day = date.getDate();
+
+                nextCard.innerHTML =
+                    '<div class="next-event-date">' +
+                        '<span>' + month + '</span>' +
+                        '<strong>' + day + '</strong>' +
+                    '</div>' +
+                    '<div class="next-event-info">' +
+                        '<span>' + escapeHtml(next.type.toUpperCase()) + (next.time && next.time !== "Due date" ? " · " + escapeHtml(next.time) : "") + '</span>' +
+                        '<h3>' + escapeHtml(next.title) + '</h3>' +
+                        '<p>' + escapeHtml(next.description) + '</p>' +
+                    '</div>';
+            }
+        }
+    }
+
+    async function loadDashboardData() {
+        updateDashboardGreeting();
+
+        try {
+            const results = await Promise.all([
+                fetchJson("getTasks"),
+                fetchJson("getEvents")
+            ]);
+
+            const tasks = Array.isArray(results[0].data) ? results[0].data : [];
+            const events = Array.isArray(results[1].data) ? results[1].data : [];
+
+            renderLiveDashboard(tasks, events);
+        } catch (error) {
+            console.error("Dashboard data loading error:", error);
+        }
+    }
+
     /* =====================================================
        TASK MANAGEMENT
        Steering-only assignment controls
@@ -3475,11 +3797,16 @@
         const list = document.getElementById("tasksList");
         const count = document.getElementById("tasksCountLabel");
         if (!list) return;
+
         if (count) count.textContent = String(tasks.length);
+
         if (!tasks.length) {
-            list.innerHTML = '<div class="tasks-empty"><strong>No tasks yet</strong><span>' + (IS_STEERING ? "No task records have been created." : "You currently have no assigned tasks.") + '</span></div>';
+            list.innerHTML = '<div class="tasks-empty"><strong>No tasks yet</strong><span>' +
+                (IS_STEERING ? "No task records have been created." : "You currently have no assigned tasks.") +
+                '</span></div>';
             return;
         }
+
         list.innerHTML = tasks.map(function(task) {
             const title = getRecordValue(task, "Task Title");
             const description = getRecordValue(task, "Description");
@@ -3487,12 +3814,46 @@
             const assignedBy = getRecordValue(task, "Assigned By");
             const dueDate = getRecordValue(task, "Due Date");
             const priority = getRecordValue(task, "Priority") || "Normal";
-            const status = getRecordValue(task, "Status") || "Pending";
-            const statusClass = normalizeTaskStatus(status);
+            const rawStatus = getRecordValue(task, "Status") || "Pending";
+            const normalizedStatus = normalizeTaskStatus(rawStatus);
             const taskId = getRecordValue(task, "Task ID");
-            const normalizedStatus = status.toLowerCase();
-            const statusControl = !IS_STEERING ? '<select class="task-status-select" data-task-id="' + escapeHtml(taskId) + '" aria-label="Update task status"><option value="Pending"' + (normalizedStatus === "pending" ? " selected" : "") + '>Pending</option><option value="In Progress"' + (normalizedStatus === "in progress" ? " selected" : "") + '>In Progress</option><option value="Complete"' + ((normalizedStatus === "complete" || normalizedStatus === "completed") ? " selected" : "") + '>Complete</option></select>' : '<span class="task-status ' + escapeHtml(statusClass) + '">' + escapeHtml(status) + '</span>';
-            return '<article class="task-row"><div class="task-main"><h3>' + escapeHtml(title || "Untitled task") + '</h3><p>' + escapeHtml(description || "No description provided.") + '</p><div class="task-meta">' + (IS_STEERING ? '<span class="task-chip">TO: ' + escapeHtml(assignedTo || "Unassigned") + '</span>' : '') + '<span class="task-chip">DUE: ' + escapeHtml(dueDate || "No due date") + '</span><span class="task-chip">PRIORITY: ' + escapeHtml(priority) + '</span>' + (IS_STEERING && assignedBy ? '<span class="task-chip">BY: ' + escapeHtml(assignedBy) + '</span>' : '') + '</div></div>' + statusControl + '<span class="task-chip">' + escapeHtml(taskId) + '</span></article>';
+
+            let statusControl;
+
+            if (IS_STEERING) {
+                statusControl =
+                    '<span class="task-status ' + escapeHtml(normalizedStatus || "pending") + '">' +
+                    escapeHtml(normalizedStatus === "completed" ? "Completed" : (rawStatus || "Pending")) +
+                    '</span>';
+            } else {
+                /*
+                   Officers own the task progress.
+                   Steering only assigns it. The task starts as Pending and
+                   officers can move it to In Progress or Completed.
+                */
+                statusControl =
+                    '<select class="task-status-select" data-task-id="' + escapeHtml(taskId) +
+                    '" aria-label="Update task status">' +
+                    '<option value="Pending" disabled' + (normalizedStatus === "pending" ? " selected" : "") + '>Pending</option>' +
+                    '<option value="In Progress"' + (normalizedStatus === "in-progress" ? " selected" : "") + '>In Progress</option>' +
+                    '<option value="Completed"' + (normalizedStatus === "completed" ? " selected" : "") + '>Completed</option>' +
+                    '</select>';
+            }
+
+            return '<article class="task-row">' +
+                '<div class="task-main">' +
+                    '<h3>' + escapeHtml(title || "Untitled task") + '</h3>' +
+                    '<p>' + escapeHtml(description || "No description provided.") + '</p>' +
+                    '<div class="task-meta">' +
+                        (IS_STEERING ? '<span class="task-chip">TO: ' + escapeHtml(assignedTo || "Unassigned") + '</span>' : '') +
+                        '<span class="task-chip">DUE: ' + escapeHtml(dueDate || "No due date") + '</span>' +
+                        '<span class="task-chip">PRIORITY: ' + escapeHtml(priority) + '</span>' +
+                        (IS_STEERING && assignedBy ? '<span class="task-chip">BY: ' + escapeHtml(assignedBy) + '</span>' : '') +
+                    '</div>' +
+                '</div>' +
+                statusControl +
+                '<span class="task-chip">' + escapeHtml(taskId) + '</span>' +
+            '</article>';
         }).join("");
     }
     async function loadTaskAssignees() {
@@ -3562,7 +3923,7 @@
             assignedBy: CURRENT_USERNAME,
             dueDate: normalize(document.getElementById("taskDueDateInput")?.value),
             priority: normalize(document.getElementById("taskPriorityInput")?.value) || "Normal",
-            status: normalize(document.getElementById("taskStatusInput")?.value) || "Pending"
+            status: "Pending"
         }};
         if (!payload.data.title || !payload.data.assignedTo || !payload.data.dueDate) {
             if (status) status.textContent = "Task title, assigned officer, and due date are required.";
@@ -3635,6 +3996,7 @@
             if (!result.success) throw new Error(result.message || "Task status could not be updated.");
             await loadTasks();
             await loadCalendarData();
+            await loadDashboardData();
         } catch (error) { console.error("Task status update error:",error); alert(error.message || "Task status could not be updated."); await loadTasks(); }
     }
 
@@ -4527,13 +4889,21 @@
             loadOfficerProfile(),
             loadAvailability(),
             loadTasks(),
-            loadCalendarData()
+            loadCalendarData(),
+            loadDashboardData()
         ]).then(function () {
 
             updateOfficerProfile();
+            updateDashboardGreeting();
             renderAvailabilityTable();
 
         });
+
+        // Keep dashboard information current without requiring a page reload.
+        setInterval(function () {
+            updateDashboardGreeting();
+            loadDashboardData();
+        }, 60000);
     }
 
 
