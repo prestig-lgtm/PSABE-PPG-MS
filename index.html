@@ -262,7 +262,7 @@
             ===================================================== */
 
             const WEB_APP_URL =
-                "YOUR_GOOGLE_APPS_SCRIPT_EXEC_URL";
+                "https://script.google.com/macros/s/AKfycbzTZORNDMsHLxoPeOLNAHurKurC14whoFKxT10RVPyCxP-z9H03slRLTUyhVx7tkyMW/exec";
 
             loginForm.addEventListener("submit", async function (event) {
                 event.preventDefault();
@@ -281,7 +281,7 @@
 
                 if (
                     !WEB_APP_URL ||
-                    WEB_APP_URL === "YOUR_GOOGLE_APPS_SCRIPT_EXEC_URL"
+                    WEB_APP_URL === "https://script.google.com/macros/s/AKfycbzTZORNDMsHLxoPeOLNAHurKurC14whoFKxT10RVPyCxP-z9H03slRLTUyhVx7tkyMW/exec"
                 ) {
                     showMessage(
                         "The Google Sheets login connection has not been configured yet.",
