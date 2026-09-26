@@ -5921,3 +5921,131 @@ body.availability-modal-open {
 .availability-modal .editor-container::-webkit-scrollbar-corner {
     background: transparent !important;
 }
+
+/* =========================================================
+   FINAL MY AVAILABILITY SCROLLBAR / GRID ALIGNMENT FIX
+   Reference behavior:
+   - scrollbar stays at the far right edge of the scrolling area
+   - header and body reserve the same 7px scrollbar space
+   - no extra scrollbar gutter
+   - no change to column proportions
+   - centralized Officer Availability table is untouched
+========================================================= */
+
+.availability-modal .editor-header-container {
+    box-sizing: border-box !important;
+    padding-right: 7px !important;
+    overflow: hidden !important;
+}
+
+.availability-modal .editor-container {
+    box-sizing: border-box !important;
+    padding-right: 0 !important;
+    padding-left: 29px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    scrollbar-gutter: auto !important;
+}
+
+.availability-modal .editor-header-container .editor-table,
+.availability-modal .editor-container .editor-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+    margin: 0 !important;
+}
+
+.availability-modal .editor-header-container .editor-table col.editor-time-col,
+.availability-modal .editor-container .editor-table col.editor-time-col {
+    width: 20% !important;
+}
+
+.availability-modal .editor-header-container .editor-table col:not(.editor-time-col),
+.availability-modal .editor-container .editor-table col:not(.editor-time-col) {
+    width: 16% !important;
+}
+
+.availability-modal .editor-header-container th:first-child,
+.availability-modal .editor-container td:first-child {
+    width: 20% !important;
+    max-width: 20% !important;
+}
+
+.availability-modal .editor-header-container th:not(:first-child),
+.availability-modal .editor-container td:not(:first-child) {
+    width: 16% !important;
+    max-width: 16% !important;
+}
+
+.availability-modal .editor-container::-webkit-scrollbar {
+    width: 7px !important;
+    height: 7px !important;
+}
+
+.availability-modal .editor-container::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+.availability-modal .editor-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 216, 192, 0.30) !important;
+    border-radius: 10px !important;
+    border: none !important;
+}
+
+.availability-modal .editor-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 216, 192, 0.45) !important;
+}
+
+.availability-modal .editor-container::-webkit-scrollbar-corner {
+    background: transparent !important;
+}
+
+.availability-modal .editor-container {
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(0, 216, 192, 0.30) transparent !important;
+}
+
+@media (max-width: 700px) {
+    .availability-modal .editor-header-container {
+        width: calc(100% - 32px) !important;
+        margin-left: 16px !important;
+        margin-right: 16px !important;
+        padding-right: 7px !important;
+    }
+
+    .availability-modal .editor-container {
+        width: calc(100% - 32px) !important;
+        margin-left: 16px !important;
+        margin-right: 16px !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        overflow-x: auto !important;
+        overflow-y: auto !important;
+        scrollbar-gutter: auto !important;
+    }
+
+    .availability-modal .editor-header-container .editor-table,
+    .availability-modal .editor-container .editor-table {
+        min-width: 700px !important;
+        width: 100% !important;
+    }
+}
+
+@media (max-width: 380px) {
+    .availability-modal .editor-header-container {
+        width: calc(100% - 28px) !important;
+        margin-left: 14px !important;
+        margin-right: 14px !important;
+        padding-right: 7px !important;
+    }
+
+    .availability-modal .editor-container {
+        width: calc(100% - 28px) !important;
+        margin-left: 14px !important;
+        margin-right: 14px !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+}
