@@ -5839,3 +5839,48 @@ body.availability-modal-open {
 .availability-modal .editor-container .editor-table tr {
     border: none !important;
 }
+
+/* =========================================================
+   MY AVAILABILITY SCROLLBAR - MATCH OFFICER AVAILABILITY
+   Design only. Checkbox behavior is unchanged.
+   The scrollbar stays directly along the right edge of
+   the editable table's scrolling area.
+========================================================= */
+.availability-modal .editor-container {
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(0, 216, 192, 0.35) transparent !important;
+    scrollbar-gutter: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+.availability-modal .editor-container::-webkit-scrollbar {
+    width: 7px !important;
+    height: 7px !important;
+}
+
+.availability-modal .editor-container::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+.availability-modal .editor-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 216, 192, 0.30) !important;
+    border-radius: 10px !important;
+    border: none !important;
+}
+
+.availability-modal .editor-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 216, 192, 0.45) !important;
+}
+
+.availability-modal .editor-container::-webkit-scrollbar-corner {
+    background: transparent !important;
+}
+
+/* Keep the editable table itself unchanged, including checkboxes. */
+.availability-modal .editor-container input[type="checkbox"] {
+    appearance: auto !important;
+    -webkit-appearance: checkbox !important;
+}
