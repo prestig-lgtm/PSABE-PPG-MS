@@ -50,6 +50,13 @@
 
 
 <body>
+<script>
+    (function () {
+        if (sessionStorage.getItem("psabeLoggedIn") !== "true") {
+            window.location.replace("index.html");
+        }
+    })();
+</script>
 
 
     <!-- =====================================================
@@ -1966,24 +1973,6 @@
                     const now =
                         new Date();
 
-                    /* Update the greeting from the actual local time. */
-                    const hour = now.getHours();
-                    let greeting = "Good evening";
-
-                    if (hour >= 5 && hour < 12) {
-                        greeting = "Good morning";
-                    } else if (hour >= 12 && hour < 18) {
-                        greeting = "Good afternoon";
-                    }
-
-                    const welcomeHeading =
-                        document.querySelector(".welcome-section h1");
-
-                    if (welcomeHeading && welcomeHeading.firstChild) {
-                        welcomeHeading.firstChild.textContent =
-                            greeting + ", ";
-                    }
-
 
                     currentDate.textContent =
                         now
@@ -3255,15 +3244,29 @@
        GOOGLE APPS SCRIPT SETTINGS
     ===================================================== */
 
-    const API_URL = "https://script.google.com/macros/s/AKfycbzTZORNDMsHLxoPeOLNAHurKurC14whoFKxT10RVPyCxP-z9H03slRLTUyhVx7tkyMW/exec";
+    const API_URL = "YOUR_GOOGLE_APPS_SCRIPT_EXEC_URL";
+
+    /* =====================================================
+       ROLE / ACCESS LEVEL
+       Steering       = management access
+       Committee Head = regular access for now
+       Officer        = regular access
+    ===================================================== */
+
+    const CURRENT_ACCESS_LEVEL =
+        (sessionStorage.getItem("psabeAccessLevel") || "Officer").trim();
+
+    const IS_STEERING =
+        CURRENT_ACCESS_LEVEL.toLowerCase() === "steering";
+
+    const IS_COMMITTEE_HEAD =
+        CURRENT_ACCESS_LEVEL.toLowerCase() === "committee head";
+
+    const IS_OFFICER =
+        CURRENT_ACCESS_LEVEL.toLowerCase() === "officer";
 
     const CURRENT_USERNAME =
-        String(sessionStorage.getItem("psabeUsername") || "").trim();
-
-    if (!CURRENT_USERNAME) {
-        window.location.replace("index.html");
-        return;
-    }
+        sessionStorage.getItem("psabeUsername") || "Mac";
 
 
     /* =====================================================
@@ -3271,16 +3274,16 @@
     ===================================================== */
 
     const timeSlots = [
-        "7:00–8:00AM",
-        "8:00–9:00AM",
-        "9:00–10:00AM",
-        "10:00–11:00AM",
-        "11:00–12:00NN",
-        "12:00–1:00PM",
-        "1:00–2:00PM",
-        "3:00–4:00PM",
-        "4:00–5:00PM",
-        "5:00–6:00PM"
+        "7:00–8:00",
+        "8:00–9:00",
+        "9:00–10:00",
+        "10:00–11:00",
+        "11:00–12:00",
+        "12:00–1:00",
+        "1:00–2:00",
+        "3:00–4:00",
+        "4:00–5:00",
+        "5:00–6:00"
     ];
 
     const days = [
@@ -3302,11 +3305,14 @@
     let currentOfficer = {
         Username: CURRENT_USERNAME,
         Name:
-            String(sessionStorage.getItem("psabeName") || "").trim(),
+            sessionStorage.getItem("psabeName") ||
+            "MC RJ Escote",
         Position:
-            String(sessionStorage.getItem("psabePosition") || "").trim(),
+            sessionStorage.getItem("psabePosition") ||
+            "Vice President",
         Status:
-            String(sessionStorage.getItem("psabeStatus") || "").trim()
+            sessionStorage.getItem("psabeStatus") ||
+            "Active"
     };
 
     let myAvailability = {};
@@ -3329,9 +3335,8 @@
 
 
     function isApiConfigured() {
-        return Boolean(
+        return (
             API_URL &&
-            API_URL.trim() !== "" &&
             API_URL !== "YOUR_GOOGLE_APPS_SCRIPT_EXEC_URL"
         );
     }
@@ -3344,8 +3349,7 @@
                 : "&";
 
         return API_URL + separator +
-            "action=" + encodeURIComponent(action) +
-            "&_=" + Date.now();
+            "action=" + encodeURIComponent(action);
     }
 
 
@@ -3389,13 +3393,43 @@
        LOAD OFFICER PROFILE
     ===================================================== */
 
+    function updateAccessLevelUI() {
+        const profileArea = document.querySelector(".profile-area");
+        if (!profileArea) return;
+
+        let roleBadge = document.getElementById("currentAccessLevel");
+
+        if (!roleBadge) {
+            roleBadge = document.createElement("small");
+            roleBadge.id = "currentAccessLevel";
+            roleBadge.style.display = "block";
+            roleBadge.style.marginTop = "2px";
+            roleBadge.style.fontSize = "11px";
+            roleBadge.style.fontWeight = "600";
+            roleBadge.style.letterSpacing = "0.04em";
+            roleBadge.style.opacity = "0.78";
+
+            const profileText =
+                profileArea.querySelector(".profile-text");
+
+            if (profileText) {
+                profileText.appendChild(roleBadge);
+            }
+        }
+
+        roleBadge.textContent = CURRENT_ACCESS_LEVEL;
+    }
+
+
     function updateOfficerProfile() {
 
         const name =
-            normalize(currentOfficer.Name);
+            normalize(currentOfficer.Name) ||
+            "Officer";
 
         const position =
-            normalize(currentOfficer.Position);
+            normalize(currentOfficer.Position) ||
+            "Officer";
 
         const initials = name
             .split(/\s+/)
@@ -3425,6 +3459,8 @@
                 element.textContent = initials || "MC";
             });
 
+        updateAccessLevelUI();
+
 
         const greetingName =
             document.querySelector(
@@ -3432,15 +3468,12 @@
             );
 
         if (greetingName) {
-            const nameParts =
-                name.split(/\s+/).filter(Boolean);
-
             const firstName =
-                nameParts[0] || "Officer";
+                name.split(/\s+/).filter(Boolean)[0] || "MC RJ";
 
             greetingName.textContent =
-                firstName.toUpperCase() === "MC" && nameParts[1]
-                    ? nameParts.slice(0, 2).join(" ")
+                firstName === "MC"
+                    ? name.split(/\s+/).slice(0, 2).join(" ")
                     : firstName;
         }
 
@@ -3859,37 +3892,6 @@
 
 
     /* =====================================================
-       APPLY SAVED AVAILABILITY LOCALLY
-       Updates the dashboard immediately after a successful save.
-    ===================================================== */
-
-    function applyMyAvailabilityLocally(records) {
-
-        const username =
-            CURRENT_USERNAME.toLowerCase();
-
-        availabilityRecords =
-            availabilityRecords.filter(function (record) {
-                return normalize(record.Username).toLowerCase() !== username;
-            });
-
-        records.forEach(function (record) {
-            availabilityRecords.push({
-                Username: CURRENT_USERNAME,
-                "Officer Name": normalize(currentOfficer.Name),
-                Position: normalize(currentOfficer.Position),
-                Day: record.day,
-                Time: record.time,
-                Status: "Available"
-            });
-        });
-
-        rebuildAvailabilityTableData();
-        renderAvailabilityTable();
-    }
-
-
-    /* =====================================================
        SAVE TO GOOGLE SHEETS
     ===================================================== */
 
@@ -3956,9 +3958,11 @@
                 data: {
                     username: CURRENT_USERNAME,
                     officerName:
-                        normalize(currentOfficer.Name),
+                        normalize(currentOfficer.Name) ||
+                        "MC RJ Escote",
                     position:
-                        normalize(currentOfficer.Position),
+                        normalize(currentOfficer.Position) ||
+                        "Vice President",
                     records: records
                 }
             };
@@ -3999,19 +4003,23 @@
 
 
             /*
-               Update the centralized table immediately from the
-               records that were just saved. This prevents the UI
-               from waiting on a cached GET response.
+               Reload the saved data from Google Sheets so the
+               centralized table and editor always reflect the
+               actual database rather than temporary browser data.
             */
-            applyMyAvailabilityLocally(records);
+
+            const availabilityResult =
+                await fetchJson("getAvailability");
+
+            availabilityRecords =
+                Array.isArray(availabilityResult.data)
+                    ? availabilityResult.data
+                    : [];
+
+            rebuildAvailabilityTableData();
+            renderAvailabilityTable();
 
             closeAvailabilityModal();
-
-            /*
-               Refresh from Google Sheets in the background so the
-               dashboard remains synchronized with the database.
-            */
-            loadAvailability();
 
         } catch (error) {
 
