@@ -5771,3 +5771,66 @@ body.availability-modal-open {
 .event-modal::-webkit-scrollbar-thumb{background:rgba(0,216,192,.30);border-radius:10px}
 .event-modal::-webkit-scrollbar-thumb:hover{background:rgba(0,216,192,.45)}
 .event-modal::-webkit-scrollbar-corner{background:transparent}
+
+
+/* =========================================================
+   LIVE DASHBOARD + TASK STATUS
+========================================================= */
+
+.dashboard-empty-activity {
+    padding: 42px 18px;
+    text-align: center;
+    border-top: 1px solid rgba(215,235,228,0.08);
+}
+
+.dashboard-empty-activity strong {
+    display: block;
+    color: #f8f3df;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.dashboard-empty-activity span {
+    color: rgba(220,239,233,0.48);
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.task-initial-status {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    box-sizing: border-box;
+    border: 1px solid rgba(202,166,84,.25);
+    background: rgba(202,166,84,.08);
+    color: #e3c878;
+    border-radius: 9px;
+    padding: 12px 13px;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .05em;
+}
+
+.task-initial-status span {
+    color: rgba(255,255,255,.45);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0;
+}
+
+.task-status-select {
+    min-width: 125px;
+}
+
+.task-status-select option:disabled {
+    color: rgba(255,255,255,.45);
+}
+
+@media (max-width: 720px) {
+    .task-initial-status {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
