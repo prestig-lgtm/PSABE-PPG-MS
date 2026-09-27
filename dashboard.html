@@ -1546,37 +1546,50 @@ body.dashboard-data-loading .dashboard-content {
             </div>
 
             <!-- =================================================
-                 PLACEHOLDER PAGE
+                 OFFICER DIRECTORY PAGE
             ================================================== -->
-
-            <div
-                id="placeholderPage"
-                class="page-section"
-            >
-
-                <div class="placeholder-panel">
-
-                    <span class="eyebrow">
-                        PSABE-PPG MANAGEMENT SYSTEM
-                    </span>
-
-                    <h1 id="placeholderTitle">
-                        Coming Soon
-                    </h1>
-
-                    <p id="placeholderDescription">
-                        This section will be built next.
-                    </p>
-
-                    <button
-                        id="backToDashboard"
-                        class="back-dashboard-button"
-                    >
-                        Back to Dashboard
-                    </button>
-
+            <div id="officersPage" class="page-section">
+                <div class="officers-page-header">
+                    <div>
+                        <p class="eyebrow">PSABE-PPG MANAGEMENT SYSTEM</p>
+                        <h1>Officer Directory</h1>
+                        <p>View the current PSABE-PPG officers and their positions.</p>
+                    </div>
+                    <div class="officers-directory-count" id="officersDirectoryCount">0 OFFICERS</div>
                 </div>
 
+                <section class="dashboard-panel officers-directory-panel">
+                    <div class="officers-toolbar">
+                        <div class="officers-search-wrap">
+                            <i data-lucide="search"></i>
+                            <input id="officerSearchInput" type="search" placeholder="Search officer or position..." autocomplete="off">
+                        </div>
+                        <select id="officerStatusFilter" class="officer-filter-select">
+                            <option value="all">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                        <button type="button" class="text-button" id="refreshOfficersButton">Refresh</button>
+                    </div>
+                    <div class="officer-directory-grid" id="officerDirectoryGrid">
+                        <div class="officers-directory-empty">
+                            <strong>Loading officers...</strong>
+                            <span>Please wait while the officer directory is loaded.</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- =================================================
+                 PLACEHOLDER PAGE FOR OTHER SECTIONS
+            ================================================== -->
+            <div id="placeholderPage" class="page-section">
+                <div class="placeholder-panel">
+                    <span class="eyebrow">PSABE-PPG MANAGEMENT SYSTEM</span>
+                    <h1 id="placeholderTitle">Coming Soon</h1>
+                    <p id="placeholderDescription">This section will be built next.</p>
+                    <button id="backToDashboard" class="back-dashboard-button">Back to Dashboard</button>
+                </div>
             </div>
 
 
@@ -1945,6 +1958,12 @@ body.dashboard-data-loading .dashboard-content {
                     );
 
 
+                const officersPage =
+                    document.getElementById(
+                        "officersPage"
+                    );
+
+
                 const placeholderPage =
                     document.getElementById(
                         "placeholderPage"
@@ -2021,6 +2040,12 @@ body.dashboard-data-loading .dashboard-content {
                         );
                     }
 
+                    if (officersPage) {
+                        officersPage.classList.remove(
+                            "active-page"
+                        );
+                    }
+
                     placeholderPage.classList.remove(
                         "active-page"
                     );
@@ -2093,6 +2118,27 @@ body.dashboard-data-loading .dashboard-content {
 
                         if (typeof window.loadTasks === "function") {
                             window.loadTasks();
+                        }
+
+                    }
+
+
+                    else if (
+                        page === "officers"
+                    ) {
+
+                        if (officersPage) {
+                            officersPage.classList.add(
+                                "active-page"
+                            );
+                        }
+
+                        setActiveNavigation(
+                            "officers"
+                        );
+
+                        if (typeof window.loadOfficerDirectory === "function") {
+                            window.loadOfficerDirectory();
                         }
 
                     }
@@ -4169,6 +4215,105 @@ body.dashboard-data-loading .dashboard-content {
     }
 
 
+    /* =====================================================
+       OFFICER DIRECTORY
+    ===================================================== */
+
+    function officerDirectoryValue(officer, key) {
+        return normalize(getRecordValue(officer, key));
+    }
+
+    function renderOfficerDirectory() {
+        const grid = document.getElementById("officerDirectoryGrid");
+        const count = document.getElementById("officersDirectoryCount");
+        const searchInput = document.getElementById("officerSearchInput");
+        const statusFilter = document.getElementById("officerStatusFilter");
+        if (!grid) return;
+
+        const query = normalize(searchInput && searchInput.value).toLowerCase();
+        const filter = normalize(statusFilter && statusFilter.value).toLowerCase() || "all";
+
+        const officers = Array.isArray(officersData) ? officersData : [];
+        const filtered = officers.filter(function(officer) {
+            const name = officerDirectoryValue(officer, "Name");
+            const position = officerDirectoryValue(officer, "Position");
+            const status = officerDirectoryValue(officer, "Status") || "Active";
+            const searchable = (name + " " + position).toLowerCase();
+            const statusMatch = filter === "all" || status.toLowerCase() === filter;
+            return statusMatch && (!query || searchable.includes(query));
+        });
+
+        if (count) {
+            count.textContent = filtered.length + (filtered.length === 1 ? " OFFICER" : " OFFICERS");
+        }
+
+        if (!filtered.length) {
+            grid.innerHTML = '<div class="officers-directory-empty"><strong>No officers found.</strong><span>Try another search or status filter.</span></div>';
+            return;
+        }
+
+        grid.innerHTML = filtered.map(function(officer, index) {
+            const name = officerDirectoryValue(officer, "Name") || "Unnamed Officer";
+            const position = officerDirectoryValue(officer, "Position") || "Position not specified";
+            const status = officerDirectoryValue(officer, "Status") || "Active";
+            const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(function(part) {
+                return part.charAt(0).toUpperCase();
+            }).join("") || "OF";
+            const statusClass = status.toLowerCase() === "active" ? "active" : "inactive";
+
+            return '<article class="officer-directory-card">' +
+                '<div class="officer-directory-avatar">' + escapeHtml(initials) + '</div>' +
+                '<div class="officer-directory-info">' +
+                    '<h3>' + escapeHtml(name) + '</h3>' +
+                    '<p>' + escapeHtml(position) + '</p>' +
+                    '<span class="officer-directory-status ' + statusClass + '"><span></span>' + escapeHtml(status) + '</span>' +
+                '</div>' +
+            '</article>';
+        }).join("");
+
+        if (window.lucide) lucide.createIcons();
+    }
+
+    async function loadOfficerDirectory() {
+        const grid = document.getElementById("officerDirectoryGrid");
+        if (grid) {
+            grid.innerHTML = '<div class="officers-directory-empty"><strong>Loading officers...</strong><span>Refreshing the officer directory from Google Sheets.</span></div>';
+        }
+
+        try {
+            const result = await fetchJson("getOfficers");
+            officersData = Array.isArray(result.data) ? result.data : [];
+            renderOfficerDirectory();
+        } catch (error) {
+            console.error("Unable to load officer directory:", error);
+            if (grid) {
+                grid.innerHTML = '<div class="officers-directory-empty"><strong>Unable to load officers.</strong><span>Check the Google Sheets connection and try Refresh again.</span></div>';
+            }
+        }
+    }
+
+    window.loadOfficerDirectory = loadOfficerDirectory;
+
+    function initializeOfficerDirectory() {
+        const search = document.getElementById("officerSearchInput");
+        const filter = document.getElementById("officerStatusFilter");
+        const refresh = document.getElementById("refreshOfficersButton");
+        if (search && !search.dataset.bound) {
+            search.addEventListener("input", renderOfficerDirectory);
+            search.dataset.bound = "true";
+        }
+        if (filter && !filter.dataset.bound) {
+            filter.addEventListener("change", renderOfficerDirectory);
+            filter.dataset.bound = "true";
+        }
+        if (refresh && !refresh.dataset.bound) {
+            refresh.addEventListener("click", loadOfficerDirectory);
+            refresh.dataset.bound = "true";
+        }
+        renderOfficerDirectory();
+    }
+
+
     async function loadOfficerProfile() {
 
         try {
@@ -5074,6 +5219,7 @@ body.dashboard-data-loading .dashboard-content {
         if(scheduleEventModal&&!scheduleEventModal.dataset.bound){scheduleEventModal.addEventListener("click",function(event){if(event.target===scheduleEventModal)closeScheduleEventModal();});scheduleEventModal.dataset.bound="true";}
         if(scheduleEventForm&&!scheduleEventForm.dataset.bound){scheduleEventForm.addEventListener("submit",submitScheduledEvent);scheduleEventForm.dataset.bound="true";}
 
+        initializeOfficerDirectory();
         updateOfficerProfile();
         rebuildAvailabilityTableData();
         renderAvailabilityTable();
@@ -5098,6 +5244,7 @@ body.dashboard-data-loading .dashboard-content {
         ]).then(function () {
 
             updateOfficerProfile();
+            renderOfficerDirectory();
             updateDashboardGreeting();
             renderAvailabilityTable();
             renderDashboardAvailability();
