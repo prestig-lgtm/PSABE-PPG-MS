@@ -5774,251 +5774,35 @@ body.availability-modal-open {
 
 
 /* =========================================================
-   LIVE DASHBOARD + TASK STATUS
+   DASHBOARD TODAY'S AVAILABILITY
+   Dynamic status states
 ========================================================= */
 
-.dashboard-empty-activity {
-    padding: 42px 18px;
-    text-align: center;
-    border-top: 1px solid rgba(215,235,228,0.08);
+.availability-status .availability-dot-inactive {
+    background: rgba(220, 239, 233, 0.28);
+    box-shadow: none;
 }
 
-.dashboard-empty-activity strong {
-    display: block;
-    color: #f8f3df;
-    font-size: 13px;
-    margin-bottom: 6px;
+.availability-status strong {
+    transition: color 0.18s ease;
 }
 
-.dashboard-empty-activity span {
-    color: rgba(220,239,233,0.48);
-    font-size: 10px;
-    line-height: 1.5;
+.availability-status small {
+    line-height: 1.35;
 }
 
-.task-initial-status {
-    min-height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    box-sizing: border-box;
-    border: 1px solid rgba(202,166,84,.25);
-    background: rgba(202,166,84,.08);
-    color: #e3c878;
-    border-radius: 9px;
-    padding: 12px 13px;
-    font-size: 11px;
-    font-weight: 900;
-    letter-spacing: .05em;
-}
+@media (max-width: 700px) {
 
-.task-initial-status span {
-    color: rgba(255,255,255,.45);
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 0;
-}
-
-.task-status-select {
-    min-width: 125px;
-}
-
-.task-status-select option:disabled {
-    color: rgba(255,255,255,.45);
-}
-
-@media (max-width: 720px) {
-    .task-initial-status {
-        align-items: flex-start;
-        flex-direction: column;
+    .availability-status {
+        gap: 9px;
     }
-}
 
-/* =========================================================
-   TASK ACTIONS / STATUS CONTROLS
-========================================================= */
-.task-status-select{
-    min-width:128px;
-}
-.task-status-select option{
-    background:#0d342c;
-    color:#fff;
-}
-.task-status.for-checking{
-    color:#c8b8ff;
-    background:rgba(139,112,214,.14);
-    border:1px solid rgba(139,112,214,.28);
-}
-.task-actions{
-    display:flex;
-    align-items:center;
-    justify-content:flex-end;
-    gap:8px;
-}
-.task-id-chip{
-    max-width:150px;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
-}
-.task-delete-button{
-    width:34px;
-    height:34px;
-    display:grid;
-    place-items:center;
-    flex:0 0 34px;
-    border:1px solid rgba(229,155,155,.28);
-    border-radius:8px;
-    background:rgba(164,68,68,.10);
-    color:#e59b9b;
-    cursor:pointer;
-    transition:.2s ease;
-}
-.task-delete-button:hover{
-    background:rgba(164,68,68,.20);
-    border-color:rgba(229,155,155,.50);
-    transform:translateY(-1px);
-}
-.task-delete-button svg{
-    width:16px;
-    height:16px;
-    stroke-width:2;
-}
-.task-initial-status{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    min-height:43px;
-    padding:11px 13px;
-    border:1px solid rgba(202,166,84,.25);
-    border-radius:9px;
-    background:rgba(202,166,84,.08);
-    color:#e3c878;
-    font-size:11px;
-    font-weight:900;
-}
-.task-initial-status span{
-    color:rgba(255,255,255,.48);
-    font-size:9px;
-    font-weight:600;
-}
-@media(max-width:720px){
-    .task-actions{
-        justify-content:flex-start;
+    .availability-status strong {
+        font-size: 10px;
     }
-    .task-id-chip{
-        max-width:none;
-    }
-}
 
-/* =========================================================
-   TASK STATUS CONTROLS
-   Assigned officers update their own task progress through a dropdown.
-========================================================= */
-.task-status-control{
-    display:flex;
-    align-items:center;
-    justify-content:flex-end;
-    gap:8px;
-    min-width:210px;
-}
-.task-status-label{
-    color:rgba(255,255,255,.48);
-    font-size:8px;
-    font-weight:900;
-    letter-spacing:.08em;
-}
-.task-status-select-officer{
-    min-width:155px;
-    height:38px;
-    padding:0 34px 0 12px;
-    border:1px solid rgba(0,216,181,.24);
-    border-radius:9px;
-    background:#0d342c;
-    color:#fff;
-    font:inherit;
-    font-size:10px;
-    font-weight:900;
-    letter-spacing:.04em;
-    text-transform:uppercase;
-    outline:none;
-    cursor:pointer;
-    transition:.18s ease;
-}
-.task-status-select-officer:hover{
-    border-color:rgba(0,216,181,.48);
-    background:#104137;
-}
-.task-status-select-officer:focus{
-    border-color:rgba(0,216,181,.70);
-    box-shadow:0 0 0 3px rgba(0,216,181,.08);
-}
-.task-status-select-officer:disabled{
-    opacity:.65;
-    cursor:wait;
-}
-.task-status-select-officer.saving{
-    border-color:rgba(202,166,84,.55);
-}
-.task-status-select-officer option{
-    background:#0d342c;
-    color:#fff;
-}
-.task-delete-button{
-    min-width:88px;
-    height:38px;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:7px;
-    flex-shrink:0;
-    border:1px solid rgba(255,120,120,.55);
-    background:rgba(164,68,68,.18);
-    color:#ffb0aa;
-    border-radius:9px;
-    padding:0 11px;
-    font-family:inherit;
-    font-size:10px;
-    font-weight:900;
-    letter-spacing:.06em;
-    text-transform:uppercase;
-    cursor:pointer;
-    transition:.18s ease;
-}
-.task-delete-button:hover{
-    color:#fff;
-    background:rgba(180,55,55,.38);
-    border-color:rgba(255,145,145,.85);
-    transform:translateY(-1px);
-    box-shadow:0 5px 18px rgba(130,35,35,.18);
-}
-.task-delete-button:focus-visible{
-    outline:none;
-    color:#fff;
-    border-color:#ffaaa3;
-    box-shadow:0 0 0 3px rgba(255,120,120,.16);
-}
-.task-delete-button svg{
-    width:17px;
-    height:17px;
-    fill:none;
-    stroke:currentColor;
-    stroke-width:2;
-    stroke-linecap:round;
-    stroke-linejoin:round;
-}
-.task-delete-button span{
-    line-height:1;
-}
-@media(max-width:720px){
-    .task-delete-button{
-        min-width:92px;
-        height:40px;
+    .availability-status small {
+        font-size: 8px;
     }
-}
-@media(max-width:900px){
-    .task-status-control{justify-content:flex-start;min-width:0;width:100%}
-    .task-status-select-officer{min-width:170px}
+
 }
