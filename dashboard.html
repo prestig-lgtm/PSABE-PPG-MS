@@ -58,6 +58,19 @@ body.dashboard-data-loading .dashboard-content {
     visibility: hidden;
 }
 
+
+/* Task status dropdown */
+.task-status-control{display:flex;align-items:center;gap:8px;min-width:0;}
+.task-status-label{font-size:9px;font-weight:900;letter-spacing:.08em;color:rgba(255,255,255,.58);white-space:nowrap;}
+.task-status-select-wrap{position:relative;display:inline-flex;align-items:center;min-width:145px;}
+.task-status-select-officer{appearance:none;-webkit-appearance:none;width:100%;min-width:145px;height:38px;padding:0 34px 0 12px;border:1px solid rgba(202,166,84,.42);border-radius:8px;background:#0d342c;color:#fff;font-family:inherit;font-size:10px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;outline:none;cursor:pointer;box-sizing:border-box;}
+.task-status-select-officer:hover{border-color:rgba(202,166,84,.72);background:#104238;}
+.task-status-select-officer:focus{border-color:#caa654;box-shadow:0 0 0 3px rgba(202,166,84,.12);}
+.task-status-select-officer:disabled{opacity:.65;cursor:wait;}
+.task-status-select-officer option{background:#0d342c;color:#fff;font-weight:800;}
+.task-status-chevron{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#caa654;display:grid;place-items:center;}
+.task-status-chevron svg{width:15px;height:15px;stroke:currentColor;stroke-width:2.5;}
+@media(max-width:720px){.task-status-control{width:100%;}.task-status-select-wrap,.task-status-select-officer{min-width:0;width:100%;}}
 </style>
 </head>
 
@@ -3803,7 +3816,7 @@ body.dashboard-data-loading .dashboard-content {
                         (IS_STEERING ? '<span class="task-chip">TO: ' + escapeHtml(assignedToName) + '</span>' : '') +
                         '<span class="task-chip">DUE: ' + escapeHtml(dueDate) + '</span>' +
                         '<span class="task-chip">PRIORITY: ' + escapeHtml(priority) + '</span>' +
-                        (IS_STEERING && assignedBy ? '<span class="task-chip">BY: ' + escapeHtml(assignedBy) + '</span>' : '') +
+                        (IS_STEERING && assignedBy ? '<span class="task-chip">BY: ' + escapeHtml(taskAssignedOfficerName(assignedBy)) + '</span>' : '') +
                     '</div>' +
                 '</div>' +
                 statusControl +
