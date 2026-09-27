@@ -3665,6 +3665,47 @@ body.dashboard-data-loading .dashboard-content {
         const normalized = normalize(value).toLowerCase().replace(/\s+/g, "-");
         return normalized === "complete" ? "completed" : normalized;
     }
+
+    function taskAssignedOfficerName(username) {
+        const value = normalize(username);
+        if (!value) return "Unassigned";
+
+        const officer = officersData.find(function (item) {
+            return normalizeUsername(getRecordValue(item, "Username")) === normalizeUsername(value);
+        });
+
+        return officer
+            ? (normalize(getRecordValue(officer, "Name")) || value)
+            : value;
+    }
+
+    function formatTaskDueDate(value) {
+        const text = normalize(value);
+        if (!text) return "No due date";
+
+        // Use the calendar date stored in the value directly so an ISO
+        // timestamp does not shift the displayed date because of timezone conversion.
+        const isoMatch = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (isoMatch) {
+            return isoMatch[2] + "/" + isoMatch[3] + "/" + isoMatch[1].slice(-2);
+        }
+
+        const slashMatch = text.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})/);
+        if (slashMatch) {
+            const year = slashMatch[3].length === 4 ? slashMatch[3].slice(-2) : slashMatch[3];
+            return String(slashMatch[1]).padStart(2, "0") + "/" +
+                String(slashMatch[2]).padStart(2, "0") + "/" + year;
+        }
+
+        const parsed = new Date(text);
+        if (!Number.isNaN(parsed.getTime())) {
+            return String(parsed.getMonth() + 1).padStart(2, "0") + "/" +
+                String(parsed.getDate()).padStart(2, "0") + "/" +
+                String(parsed.getFullYear()).slice(-2);
+        }
+
+        return text;
+    }
     function initializeSteeringControls() {
         const controls = document.getElementById("steeringTaskControls");
         if (controls) controls.style.display = IS_STEERING ? "flex" : "none";
@@ -3708,7 +3749,8 @@ body.dashboard-data-loading .dashboard-content {
             const description = getRecordValue(task, "Description");
             const assignedTo = getRecordValue(task, "Assigned To");
             const assignedBy = getRecordValue(task, "Assigned By");
-            const dueDate = getRecordValue(task, "Due Date");
+            const dueDate = formatTaskDueDate(getRecordValue(task, "Due Date"));
+            const assignedToName = taskAssignedOfficerName(assignedTo);
             const priority = getRecordValue(task, "Priority") || "Normal";
             const rawStatus = getRecordValue(task, "Status") || "Pending";
             const normalizedStatus = normalizeTaskStatus(rawStatus);
@@ -3758,8 +3800,8 @@ body.dashboard-data-loading .dashboard-content {
                     '<h3>' + escapeHtml(title || "Untitled task") + '</h3>' +
                     '<p>' + escapeHtml(description || "No description provided.") + '</p>' +
                     '<div class="task-meta">' +
-                        (IS_STEERING ? '<span class="task-chip">TO: ' + escapeHtml(assignedTo || "Unassigned") + '</span>' : '') +
-                        '<span class="task-chip">DUE: ' + escapeHtml(dueDate || "No due date") + '</span>' +
+                        (IS_STEERING ? '<span class="task-chip">TO: ' + escapeHtml(assignedToName) + '</span>' : '') +
+                        '<span class="task-chip">DUE: ' + escapeHtml(dueDate) + '</span>' +
                         '<span class="task-chip">PRIORITY: ' + escapeHtml(priority) + '</span>' +
                         (IS_STEERING && assignedBy ? '<span class="task-chip">BY: ' + escapeHtml(assignedBy) + '</span>' : '') +
                     '</div>' +
