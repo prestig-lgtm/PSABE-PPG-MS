@@ -5967,25 +5967,57 @@ body.availability-modal-open {
     color:#fff;
 }
 .task-delete-button{
-    width:34px;
-    height:34px;
-    display:grid;
-    place-items:center;
+    min-width:88px;
+    height:38px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
     flex-shrink:0;
-    border:1px solid rgba(229,155,155,.25);
-    background:rgba(164,68,68,.10);
-    color:#e59b9b;
-    border-radius:8px;
+    border:1px solid rgba(255,120,120,.55);
+    background:rgba(164,68,68,.18);
+    color:#ffb0aa;
+    border-radius:9px;
+    padding:0 11px;
+    font-family:inherit;
+    font-size:10px;
+    font-weight:900;
+    letter-spacing:.06em;
+    text-transform:uppercase;
     cursor:pointer;
     transition:.18s ease;
 }
 .task-delete-button:hover{
     color:#fff;
-    background:rgba(164,68,68,.24);
-    border-color:rgba(229,155,155,.55);
+    background:rgba(180,55,55,.38);
+    border-color:rgba(255,145,145,.85);
     transform:translateY(-1px);
+    box-shadow:0 5px 18px rgba(130,35,35,.18);
 }
-.task-delete-button svg{width:16px;height:16px;stroke-width:2.2}
+.task-delete-button:focus-visible{
+    outline:none;
+    color:#fff;
+    border-color:#ffaaa3;
+    box-shadow:0 0 0 3px rgba(255,120,120,.16);
+}
+.task-delete-button svg{
+    width:17px;
+    height:17px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+.task-delete-button span{
+    line-height:1;
+}
+@media(max-width:720px){
+    .task-delete-button{
+        min-width:92px;
+        height:40px;
+    }
+}
 @media(max-width:900px){
     .task-status-control{justify-content:flex-start;min-width:0;width:100%}
     .task-status-select-officer{min-width:170px}
