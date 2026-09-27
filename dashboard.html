@@ -573,8 +573,8 @@
                             TODAY
                         </p>
 
-                        <h1 id="welcomeGreeting">
-                            Hello,
+                        <h1>
+                            Good evening,
                             <span>MC RJ</span>.
                         </h1>
 
@@ -652,11 +652,11 @@
                                 MY TASKS
                             </span>
 
-                            <strong id="dashboardTasksCount">
-                                0
+                            <strong>
+                                3
                             </strong>
 
-                            <small id="dashboardTasksLabel">
+                            <small>
                                 Active tasks
                             </small>
 
@@ -711,11 +711,11 @@
                                 EVENTS
                             </span>
 
-                            <strong id="dashboardEventsCount">
-                                0
+                            <strong>
+                                2
                             </strong>
 
-                            <small id="dashboardEventsLabel">
+                            <small>
                                 Upcoming
                             </small>
 
@@ -761,11 +761,11 @@
                                 MEETINGS
                             </span>
 
-                            <strong id="dashboardMeetingsCount">
-                                0
+                            <strong>
+                                1
                             </strong>
 
-                            <small id="dashboardMeetingsLabel">
+                            <small>
                                 This week
                             </small>
 
@@ -801,11 +801,11 @@
                                 AVAILABILITY
                             </span>
 
-                            <strong id="dashboardAvailabilityValue">
-                                —
+                            <strong>
+                                Available
                             </strong>
 
-                            <small id="dashboardAvailabilityLabel">
+                            <small>
                                 Today
                             </small>
 
@@ -851,7 +851,7 @@
 
 
 
-                        <div class="activity-list" id="dashboardActivityList">
+                        <div class="activity-list">
 
 
                             <div class="activity-item">
@@ -997,7 +997,7 @@
 
 
 
-                        <div class="next-event-card" id="dashboardNextEventCard">
+                        <div class="next-event-card">
 
                             <div class="next-event-date">
 
@@ -1059,18 +1059,18 @@
                             </div>
 
 
-                            <div class="availability-status">
+                            <div class="availability-status" id="dashboardMyAvailability">
 
-                                <span class="status-dot"></span>
+                                <span class="status-dot" id="dashboardMyAvailabilityDot"></span>
 
                                 <div>
 
-                                    <strong>
-                                        You are available
+                                    <strong id="dashboardMyAvailabilityTitle">
+                                        Checking availability...
                                     </strong>
 
-                                    <small>
-                                        9:00 AM – 12:00 PM
+                                    <small id="dashboardMyAvailabilityTime">
+                                        Loading today's schedule
                                     </small>
 
                                 </div>
@@ -1078,18 +1078,18 @@
                             </div>
 
 
-                            <div class="availability-status">
+                            <div class="availability-status" id="dashboardOfficersAvailability">
 
-                                <span class="status-dot"></span>
+                                <span class="status-dot" id="dashboardOfficersAvailabilityDot"></span>
 
                                 <div>
 
-                                    <strong>
-                                        4 officers available
+                                    <strong id="dashboardOfficersAvailabilityTitle">
+                                        Checking officers...
                                     </strong>
 
-                                    <small>
-                                        1:00 PM – 2:00 PM
+                                    <small id="dashboardOfficersAvailabilityTime">
+                                        Loading today's schedule
                                     </small>
 
                                 </div>
@@ -1736,10 +1736,7 @@
                 <div class="task-field"><label for="taskAssignedToInput">Assign To</label><select id="taskAssignedToInput" required><option value="">Select officer</option></select></div>
                 <div class="task-field"><label for="taskDueDateInput">Due Date</label><input id="taskDueDateInput" type="date" required></div>
                 <div class="task-field"><label for="taskPriorityInput">Priority</label><select id="taskPriorityInput"><option value="Normal">Normal</option><option value="High">High</option><option value="Urgent">Urgent</option></select></div>
-                <div class="task-field">
-                    <label>Initial Status</label>
-                    <div class="task-initial-status">PENDING <span>Automatically assigned</span></div>
-                </div>
+                <div class="task-field"><label for="taskStatusInput">Status</label><select id="taskStatusInput"><option value="Pending">Pending</option><option value="In Progress">In Progress</option></select></div>
             </div>
             <div class="task-form-status" id="taskFormStatus" aria-live="polite"></div>
             <div class="task-form-actions">
@@ -3352,17 +3349,6 @@
     }
 
 
-    function isCurrentOfficer(value) {
-        const candidate = normalizeUsername(value);
-        if (!candidate) return false;
-
-        const username = normalizeUsername(CURRENT_USERNAME);
-        const name = normalizeUsername(currentOfficer && currentOfficer.Name);
-
-        return candidate === username || (name && candidate === name);
-    }
-
-
     function normalizeDay(value) {
         return normalize(value).toLowerCase();
     }
@@ -3448,325 +3434,6 @@
 
 
 
-
-    /* =====================================================
-       LIVE DASHBOARD
-       Dashboard values are read from Google Sheets so the
-       home page does not stay on the original sample data.
-    ===================================================== */
-
-    function dashboardDateKey(value) {
-        const text = normalize(value);
-        if (!text) return "";
-
-        const direct = text.match(/^(\d{4}-\d{2}-\d{2})/);
-        if (direct) return direct[1];
-
-        const parsed = new Date(text);
-        if (isNaN(parsed.getTime())) return "";
-
-        const year = parsed.getFullYear();
-        const month = String(parsed.getMonth() + 1).padStart(2, "0");
-        const day = String(parsed.getDate()).padStart(2, "0");
-        return year + "-" + month + "-" + day;
-    }
-
-    function dashboardTodayKey() {
-        const now = new Date();
-        return now.getFullYear() + "-" +
-            String(now.getMonth() + 1).padStart(2, "0") + "-" +
-            String(now.getDate()).padStart(2, "0");
-    }
-
-    function dashboardWeekStart(date) {
-        const d = new Date(date);
-        const day = d.getDay();
-        const diff = day === 0 ? -6 : 1 - day;
-        d.setDate(d.getDate() + diff);
-        d.setHours(0, 0, 0, 0);
-        return d;
-    }
-
-    function dashboardTimeMinutes(value) {
-        const text = normalize(value).toUpperCase();
-        if (!text) return 9999;
-
-        const match = text.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/);
-        if (!match) return 9999;
-
-        let hour = Number(match[1]);
-        const minute = Number(match[2]);
-        const meridiem = match[3];
-
-        if (meridiem === "AM" && hour === 12) hour = 0;
-        if (meridiem === "PM" && hour !== 12) hour += 12;
-
-        return hour * 60 + minute;
-    }
-
-    function dashboardFormatTime(value) {
-        const text = normalize(value);
-        if (!text) return "";
-
-        if (/^\d{1,2}:\d{2}\s*(AM|PM)$/i.test(text)) {
-            return text.toUpperCase();
-        }
-
-        const match = text.match(/^(\d{1,2}):(\d{2})$/);
-        if (match) {
-            let hour = Number(match[1]);
-            const minute = Number(match[2]);
-            const suffix = hour >= 12 ? "PM" : "AM";
-            hour = hour % 12 || 12;
-            return hour + ":" + String(minute).padStart(2, "0") + " " + suffix;
-        }
-
-        return text;
-    }
-
-    function dashboardTaskStatus(task) {
-        return normalizeTaskStatus(getRecordValue(task, "Status") || "Pending");
-    }
-
-    function dashboardIsOpenTask(task) {
-        return dashboardTaskStatus(task) !== "completed";
-    }
-
-    function dashboardGreeting() {
-        const now = new Date();
-        const hour = now.getHours();
-
-        if (hour >= 5 && hour < 12) return "Good morning";
-        if (hour >= 12 && hour < 18) return "Good afternoon";
-        if (hour >= 18 && hour < 22) return "Good evening";
-        return "Good night";
-    }
-
-    function updateDashboardGreeting() {
-        const greeting = document.getElementById("welcomeGreeting");
-        const nameSpan = greeting ? greeting.querySelector("span") : null;
-        if (!greeting || !nameSpan) return;
-
-        const firstName = normalize(currentOfficer.Name || sessionStorage.getItem("psabeName") || CURRENT_USERNAME)
-            .split(/\s+/)[0] || "Officer";
-
-        const prefix = document.createTextNode(dashboardGreeting() + ", ");
-        greeting.innerHTML = "";
-        greeting.appendChild(prefix);
-
-        nameSpan.textContent = firstName;
-        greeting.appendChild(nameSpan);
-        greeting.appendChild(document.createTextNode("."));
-    }
-
-    function dashboardActivityHtml(item) {
-        const type = item.type || "event";
-        const typeLabel = type === "task" ? "TASK" : (type === "meeting" ? "MEETING" : "EVENT");
-        const lineClass = type === "task" ? "task-line" : (type === "meeting" ? "meeting-line" : "event-line");
-        const typeClass = type === "task" ? "task-type" : (type === "meeting" ? "meeting-type" : "event-type");
-
-        return '<div class="activity-item">' +
-            '<div class="activity-time">' +
-                '<strong>' + escapeHtml(item.time || "ALL DAY") + '</strong>' +
-                '<span>' + escapeHtml(item.timeLabel || "") + '</span>' +
-            '</div>' +
-            '<div class="activity-line ' + lineClass + '"></div>' +
-            '<div class="activity-details">' +
-                '<span class="activity-type ' + typeClass + '">' + typeLabel + '</span>' +
-                '<h3>' + escapeHtml(item.title || "Untitled activity") + '</h3>' +
-                '<p>' + escapeHtml(item.description || "") + '</p>' +
-            '</div>' +
-        '</div>';
-    }
-
-    function renderLiveDashboard(tasks, events) {
-        const todayKey = dashboardTodayKey();
-        const now = new Date();
-        const weekStart = dashboardWeekStart(now);
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekEnd.getDate() + 6);
-        weekEnd.setHours(23, 59, 59, 999);
-
-        const visibleTasks = IS_STEERING
-            ? tasks
-            : tasks.filter(function(task) {
-                return normalizeUsername(getRecordValue(task, "Assigned To")) === normalizeUsername(CURRENT_USERNAME);
-            });
-
-        const activeTasks = visibleTasks.filter(dashboardIsOpenTask);
-
-        const upcomingEvents = events.filter(function(event) {
-            const status = normalize(getRecordValue(event, "Status")).toLowerCase();
-            if (status && status !== "active") return false;
-
-            const key = dashboardDateKey(getRecordValue(event, "Date"));
-            if (!key) return false;
-
-            return key >= todayKey;
-        });
-
-        const weekMeetings = events.filter(function(event) {
-            const status = normalize(getRecordValue(event, "Status")).toLowerCase();
-            if (status && status !== "active") return false;
-
-            const key = dashboardDateKey(getRecordValue(event, "Date"));
-            if (!key) return false;
-
-            const date = new Date(key + "T00:00:00");
-            return date >= weekStart && date <= weekEnd &&
-                normalize(getRecordValue(event, "Type")).toLowerCase() === "meeting";
-        });
-
-        const todayTasks = visibleTasks.filter(function(task) {
-            return dashboardDateKey(getRecordValue(task, "Due Date")) === todayKey &&
-                dashboardIsOpenTask(task);
-        });
-
-        const todayEvents = events.filter(function(event) {
-            const status = normalize(getRecordValue(event, "Status")).toLowerCase();
-            return (!status || status === "active") &&
-                dashboardDateKey(getRecordValue(event, "Date")) === todayKey;
-        });
-
-        const activities = [];
-
-        todayTasks.forEach(function(task) {
-            activities.push({
-                type: "task",
-                title: getRecordValue(task, "Task Title") || "Task",
-                description: getRecordValue(task, "Description") || "Assigned task",
-                time: "DUE",
-                timeLabel: getRecordValue(task, "Priority") ? getRecordValue(task, "Priority") + " priority" : ""
-            });
-        });
-
-        todayEvents.forEach(function(event) {
-            const typeText = normalize(getRecordValue(event, "Type")).toLowerCase();
-            const isMeeting = typeText === "meeting";
-            const start = dashboardFormatTime(getRecordValue(event, "Start Time"));
-            const end = dashboardFormatTime(getRecordValue(event, "End Time"));
-
-            activities.push({
-                type: isMeeting ? "meeting" : "event",
-                title: getRecordValue(event, "Title") || "Activity",
-                description: getRecordValue(event, "Description") || getRecordValue(event, "Location") || "Scheduled activity",
-                time: start || "ALL DAY",
-                timeLabel: end ? "TO " + end : (getRecordValue(event, "Location") || "")
-            });
-        });
-
-        activities.sort(function(a, b) {
-            return dashboardTimeMinutes(a.time) - dashboardTimeMinutes(b.time);
-        });
-
-        const tasksCount = document.getElementById("dashboardTasksCount");
-        const eventsCount = document.getElementById("dashboardEventsCount");
-        const meetingsCount = document.getElementById("dashboardMeetingsCount");
-        const activityList = document.getElementById("dashboardActivityList");
-        const nextCard = document.getElementById("dashboardNextEventCard");
-
-        if (tasksCount) tasksCount.textContent = String(activeTasks.length);
-        if (eventsCount) eventsCount.textContent = String(upcomingEvents.length);
-        if (meetingsCount) meetingsCount.textContent = String(weekMeetings.length);
-
-        const taskLabel = document.getElementById("dashboardTasksLabel");
-        const eventLabel = document.getElementById("dashboardEventsLabel");
-        const meetingLabel = document.getElementById("dashboardMeetingsLabel");
-        if (taskLabel) taskLabel.textContent = "Active tasks";
-        if (eventLabel) eventLabel.textContent = "Upcoming";
-        if (meetingLabel) meetingLabel.textContent = "This week";
-
-        if (activityList) {
-            if (!activities.length) {
-                activityList.innerHTML =
-                    '<div class="dashboard-empty-activity">' +
-                    '<strong>No activities scheduled for today.</strong>' +
-                    '<span>Your dashboard will update automatically when tasks or activities are added.</span>' +
-                    '</div>';
-            } else {
-                activityList.innerHTML = activities.slice(0, 6).map(dashboardActivityHtml).join("");
-            }
-        }
-
-        const upcomingItems = [];
-
-        upcomingEvents.forEach(function(event) {
-            const key = dashboardDateKey(getRecordValue(event, "Date"));
-            if (!key) return;
-
-            upcomingItems.push({
-                date: key,
-                title: getRecordValue(event, "Title") || "Activity",
-                description: getRecordValue(event, "Description") || getRecordValue(event, "Location") || "Scheduled activity",
-                type: normalize(getRecordValue(event, "Type")) || "Event",
-                time: dashboardFormatTime(getRecordValue(event, "Start Time"))
-            });
-        });
-
-        visibleTasks.filter(dashboardIsOpenTask).forEach(function(task) {
-            const key = dashboardDateKey(getRecordValue(task, "Due Date"));
-            if (!key || key < todayKey) return;
-
-            upcomingItems.push({
-                date: key,
-                title: getRecordValue(task, "Task Title") || "Task",
-                description: getRecordValue(task, "Description") || "Assigned task",
-                type: "Task",
-                time: "Due date"
-            });
-        });
-
-        upcomingItems.sort(function(a, b) {
-            return a.date.localeCompare(b.date);
-        });
-
-        if (nextCard) {
-            const next = upcomingItems[0];
-
-            if (!next) {
-                nextCard.innerHTML =
-                    '<div class="next-event-info">' +
-                        '<span>UPCOMING</span>' +
-                        '<h3>No upcoming activities</h3>' +
-                        '<p>There are no scheduled events or open task due dates.</p>' +
-                    '</div>';
-            } else {
-                const date = new Date(next.date + "T00:00:00");
-                const month = date.toLocaleDateString("en-PH", {month:"short"}).toUpperCase();
-                const day = date.getDate();
-
-                nextCard.innerHTML =
-                    '<div class="next-event-date">' +
-                        '<span>' + month + '</span>' +
-                        '<strong>' + day + '</strong>' +
-                    '</div>' +
-                    '<div class="next-event-info">' +
-                        '<span>' + escapeHtml(next.type.toUpperCase()) + (next.time && next.time !== "Due date" ? " · " + escapeHtml(next.time) : "") + '</span>' +
-                        '<h3>' + escapeHtml(next.title) + '</h3>' +
-                        '<p>' + escapeHtml(next.description) + '</p>' +
-                    '</div>';
-            }
-        }
-    }
-
-    async function loadDashboardData() {
-        updateDashboardGreeting();
-
-        try {
-            const results = await Promise.all([
-                fetchJson("getTasks"),
-                fetchJson("getEvents")
-            ]);
-
-            const tasks = Array.isArray(results[0].data) ? results[0].data : [];
-            const events = Array.isArray(results[1].data) ? results[1].data : [];
-
-            renderLiveDashboard(tasks, events);
-        } catch (error) {
-            console.error("Dashboard data loading error:", error);
-        }
-    }
-
     /* =====================================================
        TASK MANAGEMENT
        Steering-only assignment controls
@@ -3808,16 +3475,11 @@
         const list = document.getElementById("tasksList");
         const count = document.getElementById("tasksCountLabel");
         if (!list) return;
-
         if (count) count.textContent = String(tasks.length);
-
         if (!tasks.length) {
-            list.innerHTML = '<div class="tasks-empty"><strong>No tasks yet</strong><span>' +
-                (IS_STEERING ? "No task records have been created." : "You currently have no assigned tasks.") +
-                '</span></div>';
+            list.innerHTML = '<div class="tasks-empty"><strong>No tasks yet</strong><span>' + (IS_STEERING ? "No task records have been created." : "You currently have no assigned tasks.") + '</span></div>';
             return;
         }
-
         list.innerHTML = tasks.map(function(task) {
             const title = getRecordValue(task, "Task Title");
             const description = getRecordValue(task, "Description");
@@ -3825,72 +3487,12 @@
             const assignedBy = getRecordValue(task, "Assigned By");
             const dueDate = getRecordValue(task, "Due Date");
             const priority = getRecordValue(task, "Priority") || "Normal";
-            const rawStatus = getRecordValue(task, "Status") || "Pending";
-            const normalizedStatus = normalizeTaskStatus(rawStatus);
+            const status = getRecordValue(task, "Status") || "Pending";
+            const statusClass = normalizeTaskStatus(status);
             const taskId = getRecordValue(task, "Task ID");
-
-            const isAssignedOfficer = isCurrentOfficer(assignedTo);
-
-            let statusControl;
-
-            if (isAssignedOfficer) {
-                /*
-                   The assigned officer controls task progress.
-                   Every new task starts as Pending.
-                   Pending is displayed as the initial state and cannot be
-                   selected again. The officer can mark the task as:
-                   In Progress -> For Checking -> Completed.
-                */
-                statusControl =
-                    '<div class="task-status-control" data-task-id="' + escapeHtml(taskId) + '">' +
-                        '<label class="task-status-label" for="task-status-' + escapeHtml(taskId) + '">STATUS</label>' +
-                        '<select id="task-status-' + escapeHtml(taskId) + '" class="task-status-select-officer" aria-label="Update task status" data-task-id="' + escapeHtml(taskId) + '">' +
-                            '<option value="Pending"' + (normalizedStatus === "pending" ? " selected" : "") + '>Pending</option>' +
-                            '<option value="In Progress"' + (normalizedStatus === "in-progress" ? " selected" : "") + '>In Progress</option>' +
-                            '<option value="For Checking"' + (normalizedStatus === "for-checking" ? " selected" : "") + '>For Checking</option>' +
-                            '<option value="Completed"' + (normalizedStatus === "completed" ? " selected" : "") + '>Completed</option>' +
-                        '</select>' +
-                    '</div>';
-            } else {
-                statusControl =
-                    '<span class="task-status ' + escapeHtml(normalizedStatus || "pending") + '">' +
-                    escapeHtml(rawStatus || "Pending") +
-                    '</span>';
-            }
-
-            /* Only the officer who originally assigned the task can delete it. */
-            const canDelete = isCurrentOfficer(assignedBy);
-
-            const deleteControl = canDelete
-                ? '<button type="button" class="task-delete-button" data-task-id="' + escapeHtml(taskId) + '" aria-label="Delete task" title="Delete this task">' +
-                    '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
-                        '<path d="M3 6h18"></path>' +
-                        '<path d="M8 6V4h8v2"></path>' +
-                        '<path d="M19 6l-1 15H6L5 6"></path>' +
-                        '<path d="M10 11v6"></path>' +
-                        '<path d="M14 11v6"></path>' +
-                    '</svg>' +
-                    '<span>Delete</span>' +
-                  '</button>'
-                : '';
-
-            return '<article class="task-row">' +
-                '<div class="task-main">' +
-                    '<h3>' + escapeHtml(title || "Untitled task") + '</h3>' +
-                    '<p>' + escapeHtml(description || "No description provided.") + '</p>' +
-                    '<div class="task-meta">' +
-                        (IS_STEERING ? '<span class="task-chip">TO: ' + escapeHtml(assignedTo || "Unassigned") + '</span>' : '') +
-                        '<span class="task-chip">DUE: ' + escapeHtml(dueDate || "No due date") + '</span>' +
-                        '<span class="task-chip">PRIORITY: ' + escapeHtml(priority) + '</span>' +
-                        (IS_STEERING && assignedBy ? '<span class="task-chip">BY: ' + escapeHtml(assignedBy) + '</span>' : '') +
-                    '</div>' +
-                '</div>' +
-                statusControl +
-                '<div class="task-actions">' +
-                    '<span class="task-chip task-id-chip">' + escapeHtml(taskId) + '</span>' +
-                    deleteControl +
-                '</div>' +
-            '</article>';
+            const normalizedStatus = status.toLowerCase();
+            const statusControl = !IS_STEERING ? '<select class="task-status-select" data-task-id="' + escapeHtml(taskId) + '" aria-label="Update task status"><option value="Pending"' + (normalizedStatus === "pending" ? " selected" : "") + '>Pending</option><option value="In Progress"' + (normalizedStatus === "in progress" ? " selected" : "") + '>In Progress</option><option value="Complete"' + ((normalizedStatus === "complete" || normalizedStatus === "completed") ? " selected" : "") + '>Complete</option></select>' : '<span class="task-status ' + escapeHtml(statusClass) + '">' + escapeHtml(status) + '</span>';
+            return '<article class="task-row"><div class="task-main"><h3>' + escapeHtml(title || "Untitled task") + '</h3><p>' + escapeHtml(description || "No description provided.") + '</p><div class="task-meta">' + (IS_STEERING ? '<span class="task-chip">TO: ' + escapeHtml(assignedTo || "Unassigned") + '</span>' : '') + '<span class="task-chip">DUE: ' + escapeHtml(dueDate || "No due date") + '</span><span class="task-chip">PRIORITY: ' + escapeHtml(priority) + '</span>' + (IS_STEERING && assignedBy ? '<span class="task-chip">BY: ' + escapeHtml(assignedBy) + '</span>' : '') + '</div></div>' + statusControl + '<span class="task-chip">' + escapeHtml(taskId) + '</span></article>';
         }).join("");
     }
     async function loadTaskAssignees() {
@@ -3960,7 +3562,7 @@
             assignedBy: CURRENT_USERNAME,
             dueDate: normalize(document.getElementById("taskDueDateInput")?.value),
             priority: normalize(document.getElementById("taskPriorityInput")?.value) || "Normal",
-            status: "Pending"
+            status: normalize(document.getElementById("taskStatusInput")?.value) || "Pending"
         }};
         if (!payload.data.title || !payload.data.assignedTo || !payload.data.dueDate) {
             if (status) status.textContent = "Task title, assigned officer, and due date are required.";
@@ -4024,84 +3626,16 @@
         } catch (error) { console.error("Calendar data loading error:", error); }
     }
 
-    async function updateAssignedTaskStatus(taskId, statusValue, selectElement) {
-        if (!taskId || !statusValue || statusValue === "Pending") {
-            if (selectElement && statusValue === "Pending") selectElement.value = selectElement.dataset.previousStatus || "Pending";
-            return;
-        }
-
-        const previousStatus = selectElement ? (selectElement.dataset.previousStatus || "Pending") : "Pending";
-        if (selectElement) {
-            selectElement.disabled = true;
-            selectElement.classList.add("saving");
-        }
-
+    async function updateAssignedTaskStatus(taskId, statusValue) {
+        if (IS_STEERING || !taskId) return;
         try {
-            const response = await fetch(API_URL, {
-                method:"POST",
-                headers:{"Content-Type":"text/plain;charset=utf-8"},
-                body:JSON.stringify({action:"updateTaskStatus",data:{taskId:taskId,username:CURRENT_USERNAME,officerName:normalize(currentOfficer.Name),status:statusValue}})
-            });
+            const response = await fetch(API_URL, {method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"updateTaskStatus",data:{taskId:taskId,username:CURRENT_USERNAME,status:statusValue}})});
             if (!response.ok) throw new Error("Task status request failed.");
             const result = await response.json();
             if (!result.success) throw new Error(result.message || "Task status could not be updated.");
             await loadTasks();
             await loadCalendarData();
-            await loadDashboardData();
-        } catch (error) {
-            console.error("Task status update error:",error);
-            if (selectElement) {
-                selectElement.value = previousStatus;
-                selectElement.dataset.previousStatus = previousStatus;
-            }
-            alert(error.message || "Task status could not be updated.");
-        } finally {
-            if (selectElement) {
-                selectElement.disabled = false;
-                selectElement.classList.remove("saving");
-            }
-        }
-    }
-
-    async function deleteAssignedTask(taskId) {
-        if (!taskId) return;
-
-        const task = tasksData.find(function(item) {
-            return normalize(String(getRecordValue(item, "Task ID"))) === normalize(String(taskId));
-        });
-
-        if (!task) {
-            alert("The task could not be found.");
-            return;
-        }
-
-        const assignedBy = getRecordValue(task, "Assigned By");
-        if (normalizeUsername(assignedBy) !== normalizeUsername(CURRENT_USERNAME)) {
-            alert("Only the officer who assigned this task can delete it.");
-            return;
-        }
-
-        const title = getRecordValue(task, "Task Title") || "this task";
-        if (!window.confirm('Delete "' + title + '"? This action cannot be undone.')) return;
-
-        try {
-            const response = await fetch(API_URL, {
-                method:"POST",
-                headers:{"Content-Type":"text/plain;charset=utf-8"},
-                body:JSON.stringify({action:"deleteTask",data:{taskId:taskId,username:CURRENT_USERNAME,officerName:normalize(currentOfficer.Name)}})
-            });
-            if (!response.ok) throw new Error("Task deletion request failed.");
-            const result = await response.json();
-            if (!result.success) throw new Error(result.message || "Task could not be deleted.");
-
-            await loadTasks();
-            await loadCalendarData();
-            await loadDashboardData();
-        } catch (error) {
-            console.error("Task deletion error:", error);
-            alert(error.message || "Task could not be deleted.");
-            await loadTasks();
-        }
+        } catch (error) { console.error("Task status update error:",error); alert(error.message || "Task status could not be updated."); await loadTasks(); }
     }
 
     function openScheduleEventModal() {
@@ -4326,6 +3860,546 @@
     }
 
 
+    /* =====================================================
+       DASHBOARD TODAY'S AVAILABILITY
+       Reads the same Google Sheets availability records used
+       by the full Available Officers page.
+    ===================================================== */
+
+    function dashboardAvailabilityDayKey(date) {
+        const day = date.getDay();
+
+        const map = {
+            1: "mon",
+            2: "tue",
+            3: "wed",
+            4: "thu",
+            5: "fri"
+        };
+
+        return map[day] || "";
+    }
+
+
+    function dashboardTimeToMinutes(hour, minute, suffix) {
+        let h = Number(hour);
+        const m = Number(minute);
+
+        if (!Number.isFinite(h) || !Number.isFinite(m)) {
+            return null;
+        }
+
+        const normalizedSuffix =
+            normalize(suffix).toUpperCase();
+
+        if (normalizedSuffix === "NN") {
+            h = 12;
+        } else if (normalizedSuffix === "AM") {
+            h = h === 12 ? 0 : h;
+        } else if (normalizedSuffix === "PM") {
+            h = h === 12 ? 12 : h + 12;
+        }
+
+        return h * 60 + m;
+    }
+
+
+    function dashboardParseTimeRange(value) {
+
+        const text =
+            normalizeTime(value)
+                .replace(/\s+/g, "");
+
+        const match = text.match(
+            /^(\d{1,2}):(\d{2})(AM|PM|NN)?[–-](\d{1,2}):(\d{2})(AM|PM|NN)?$/i
+        );
+
+        if (!match) {
+            return null;
+        }
+
+        let startSuffix =
+            match[3] || "";
+
+        let endSuffix =
+            match[6] || "";
+
+        /*
+           If the first half has no AM/PM marker, use the
+           second half when possible. This handles slots such
+           as 9:00–10:00AM and 12:00–1:00PM.
+        */
+        if (!startSuffix) {
+            startSuffix = endSuffix;
+        }
+
+        if (!endSuffix) {
+            endSuffix = startSuffix;
+        }
+
+        const start =
+            dashboardTimeToMinutes(
+                match[1],
+                match[2],
+                startSuffix
+            );
+
+        const end =
+            dashboardTimeToMinutes(
+                match[4],
+                match[5],
+                endSuffix
+            );
+
+        if (start === null || end === null) {
+            return null;
+        }
+
+        return {
+            start: start,
+            end: end
+        };
+    }
+
+
+    function dashboardFormatMinutes(minutes) {
+
+        let value =
+            Number(minutes);
+
+        if (!Number.isFinite(value)) {
+            return "";
+        }
+
+        value = Math.max(0, Math.min(1439, value));
+
+        let hour =
+            Math.floor(value / 60);
+
+        const minute =
+            value % 60;
+
+        const suffix =
+            hour >= 12
+                ? "PM"
+                : "AM";
+
+        hour =
+            hour % 12 || 12;
+
+        return (
+            hour +
+            ":" +
+            String(minute).padStart(2, "0") +
+            " " +
+            suffix
+        );
+    }
+
+
+    function dashboardFormatAvailabilityRange(time) {
+
+        const range =
+            dashboardParseTimeRange(time);
+
+        if (!range) {
+            return normalize(time);
+        }
+
+        return (
+            dashboardFormatMinutes(range.start) +
+            " – " +
+            dashboardFormatMinutes(range.end)
+        );
+    }
+
+
+    function dashboardRecordMatchesCurrentOfficer(record) {
+
+        const username =
+            normalizeUsername(
+                getRecordValue(record, "Username")
+            );
+
+        const officerName =
+            normalize(
+                getRecordValue(record, "Officer Name")
+            ).toLowerCase();
+
+        const currentUsername =
+            normalizeUsername(
+                CURRENT_USERNAME
+            );
+
+        const currentName =
+            normalize(
+                currentOfficer.Name
+            ).toLowerCase();
+
+        return (
+            (
+                username &&
+                username === currentUsername
+            ) ||
+            (
+                officerName &&
+                currentName &&
+                officerName === currentName
+            )
+        );
+    }
+
+
+    function dashboardGetCurrentAvailability() {
+
+        const now =
+            new Date();
+
+        const day =
+            dashboardAvailabilityDayKey(now);
+
+        if (!day) {
+            return {
+                day: "",
+                current: [],
+                upcoming: []
+            };
+        }
+
+        const currentMinutes =
+            now.getHours() * 60 +
+            now.getMinutes();
+
+        const records =
+            availabilityRecords.filter(
+                function (record) {
+
+                    const recordDay =
+                        normalizeDay(
+                            getRecordValue(
+                                record,
+                                "Day"
+                            )
+                        );
+
+                    if (recordDay !== day) {
+                        return false;
+                    }
+
+                    const status =
+                        normalize(
+                            getRecordValue(
+                                record,
+                                "Status"
+                            )
+                        ).toLowerCase();
+
+                    if (
+                        status &&
+                        status !== "available"
+                    ) {
+                        return false;
+                    }
+
+                    return true;
+                }
+            );
+
+        const current = [];
+        const upcoming = [];
+
+        records.forEach(
+            function (record) {
+
+                const range =
+                    dashboardParseTimeRange(
+                        getRecordValue(
+                            record,
+                            "Time"
+                        )
+                    );
+
+                if (!range) return;
+
+                const item = {
+                    record: record,
+                    range: range,
+                    time: getRecordValue(
+                        record,
+                        "Time"
+                    )
+                };
+
+                if (
+                    currentMinutes >= range.start &&
+                    currentMinutes < range.end
+                ) {
+                    current.push(item);
+                } else if (
+                    range.start > currentMinutes
+                ) {
+                    upcoming.push(item);
+                }
+            }
+        );
+
+        return {
+            day: day,
+            current: current,
+            upcoming: upcoming
+        };
+    }
+
+
+    function dashboardUniqueOfficers(records) {
+
+        const unique = [];
+        const seen = {};
+
+        records.forEach(
+            function (item) {
+
+                const record =
+                    item.record || item;
+
+                const username =
+                    normalizeUsername(
+                        getRecordValue(
+                            record,
+                            "Username"
+                        )
+                    );
+
+                const officerName =
+                    normalize(
+                        getRecordValue(
+                            record,
+                            "Officer Name"
+                        )
+                    );
+
+                const key =
+                    username ||
+                    officerName.toLowerCase();
+
+                if (!key || seen[key]) {
+                    return;
+                }
+
+                seen[key] = true;
+                unique.push(officerName || username);
+            }
+        );
+
+        return unique;
+    }
+
+
+    function renderDashboardAvailability() {
+
+        const myTitle =
+            document.getElementById(
+                "dashboardMyAvailabilityTitle"
+            );
+
+        const myTime =
+            document.getElementById(
+                "dashboardMyAvailabilityTime"
+            );
+
+        const myDot =
+            document.getElementById(
+                "dashboardMyAvailabilityDot"
+            );
+
+        const officersTitle =
+            document.getElementById(
+                "dashboardOfficersAvailabilityTitle"
+            );
+
+        const officersTime =
+            document.getElementById(
+                "dashboardOfficersAvailabilityTime"
+            );
+
+        const officersDot =
+            document.getElementById(
+                "dashboardOfficersAvailabilityDot"
+            );
+
+        if (
+            !myTitle ||
+            !myTime ||
+            !myDot ||
+            !officersTitle ||
+            !officersTime ||
+            !officersDot
+        ) {
+            return;
+        }
+
+        const availability =
+            dashboardGetCurrentAvailability();
+
+        const current =
+            availability.current;
+
+        const currentRecords =
+            current.map(
+                function (item) {
+                    return item.record;
+                }
+            );
+
+        const currentOfficers =
+            dashboardUniqueOfficers(
+                current
+            );
+
+        const myCurrent =
+            current.filter(
+                function (item) {
+                    return dashboardRecordMatchesCurrentOfficer(
+                        item.record
+                    );
+                }
+            );
+
+        const myUpcoming =
+            availability.upcoming
+                .filter(
+                    function (item) {
+                        return dashboardRecordMatchesCurrentOfficer(
+                            item.record
+                        );
+                    }
+                );
+
+        const todayUpcoming =
+            availability.upcoming;
+
+        /*
+           MY AVAILABILITY
+        */
+        if (myCurrent.length) {
+
+            myTitle.textContent =
+                "You are available";
+
+            myTime.textContent =
+                dashboardFormatAvailabilityRange(
+                    myCurrent[0].time
+                );
+
+            myDot.classList.remove(
+                "availability-dot-inactive"
+            );
+
+        } else if (myUpcoming.length) {
+
+            myTitle.textContent =
+                "You are unavailable";
+
+            myTime.textContent =
+                "Next: " +
+                dashboardFormatAvailabilityRange(
+                    myUpcoming[0].time
+                );
+
+            myDot.classList.add(
+                "availability-dot-inactive"
+            );
+
+        } else {
+
+            myTitle.textContent =
+                "You are unavailable";
+
+            myTime.textContent =
+                "No more availability today";
+
+            myDot.classList.add(
+                "availability-dot-inactive"
+            );
+        }
+
+
+        /*
+           OTHER OFFICERS
+           Count unique officers currently available.
+        */
+        if (currentOfficers.length) {
+
+            officersTitle.textContent =
+                currentOfficers.length === 1
+                    ? "1 officer available"
+                    : currentOfficers.length +
+                      " officers available";
+
+            /*
+               Show the shared/current time period.
+               If multiple slots overlap, show the first
+               current slot represented by the records.
+            */
+            const currentTimes = [];
+
+            current.forEach(
+                function (item) {
+
+                    const formatted =
+                        dashboardFormatAvailabilityRange(
+                            item.time
+                        );
+
+                    if (
+                        !currentTimes.includes(
+                            formatted
+                        )
+                    ) {
+                        currentTimes.push(
+                            formatted
+                        );
+                    }
+                }
+            );
+
+            officersTime.textContent =
+                currentTimes.join(" · ");
+
+            officersDot.classList.remove(
+                "availability-dot-inactive"
+            );
+
+        } else if (todayUpcoming.length) {
+
+            officersTitle.textContent =
+                "No officers available now";
+
+            officersTime.textContent =
+                "Next: " +
+                dashboardFormatAvailabilityRange(
+                    todayUpcoming[0].time
+                );
+
+            officersDot.classList.add(
+                "availability-dot-inactive"
+            );
+
+        } else {
+
+            officersTitle.textContent =
+                "No officers available";
+
+            officersTime.textContent =
+                "No more availability today";
+
+            officersDot.classList.add(
+                "availability-dot-inactive"
+            );
+        }
+    }
+
+
     async function loadAvailability() {
 
         try {
@@ -4340,6 +4414,7 @@
 
             rebuildAvailabilityTableData();
             renderAvailabilityTable();
+            renderDashboardAvailability();
 
         } catch (error) {
 
@@ -4351,6 +4426,7 @@
             availabilityRecords = [];
             rebuildAvailabilityTableData();
             renderAvailabilityTable();
+            renderDashboardAvailability();
         }
     }
 
@@ -4767,6 +4843,7 @@
 
             rebuildAvailabilityTableData();
             renderAvailabilityTable();
+            renderDashboardAvailability();
             initializeMyAvailability();
 
             if (status) {
@@ -4963,30 +5040,7 @@
             refreshTasksButton.dataset.taskBound = "true";
         }
         const tasksList = document.getElementById("tasksList");
-        if (tasksList && !tasksList.dataset.statusBound) {
-            tasksList.addEventListener("change", function(event){
-                const select = event.target.closest(".task-status-select-officer[data-task-id]");
-                if (select) {
-                    const newStatus = select.value;
-                    const currentStatus = select.dataset.previousStatus || "";
-                    if (newStatus === "Pending" && currentStatus !== "Pending") {
-                        select.value = currentStatus || "Pending";
-                        return;
-                    }
-                    select.dataset.previousStatus = newStatus;
-                    updateAssignedTaskStatus(select.dataset.taskId, newStatus, select);
-                }
-            });
-            tasksList.addEventListener("focusin", function(event){
-                const select = event.target.closest(".task-status-select-officer[data-task-id]");
-                if (select) select.dataset.previousStatus = select.value;
-            });
-            tasksList.addEventListener("click", function(event){
-                const button = event.target.closest(".task-delete-button");
-                if(button) deleteAssignedTask(button.dataset.taskId);
-            });
-            tasksList.dataset.statusBound="true";
-        }
+        if (tasksList && !tasksList.dataset.statusBound) { tasksList.addEventListener("change", function(event){ const control=event.target.closest(".task-status-select"); if(control) updateAssignedTaskStatus(control.dataset.taskId,control.value); }); tasksList.dataset.statusBound="true"; }
         const openScheduleEventButton=document.getElementById("openScheduleEventButton");
         const closeScheduleEventButton=document.getElementById("closeScheduleEventButton");
         const cancelScheduleEventButton=document.getElementById("cancelScheduleEventButton");
@@ -5016,21 +5070,24 @@
             loadOfficerProfile(),
             loadAvailability(),
             loadTasks(),
-            loadCalendarData(),
-            loadDashboardData()
+            loadCalendarData()
         ]).then(function () {
 
             updateOfficerProfile();
-            updateDashboardGreeting();
             renderAvailabilityTable();
+            renderDashboardAvailability();
 
         });
 
-        // Keep dashboard information current without requiring a page reload.
-        setInterval(function () {
-            updateDashboardGreeting();
-            loadDashboardData();
-        }, 60000);
+        setInterval(
+            renderDashboardAvailability,
+            15000
+        );
+
+        setInterval(
+            loadAvailability,
+            60000
+        );
     }
 
 
