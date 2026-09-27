@@ -1580,6 +1580,28 @@ body.dashboard-data-loading .dashboard-content {
                 </section>
             </div>
 
+            <!-- OFFICER AVAILABILITY MODAL -->
+            <div class="officer-availability-overlay" id="officerAvailabilityModal" aria-hidden="true">
+                <div class="officer-availability-modal" role="dialog" aria-modal="true" aria-labelledby="officerAvailabilityTitle">
+                    <div class="officer-availability-modal-header">
+                        <div class="officer-availability-heading">
+                            <div class="modal-label">OFFICER AVAILABILITY</div>
+                            <h2 id="officerAvailabilityTitle">Officer</h2>
+                            <p id="officerAvailabilityPosition">Position</p>
+                        </div>
+                        <button type="button" class="event-modal-close" id="closeOfficerAvailabilityButton" aria-label="Close">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+                    <div class="officer-availability-body">
+                        <div class="officer-availability-summary">
+                            <span class="officer-directory-status active"><span></span>LIVE FROM GOOGLE SHEETS</span>
+                        </div>
+                        <div class="officer-week-grid" id="officerAvailabilityGrid"></div>
+                    </div>
+                </div>
+            </div>
+
             <!-- =================================================
                  PLACEHOLDER PAGE FOR OTHER SECTIONS
             ================================================== -->
@@ -4261,17 +4283,126 @@ body.dashboard-data-loading .dashboard-content {
             }).join("") || "OF";
             const statusClass = status.toLowerCase() === "active" ? "active" : "inactive";
 
-            return '<article class="officer-directory-card">' +
+            const username = officerDirectoryValue(officer, "Username");
+
+            return '<article class="officer-directory-card" tabindex="0" role="button" data-officer-username="' + escapeHtml(username) + '" data-officer-name="' + escapeHtml(name) + '" data-officer-position="' + escapeHtml(position) + '">' +
                 '<div class="officer-directory-avatar">' + escapeHtml(initials) + '</div>' +
                 '<div class="officer-directory-info">' +
                     '<h3>' + escapeHtml(name) + '</h3>' +
                     '<p>' + escapeHtml(position) + '</p>' +
                     '<span class="officer-directory-status ' + statusClass + '"><span></span>' + escapeHtml(status) + '</span>' +
                 '</div>' +
+                '<div class="officer-directory-chevron"><i data-lucide="chevron-right"></i></div>' +
             '</article>';
         }).join("");
 
         if (window.lucide) lucide.createIcons();
+    }
+
+    function officerAvailabilityMatches(record, username, name) {
+        const recordUsername = normalizeUsername(getRecordValue(record, "Username"));
+        const recordName = normalize(getRecordValue(record, "Officer Name")).toLowerCase();
+        return (username && recordUsername === normalizeUsername(username)) ||
+               (name && recordName === normalize(name).toLowerCase());
+    }
+
+    function officerAvailabilityRangeText(value) {
+        return dashboardAvailabilityRangeText(value);
+    }
+
+    function openOfficerAvailabilityModal(officer) {
+        const modal = document.getElementById("officerAvailabilityModal");
+        const title = document.getElementById("officerAvailabilityTitle");
+        const position = document.getElementById("officerAvailabilityPosition");
+        const grid = document.getElementById("officerAvailabilityGrid");
+        if (!modal || !grid || !officer) return;
+
+        const username = normalize(officer.Username);
+        const name = normalize(officer.Name) || "Officer";
+        const officerPosition = normalize(officer.Position) || "Position not specified";
+        if (title) title.textContent = name;
+        if (position) position.textContent = officerPosition;
+
+        const officerRecords = (Array.isArray(availabilityRecords) ? availabilityRecords : []).filter(function(record) {
+            const status = normalize(getRecordValue(record, "Status")).toLowerCase();
+            return (!status || status === "available") && officerAvailabilityMatches(record, username, name);
+        });
+
+        grid.innerHTML = days.map(function(day) {
+            const records = officerRecords.filter(function(record) {
+                return normalizeDay(getRecordValue(record, "Day")) === day;
+            });
+
+            const ranges = records.map(function(record) {
+                return officerAvailabilityRangeText(getRecordValue(record, "Time"));
+            }).filter(Boolean);
+
+            const uniqueRanges = Array.from(new Set(ranges));
+            const dayLabel = day.charAt(0).toUpperCase() + day.slice(1);
+
+            return '<div class="officer-day-card">' +
+                '<div class="officer-day-name">' + escapeHtml(dayLabel) + '</div>' +
+                (uniqueRanges.length
+                    ? '<div class="officer-day-ranges">' + uniqueRanges.map(function(range) { return '<span>' + escapeHtml(range) + '</span>'; }).join("") + '</div>'
+                    : '<div class="officer-day-unavailable"><span></span>Not available</div>') +
+            '</div>';
+        }).join("");
+
+        modal.classList.add("show");
+        modal.setAttribute("aria-hidden", "false");
+        document.body.classList.add("officer-availability-modal-open");
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function closeOfficerAvailabilityModal() {
+        const modal = document.getElementById("officerAvailabilityModal");
+        if (modal) {
+            modal.classList.remove("show");
+            modal.setAttribute("aria-hidden", "true");
+        }
+        document.body.classList.remove("officer-availability-modal-open");
+    }
+
+    function initializeOfficerAvailabilityModal() {
+        const grid = document.getElementById("officerDirectoryGrid");
+        const modal = document.getElementById("officerAvailabilityModal");
+        const close = document.getElementById("closeOfficerAvailabilityButton");
+        if (grid && !grid.dataset.availabilityClickBound) {
+            grid.addEventListener("click", function(event) {
+                const card = event.target.closest(".officer-directory-card");
+                if (!card) return;
+                const username = card.dataset.officerUsername || "";
+                const officer = (Array.isArray(officersData) ? officersData : []).find(function(item) {
+                    return normalizeUsername(getRecordValue(item, "Username")) === normalizeUsername(username);
+                });
+                if (officer) openOfficerAvailabilityModal(officer);
+            });
+            grid.addEventListener("keydown", function(event) {
+                if (event.key !== "Enter" && event.key !== " ") return;
+                const card = event.target.closest(".officer-directory-card");
+                if (!card) return;
+                event.preventDefault();
+                const username = card.dataset.officerUsername || "";
+                const officer = (Array.isArray(officersData) ? officersData : []).find(function(item) {
+                    return normalizeUsername(getRecordValue(item, "Username")) === normalizeUsername(username);
+                });
+                if (officer) openOfficerAvailabilityModal(officer);
+            });
+            grid.dataset.availabilityClickBound = "true";
+        }
+        if (close && !close.dataset.bound) {
+            close.addEventListener("click", closeOfficerAvailabilityModal);
+            close.dataset.bound = "true";
+        }
+        if (modal && !modal.dataset.bound) {
+            modal.addEventListener("click", function(event) {
+                if (event.target === modal) closeOfficerAvailabilityModal();
+            });
+            modal.dataset.bound = "true";
+        }
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "Escape") closeOfficerAvailabilityModal();
+        });
     }
 
     async function loadOfficerDirectory() {
@@ -4311,6 +4442,7 @@ body.dashboard-data-loading .dashboard-content {
             refresh.dataset.bound = "true";
         }
         renderOfficerDirectory();
+        initializeOfficerAvailabilityModal();
     }
 
 
