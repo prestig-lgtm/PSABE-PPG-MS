@@ -6548,3 +6548,63 @@ body.availability-modal-open {
     .announcement-card p{font-size:12px;}
     .announcement-form-footer{align-items:stretch;flex-direction:column;}
 }
+
+
+/* =========================================================
+   ANNOUNCEMENT MODAL BUTTON ALIGNMENT
+   Match the announcement actions to the existing Steering
+   modal controls used throughout the Management System.
+========================================================= */
+
+#announcementModal .event-modal-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 9px;
+    width: 100%;
+}
+
+#announcementModal .task-cancel-button {
+    min-height: 42px;
+    min-width: 92px;
+    padding: 0 15px;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+#announcementModal .steering-action-button {
+    min-height: 42px;
+    min-width: 168px;
+    padding: 0 17px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+}
+
+#announcementModal .steering-action-button svg {
+    width: 15px;
+    height: 15px;
+}
+
+@media (max-width: 600px) {
+    #announcementModal .event-modal-actions {
+        width: 100%;
+    }
+
+    #announcementModal .task-cancel-button,
+    #announcementModal .steering-action-button {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+}
