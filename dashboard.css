@@ -5915,59 +5915,56 @@ body.availability-modal-open {
 
 /* =========================================================
    TASK STATUS CONTROLS
-   Assigned officers can update their own task progress.
+   Assigned officers update their own task progress through a dropdown.
 ========================================================= */
 .task-status-control{
     display:flex;
     align-items:center;
     justify-content:flex-end;
-    flex-wrap:wrap;
-    gap:6px;
-    max-width:430px;
+    gap:8px;
+    min-width:210px;
 }
-.task-status-option{
-    border:1px solid rgba(255,255,255,.12);
-    background:rgba(255,255,255,.04);
-    color:rgba(255,255,255,.72);
-    border-radius:8px;
-    padding:8px 10px;
+.task-status-label{
+    color:rgba(255,255,255,.48);
+    font-size:8px;
+    font-weight:900;
+    letter-spacing:.08em;
+}
+.task-status-select-officer{
+    min-width:155px;
+    height:38px;
+    padding:0 34px 0 12px;
+    border:1px solid rgba(0,216,181,.24);
+    border-radius:9px;
+    background:#0d342c;
+    color:#fff;
     font:inherit;
-    font-size:9px;
+    font-size:10px;
     font-weight:900;
     letter-spacing:.04em;
     text-transform:uppercase;
+    outline:none;
     cursor:pointer;
     transition:.18s ease;
 }
-.task-status-option:hover:not(:disabled){
-    transform:translateY(-1px);
-    border-color:rgba(0,216,181,.45);
+.task-status-select-officer:hover{
+    border-color:rgba(0,216,181,.48);
+    background:#104137;
+}
+.task-status-select-officer:focus{
+    border-color:rgba(0,216,181,.70);
+    box-shadow:0 0 0 3px rgba(0,216,181,.08);
+}
+.task-status-select-officer:disabled{
+    opacity:.65;
+    cursor:wait;
+}
+.task-status-select-officer.saving{
+    border-color:rgba(202,166,84,.55);
+}
+.task-status-select-officer option{
+    background:#0d342c;
     color:#fff;
-    background:rgba(0,216,181,.09);
-}
-.task-status-option:disabled{
-    cursor:default;
-    opacity:1;
-}
-.task-status-option.pending.active{
-    color:#e3c878;
-    background:rgba(202,166,84,.14);
-    border-color:rgba(202,166,84,.35);
-}
-.task-status-option.in-progress.active{
-    color:#9ed2c1;
-    background:rgba(73,139,115,.18);
-    border-color:rgba(73,139,115,.40);
-}
-.task-status-option.for-checking.active{
-    color:#b8c8ff;
-    background:rgba(104,125,210,.18);
-    border-color:rgba(104,125,210,.40);
-}
-.task-status-option.completed.active{
-    color:#a9d9b2;
-    background:rgba(82,150,94,.18);
-    border-color:rgba(82,150,94,.40);
 }
 .task-delete-button{
     width:34px;
@@ -5990,5 +5987,6 @@ body.availability-modal-open {
 }
 .task-delete-button svg{width:16px;height:16px;stroke-width:2.2}
 @media(max-width:900px){
-    .task-status-control{justify-content:flex-start;max-width:none}
+    .task-status-control{justify-content:flex-start;min-width:0;width:100%}
+    .task-status-select-officer{min-width:170px}
 }
