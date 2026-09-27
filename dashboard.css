@@ -6427,3 +6427,38 @@ body.availability-modal-open {
     .officer-filter-select{flex:1;}
     .officer-directory-grid{grid-template-columns:1fr;padding:12px;}
 }
+
+/* =========================================================
+   OFFICER DIRECTORY AVAILABILITY DETAIL
+========================================================= */
+.officer-directory-card{cursor:pointer;position:relative;padding-right:46px;}
+.officer-directory-card:focus-visible{outline:none;border-color:rgba(0,216,181,.6);box-shadow:0 0 0 3px rgba(0,216,181,.10);}
+.officer-directory-chevron{position:absolute;right:15px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.42);}
+.officer-directory-chevron svg{width:18px;height:18px;}
+.officer-availability-overlay{position:fixed;inset:0;z-index:1200;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(1,15,12,.78);backdrop-filter:blur(8px);}
+.officer-availability-overlay.show{display:flex;}
+.officer-availability-modal{width:min(760px,100%);max-height:min(760px,calc(100vh - 44px));overflow:auto;border:1px solid rgba(255,255,255,.10);border-radius:16px;background:linear-gradient(145deg,rgba(9,49,40,.98),rgba(4,29,24,.98));box-shadow:0 25px 70px rgba(0,0,0,.42);}
+.officer-availability-modal-header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:22px 24px 18px;border-bottom:1px solid rgba(255,255,255,.08);}
+.officer-availability-heading h2{margin:4px 0 3px;color:#fff;font-size:22px;font-weight:850;}
+.officer-availability-heading p{margin:0;color:rgba(225,239,233,.64);font-size:12px;}
+.officer-availability-body{padding:18px 20px 22px;}
+.officer-availability-summary{margin-bottom:14px;}
+.officer-week-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;}
+.officer-day-card{min-height:132px;padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(5,34,28,.62);}
+.officer-day-name{color:#dcefe8;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;margin-bottom:13px;}
+.officer-day-ranges{display:flex;flex-direction:column;gap:7px;}
+.officer-day-ranges span{display:block;padding:8px 9px;border-radius:8px;background:rgba(0,216,181,.10);border:1px solid rgba(0,216,181,.18);color:#dffff7;font-size:11px;font-weight:750;line-height:1.3;}
+.officer-day-unavailable{display:flex;align-items:center;gap:7px;color:rgba(225,239,233,.42);font-size:11px;line-height:1.35;}
+.officer-day-unavailable span{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.22);flex:0 0 7px;}
+.officer-availability-modal-open{overflow:hidden;}
+@media (max-width:760px){
+    .officer-availability-overlay{padding:12px;}
+    .officer-availability-modal{max-height:calc(100vh - 24px);}
+    .officer-availability-modal-header{padding:18px 18px 15px;}
+    .officer-availability-heading h2{font-size:19px;}
+    .officer-availability-body{padding:14px;}
+    .officer-week-grid{grid-template-columns:1fr 1fr;}
+}
+@media (max-width:430px){
+    .officer-week-grid{grid-template-columns:1fr;}
+}
