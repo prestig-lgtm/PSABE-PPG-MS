@@ -1603,6 +1603,40 @@ body.dashboard-data-loading .dashboard-content {
             </div>
 
             <!-- =================================================
+                 ANNOUNCEMENTS PAGE
+            ================================================== -->
+            <div id="announcementsPage" class="page-section announcements-page">
+                <div class="announcements-page-header">
+                    <div>
+                        <p class="eyebrow">PSABE-PPG MANAGEMENT SYSTEM</p>
+                        <h1>Announcements</h1>
+                        <p>Stay updated with the latest notices, reminders, and organization information.</p>
+                    </div>
+                    <button type="button" class="steering-action-button announcements-post-button" id="openAnnouncementButton" style="display:none;">
+                        <i data-lucide="megaphone"></i> POST ANNOUNCEMENT
+                    </button>
+                </div>
+                <section class="dashboard-panel announcements-panel">
+                    <div class="announcements-toolbar">
+                        <div class="announcements-toolbar-title">
+                            <div><span class="panel-label">ORGANIZATION NOTICES</span><h2>Latest Announcements</h2></div>
+                            <strong id="announcementsCountLabel">0</strong>
+                        </div>
+                        <div class="announcements-toolbar-actions">
+                            <div class="announcements-search-wrap"><i data-lucide="search"></i><input id="announcementSearchInput" type="search" placeholder="Search announcements..." autocomplete="off"></div>
+                            <select id="announcementTypeFilter" class="announcement-filter-select" aria-label="Filter announcement type">
+                                <option value="all">All Types</option><option value="announcement">Announcement</option><option value="important">Important</option><option value="event">Event</option><option value="meeting">Meeting</option><option value="reminder">Reminder</option>
+                            </select>
+                            <button type="button" class="text-button" id="refreshAnnouncementsButton">Refresh</button>
+                        </div>
+                    </div>
+                    <div class="announcements-list" id="announcementsList">
+                        <div class="announcements-empty"><div class="announcements-empty-icon"><i data-lucide="megaphone"></i></div><strong>Loading announcements...</strong><span>Please wait while the latest organization notices are loaded.</span></div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- =================================================
                  PLACEHOLDER PAGE FOR OTHER SECTIONS
             ================================================== -->
             <div id="placeholderPage" class="page-section">
@@ -1621,6 +1655,24 @@ body.dashboard-data-loading .dashboard-content {
 
 
 
+
+<!-- STEERING ANNOUNCEMENT MODAL -->
+<div class="event-modal-overlay announcement-modal-overlay" id="announcementModal" aria-hidden="true">
+<div class="event-modal announcement-modal" role="dialog" aria-modal="true" aria-labelledby="announcementModalTitle">
+<div class="event-modal-header"><div><div class="modal-label">STEERING CONTROL</div><h2 id="announcementModalTitle">Post Announcement</h2><p>Publish an organization notice that will be visible to PSABE-PPG officers.</p></div><button type="button" class="event-modal-close" id="closeAnnouncementButton" aria-label="Close"><i data-lucide="x"></i></button></div>
+<form class="event-form" id="announcementForm"><input type="hidden" id="announcementIdInput">
+<div class="event-form-grid">
+<div class="event-field full"><label for="announcementTitleInput">Title</label><input id="announcementTitleInput" type="text" maxlength="120" required placeholder="Enter announcement title"></div>
+<div class="event-field full"><label for="announcementMessageInput">Message</label><textarea id="announcementMessageInput" maxlength="2000" required placeholder="Write the announcement message..."></textarea></div>
+<div class="event-field"><label for="announcementTypeInput">Type</label><select id="announcementTypeInput"><option value="Announcement">Announcement</option><option value="Important">Important</option><option value="Event">Event</option><option value="Meeting">Meeting</option><option value="Reminder">Reminder</option></select></div>
+<div class="event-field"><label for="announcementDateInput">Date <span class="optional-label">Optional</span></label><input id="announcementDateInput" type="date"></div>
+<div class="event-field"><label for="announcementTimeInput">Time <span class="optional-label">Optional</span></label><input id="announcementTimeInput" type="time"></div>
+<div class="event-field"><label for="announcementLocationInput">Location <span class="optional-label">Optional</span></label><input id="announcementLocationInput" type="text" maxlength="180" placeholder="Enter location"></div>
+</div>
+<div class="announcement-form-footer"><span id="announcementFormStatus"></span><div class="event-modal-actions"><button type="button" class="event-cancel-button" id="cancelAnnouncementButton">CANCEL</button><button type="submit" class="event-submit-button" id="announcementSubmitButton">POST ANNOUNCEMENT</button></div></div>
+</form>
+</div>
+</div>
 
 <!-- STEERING SCHEDULE ACTIVITY MODAL -->
 <div class="event-modal-overlay" id="scheduleEventModal">
@@ -1986,6 +2038,12 @@ body.dashboard-data-loading .dashboard-content {
                     );
 
 
+                const announcementsPage =
+                    document.getElementById(
+                        "announcementsPage"
+                    );
+
+
                 const placeholderPage =
                     document.getElementById(
                         "placeholderPage"
@@ -2064,6 +2122,12 @@ body.dashboard-data-loading .dashboard-content {
 
                     if (officersPage) {
                         officersPage.classList.remove(
+                            "active-page"
+                        );
+                    }
+
+                    if (announcementsPage) {
+                        announcementsPage.classList.remove(
                             "active-page"
                         );
                     }
@@ -2161,6 +2225,27 @@ body.dashboard-data-loading .dashboard-content {
 
                         if (typeof window.loadOfficerDirectory === "function") {
                             window.loadOfficerDirectory();
+                        }
+
+                    }
+
+
+                    else if (
+                        page === "announcements"
+                    ) {
+
+                        if (announcementsPage) {
+                            announcementsPage.classList.add(
+                                "active-page"
+                            );
+                        }
+
+                        setActiveNavigation(
+                            "announcements"
+                        );
+
+                        if (typeof window.loadAnnouncements === "function") {
+                            window.loadAnnouncements();
                         }
 
                     }
@@ -3695,24 +3780,7 @@ body.dashboard-data-loading .dashboard-content {
             }
         }
 
-        const announcementLabel = document.getElementById("dashboardAnnouncementLabel");
-        const announcementTitle = document.getElementById("dashboardAnnouncementTitle");
-        const announcementText = document.getElementById("dashboardAnnouncementText");
-        if (announcementLabel && announcementTitle && announcementText) {
-            const updateItems = upcomingEvents.slice().sort(function(a, b) {
-                return dashboardDateKey(getRecordValue(a, "Date")).localeCompare(dashboardDateKey(getRecordValue(b, "Date")));
-            });
-            const latest = updateItems[0];
-            if (latest) {
-                announcementLabel.textContent = "LATEST UPDATE";
-                announcementTitle.textContent = getRecordValue(latest, "Title") || "Scheduled activity";
-                announcementText.textContent = getRecordValue(latest, "Description") || getRecordValue(latest, "Location") || "A new organization activity is scheduled.";
-            } else {
-                announcementLabel.textContent = "LATEST UPDATE";
-                announcementTitle.textContent = "No scheduled updates";
-                announcementText.textContent = "There are currently no active organization events.";
-            }
-        }
+        updateDashboardAnnouncement();
     }
 
     async function loadDashboardData() {
@@ -3731,6 +3799,94 @@ body.dashboard-data-loading .dashboard-content {
         } catch (error) {
             console.error("Dashboard data loading error:", error);
         }
+    }
+
+    /* =====================================================
+       ANNOUNCEMENTS
+       Live Google Sheets announcement management
+    ===================================================== */
+    let announcementsData = [];
+
+    function announcementDateText(value) {
+        const text = normalize(value);
+        if (!text) return "";
+        const iso = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (iso) return iso[2] + "/" + iso[3] + "/" + iso[1].slice(-2);
+        return text;
+    }
+    function announcementTimeText(value) {
+        const text = normalize(value);
+        if (!text) return "";
+        const match = text.match(/^(\d{1,2}):(\d{2})/);
+        if (!match) return text;
+        let hour = Number(match[1]);
+        const suffix = hour >= 12 ? "PM" : "AM";
+        hour = hour % 12 || 12;
+        return hour + ":" + match[2] + " " + suffix;
+    }
+    function announcementTypeClass(value) {
+        return normalize(value).toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") || "announcement";
+    }
+    function announcementSortKey(item) {
+        return (normalize(getRecordValue(item, "Date")) + " " + normalize(getRecordValue(item, "Time")));
+    }
+    function updateDashboardAnnouncement() {
+        const label=document.getElementById("dashboardAnnouncementLabel"), title=document.getElementById("dashboardAnnouncementTitle"), text=document.getElementById("dashboardAnnouncementText");
+        if (!label || !title || !text) return;
+        const active=announcementsData.filter(function(item){const status=normalize(getRecordValue(item,"Status")).toLowerCase();return !status||status==="active";}).slice().sort(function(a,b){return announcementSortKey(b).localeCompare(announcementSortKey(a));});
+        const latest=active[0];
+        label.textContent="LATEST ANNOUNCEMENT";
+        title.textContent=latest ? (getRecordValue(latest,"Title")||"Announcement") : "No active announcements";
+        text.textContent=latest ? (getRecordValue(latest,"Message")||"Please check the Announcements section for details.") : "There are currently no organization announcements.";
+    }
+    function renderAnnouncements() {
+        const list=document.getElementById("announcementsList"), count=document.getElementById("announcementsCountLabel"), search=document.getElementById("announcementSearchInput"), filter=document.getElementById("announcementTypeFilter");
+        if(!list)return;
+        const query=normalize(search?search.value:"").toLowerCase(), type=normalize(filter?filter.value:"all").toLowerCase();
+        const visible=announcementsData.filter(function(item){
+            const status=normalize(getRecordValue(item,"Status")).toLowerCase(); if(status&&status!=="active")return false;
+            const itemType=normalize(getRecordValue(item,"Type")).toLowerCase(); if(type!=="all"&&itemType!==type)return false;
+            if(!query)return true;
+            return [getRecordValue(item,"Title"),getRecordValue(item,"Message"),getRecordValue(item,"Type"),getRecordValue(item,"Location"),getRecordValue(item,"Posted By")].join(" ").toLowerCase().indexOf(query)!==-1;
+        }).slice().sort(function(a,b){return announcementSortKey(b).localeCompare(announcementSortKey(a));});
+        if(count)count.textContent=visible.length;
+        if(!visible.length){list.innerHTML='<div class="announcements-empty"><div class="announcements-empty-icon"><i data-lucide="megaphone"></i></div><strong>'+(query||type!=="all"?"No matching announcements":"No active announcements")+'</strong><span>'+(query||type!=="all"?"Try another search or filter.":(IS_STEERING?"Post the first organization announcement.":"There are currently no active organization announcements."))+'</span></div>';if(window.lucide)lucide.createIcons();return;}
+        list.innerHTML=visible.map(function(item){
+            const id=normalize(getRecordValue(item,"Announcement ID")), title=normalize(getRecordValue(item,"Title")), message=normalize(getRecordValue(item,"Message")), itemType=normalize(getRecordValue(item,"Type"))||"Announcement", date=announcementDateText(getRecordValue(item,"Date")), time=announcementTimeText(getRecordValue(item,"Time")), location=normalize(getRecordValue(item,"Location")), createdByName=normalize(getRecordValue(item,"Posted By"))||taskAssignedOfficerName(getRecordValue(item,"Posted By")), meta=[date,time,location].filter(Boolean).join(" · ");
+            const actions=IS_STEERING?'<div class="announcement-card-actions"><button type="button" class="announcement-icon-button" data-announcement-action="edit" data-announcement-id="'+escapeHtml(id)+'" aria-label="Edit announcement" title="Edit announcement"><i data-lucide="pencil"></i></button><button type="button" class="announcement-icon-button danger" data-announcement-action="delete" data-announcement-id="'+escapeHtml(id)+'" aria-label="Delete announcement" title="Delete announcement"><i data-lucide="trash-2"></i></button></div>':'';
+            return '<article class="announcement-card announcement-type-'+escapeHtml(announcementTypeClass(itemType))+'" data-announcement-id="'+escapeHtml(id)+'"><div class="announcement-card-accent"></div><div class="announcement-card-body"><div class="announcement-card-top"><span class="announcement-type-badge">'+escapeHtml(itemType.toUpperCase())+'</span>'+(meta?'<span class="announcement-meta">'+escapeHtml(meta)+'</span>':'')+actions+'</div><h3>'+escapeHtml(title||"Untitled announcement")+'</h3><p>'+escapeHtml(message||"No message provided.")+'</p><div class="announcement-card-footer"><span><i data-lucide="user-round"></i> '+escapeHtml(createdByName||"PSABE-PPG")+'</span><span class="announcement-live-label"><i data-lucide="radio"></i> LIVE</span></div></div></article>';
+        }).join("");
+        if(window.lucide)lucide.createIcons();
+    }
+    async function loadAnnouncements(){
+        const list=document.getElementById("announcementsList");
+        try{const result=await fetchJson("getAnnouncements");announcementsData=Array.isArray(result.data)?result.data:[];renderAnnouncements();updateDashboardAnnouncement();}
+        catch(error){console.error("Announcements loading error:",error);if(list)list.innerHTML='<div class="announcements-empty"><div class="announcements-empty-icon"><i data-lucide="triangle-alert"></i></div><strong>Unable to load announcements</strong><span>'+escapeHtml(error.message||"Please try again.")+'</span></div>';if(window.lucide)lucide.createIcons();}
+    }
+    window.loadAnnouncements=loadAnnouncements;
+    function openAnnouncementModal(item){
+        if(!IS_STEERING)return; const modal=document.getElementById("announcementModal"), form=document.getElementById("announcementForm"); if(!modal||!form)return; form.reset();
+        document.getElementById("announcementIdInput").value=item?normalize(getRecordValue(item,"Announcement ID")):"";
+        document.getElementById("announcementTitleInput").value=item?normalize(getRecordValue(item,"Title")):"";
+        document.getElementById("announcementMessageInput").value=item?normalize(getRecordValue(item,"Message")):"";
+        document.getElementById("announcementTypeInput").value=item?(normalize(getRecordValue(item,"Type"))||"Announcement"):"Announcement";
+        document.getElementById("announcementDateInput").value=item?normalize(getRecordValue(item,"Date")):"";
+        document.getElementById("announcementTimeInput").value=item?normalize(getRecordValue(item,"Time")):"";
+        document.getElementById("announcementLocationInput").value=item?normalize(getRecordValue(item,"Location")):"";
+        document.getElementById("announcementModalTitle").textContent=item?"Edit Announcement":"Post Announcement";
+        document.getElementById("announcementSubmitButton").textContent=item?"SAVE CHANGES":"POST ANNOUNCEMENT";
+        document.getElementById("announcementFormStatus").textContent="";
+        modal.classList.add("show");modal.setAttribute("aria-hidden","false");if(window.lucide)lucide.createIcons();
+    }
+    function closeAnnouncementModal(){const modal=document.getElementById("announcementModal");if(modal){modal.classList.remove("show");modal.setAttribute("aria-hidden","true");}}
+    async function submitAnnouncement(event){
+        event.preventDefault();if(!IS_STEERING)return;const submit=document.getElementById("announcementSubmitButton"),status=document.getElementById("announcementFormStatus"),id=normalize(document.getElementById("announcementIdInput").value),data={username:CURRENT_USERNAME,announcementId:id,title:normalize(document.getElementById("announcementTitleInput").value),message:normalize(document.getElementById("announcementMessageInput").value),type:normalize(document.getElementById("announcementTypeInput").value)||"Announcement",date:normalize(document.getElementById("announcementDateInput").value),time:normalize(document.getElementById("announcementTimeInput").value),location:normalize(document.getElementById("announcementLocationInput").value)};
+        if(!data.title||!data.message){status.textContent="Title and message are required.";return;} submit.disabled=true;status.textContent=id?"Saving changes...":"Posting announcement...";
+        try{const response=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:id?"updateAnnouncement":"createAnnouncement",data:data})});if(!response.ok)throw new Error("Announcement request failed.");const result=await response.json();if(!result.success)throw new Error(result.message||"The announcement could not be saved.");status.textContent=result.message||"Announcement saved successfully.";await loadAnnouncements();setTimeout(closeAnnouncementModal,350);}catch(error){console.error("Announcement save error:",error);status.textContent=error.message||"The announcement could not be saved.";}finally{submit.disabled=false;}
+    }
+    async function deleteAnnouncement(announcementId){
+        if(!IS_STEERING||!announcementId)return;if(!confirm("Delete this announcement? This cannot be undone."))return;
+        try{const response=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"deleteAnnouncement",data:{username:CURRENT_USERNAME,announcementId:announcementId}})});if(!response.ok)throw new Error("Announcement delete request failed.");const result=await response.json();if(!result.success)throw new Error(result.message||"The announcement could not be deleted.");await loadAnnouncements();}catch(error){console.error("Announcement delete error:",error);alert(error.message||"The announcement could not be deleted.");}
     }
 
     /* =====================================================
@@ -5351,6 +5507,17 @@ body.dashboard-data-loading .dashboard-content {
         if(scheduleEventModal&&!scheduleEventModal.dataset.bound){scheduleEventModal.addEventListener("click",function(event){if(event.target===scheduleEventModal)closeScheduleEventModal();});scheduleEventModal.dataset.bound="true";}
         if(scheduleEventForm&&!scheduleEventForm.dataset.bound){scheduleEventForm.addEventListener("submit",submitScheduledEvent);scheduleEventForm.dataset.bound="true";}
 
+        const openAnnouncementButton=document.getElementById("openAnnouncementButton"), closeAnnouncementButton=document.getElementById("closeAnnouncementButton"), cancelAnnouncementButton=document.getElementById("cancelAnnouncementButton"), announcementModal=document.getElementById("announcementModal"), announcementForm=document.getElementById("announcementForm"), refreshAnnouncementsButton=document.getElementById("refreshAnnouncementsButton"), announcementSearchInput=document.getElementById("announcementSearchInput"), announcementTypeFilter=document.getElementById("announcementTypeFilter"), announcementsList=document.getElementById("announcementsList");
+        if(openAnnouncementButton){openAnnouncementButton.style.display=IS_STEERING?"inline-flex":"none";if(!openAnnouncementButton.dataset.bound){openAnnouncementButton.addEventListener("click",function(){openAnnouncementModal(null);});openAnnouncementButton.dataset.bound="true";}}
+        if(closeAnnouncementButton&&!closeAnnouncementButton.dataset.bound){closeAnnouncementButton.addEventListener("click",closeAnnouncementModal);closeAnnouncementButton.dataset.bound="true";}
+        if(cancelAnnouncementButton&&!cancelAnnouncementButton.dataset.bound){cancelAnnouncementButton.addEventListener("click",closeAnnouncementModal);cancelAnnouncementButton.dataset.bound="true";}
+        if(announcementModal&&!announcementModal.dataset.bound){announcementModal.addEventListener("click",function(event){if(event.target===announcementModal)closeAnnouncementModal();});announcementModal.dataset.bound="true";}
+        if(announcementForm&&!announcementForm.dataset.bound){announcementForm.addEventListener("submit",submitAnnouncement);announcementForm.dataset.bound="true";}
+        if(refreshAnnouncementsButton&&!refreshAnnouncementsButton.dataset.bound){refreshAnnouncementsButton.addEventListener("click",loadAnnouncements);refreshAnnouncementsButton.dataset.bound="true";}
+        if(announcementSearchInput&&!announcementSearchInput.dataset.bound){announcementSearchInput.addEventListener("input",renderAnnouncements);announcementSearchInput.dataset.bound="true";}
+        if(announcementTypeFilter&&!announcementTypeFilter.dataset.bound){announcementTypeFilter.addEventListener("change",renderAnnouncements);announcementTypeFilter.dataset.bound="true";}
+        if(announcementsList&&!announcementsList.dataset.bound){announcementsList.addEventListener("click",function(event){const button=event.target.closest("[data-announcement-action]");if(!button)return;const id=button.dataset.announcementId||"",action=button.dataset.announcementAction,item=announcementsData.find(function(entry){return normalize(getRecordValue(entry,"Announcement ID"))===normalize(id);});if(action==="edit"&&item)openAnnouncementModal(item);if(action==="delete")deleteAnnouncement(id);});announcementsList.dataset.bound="true";}
+
         initializeOfficerDirectory();
         updateOfficerProfile();
         rebuildAvailabilityTableData();
@@ -5372,7 +5539,8 @@ body.dashboard-data-loading .dashboard-content {
             loadAvailability(),
             loadTasks(),
             loadCalendarData(),
-            loadDashboardData()
+            loadDashboardData(),
+            loadAnnouncements()
         ]).then(function () {
 
             updateOfficerProfile();
@@ -5393,6 +5561,7 @@ body.dashboard-data-loading .dashboard-content {
         setInterval(function () {
             updateDashboardGreeting();
             loadDashboardData();
+            loadAnnouncements();
             loadAvailability();
             loadOfficerProfile();
         }, 60000);
