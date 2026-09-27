@@ -3352,6 +3352,17 @@
     }
 
 
+    function isCurrentOfficer(value) {
+        const candidate = normalizeUsername(value);
+        if (!candidate) return false;
+
+        const username = normalizeUsername(CURRENT_USERNAME);
+        const name = normalizeUsername(currentOfficer && currentOfficer.Name);
+
+        return candidate === username || (name && candidate === name);
+    }
+
+
     function normalizeDay(value) {
         return normalize(value).toLowerCase();
     }
@@ -3818,32 +3829,34 @@
             const normalizedStatus = normalizeTaskStatus(rawStatus);
             const taskId = getRecordValue(task, "Task ID");
 
+            const isAssignedOfficer = isCurrentOfficer(assignedTo);
+
             let statusControl;
 
-            if (IS_STEERING) {
+            if (isAssignedOfficer) {
+                /*
+                   The assigned officer controls task progress.
+                   Every new task starts as Pending.
+                   Pending is displayed as the initial state and cannot be
+                   selected again. The officer can mark the task as:
+                   In Progress -> For Checking -> Completed.
+                */
+                statusControl =
+                    '<div class="task-status-control" data-task-id="' + escapeHtml(taskId) + '">' +
+                        '<button type="button" class="task-status-option pending' + (normalizedStatus === "pending" ? " active" : "") + '" disabled>Pending</button>' +
+                        '<button type="button" class="task-status-option in-progress' + (normalizedStatus === "in-progress" ? " active" : "") + '" data-status="In Progress">In Progress</button>' +
+                        '<button type="button" class="task-status-option for-checking' + (normalizedStatus === "for-checking" ? " active" : "") + '" data-status="For Checking">For Checking</button>' +
+                        '<button type="button" class="task-status-option completed' + (normalizedStatus === "completed" ? " active" : "") + '" data-status="Completed">Completed</button>' +
+                    '</div>';
+            } else {
                 statusControl =
                     '<span class="task-status ' + escapeHtml(normalizedStatus || "pending") + '">' +
                     escapeHtml(rawStatus || "Pending") +
                     '</span>';
-            } else {
-                /*
-                   Assigned officers own the task progress.
-                   Pending is assigned automatically by Steering.
-                   Officers may move the task through In Progress, For Checking,
-                   and Completed from My Tasks.
-                */
-                statusControl =
-                    '<select class="task-status-select" data-task-id="' + escapeHtml(taskId) +
-                    '" aria-label="Update task status">' +
-                    '<option value="Pending" disabled' + (normalizedStatus === "pending" ? " selected" : "") + '>Pending</option>' +
-                    '<option value="In Progress"' + (normalizedStatus === "in-progress" ? " selected" : "") + '>In Progress</option>' +
-                    '<option value="For Checking"' + (normalizedStatus === "for-checking" ? " selected" : "") + '>For Checking</option>' +
-                    '<option value="Completed"' + (normalizedStatus === "completed" ? " selected" : "") + '>Completed</option>' +
-                    '</select>';
             }
 
-            const canDelete = IS_STEERING &&
-                normalizeUsername(assignedBy) === normalizeUsername(CURRENT_USERNAME);
+            /* Only the officer who originally assigned the task can delete it. */
+            const canDelete = isCurrentOfficer(assignedBy);
 
             const deleteControl = canDelete
                 ? '<button type="button" class="task-delete-button" data-task-id="' + escapeHtml(taskId) + '" aria-label="Delete task" title="Delete task"><i data-lucide="trash-2"></i></button>'
@@ -4000,9 +4013,9 @@
     }
 
     async function updateAssignedTaskStatus(taskId, statusValue) {
-        if (IS_STEERING || !taskId) return;
+        if (!taskId || !statusValue) return;
         try {
-            const response = await fetch(API_URL, {method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"updateTaskStatus",data:{taskId:taskId,username:CURRENT_USERNAME,status:statusValue}})});
+            const response = await fetch(API_URL, {method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"updateTaskStatus",data:{taskId:taskId,username:CURRENT_USERNAME,officerName:normalize(currentOfficer.Name),status:statusValue}})});
             if (!response.ok) throw new Error("Task status request failed.");
             const result = await response.json();
             if (!result.success) throw new Error(result.message || "Task status could not be updated.");
@@ -4013,7 +4026,7 @@
     }
 
     async function deleteAssignedTask(taskId) {
-        if (!IS_STEERING || !taskId) return;
+        if (!taskId) return;
 
         const task = tasksData.find(function(item) {
             return normalize(String(getRecordValue(item, "Task ID"))) === normalize(String(taskId));
@@ -4037,7 +4050,7 @@
             const response = await fetch(API_URL, {
                 method:"POST",
                 headers:{"Content-Type":"text/plain;charset=utf-8"},
-                body:JSON.stringify({action:"deleteTask",data:{taskId:taskId,username:CURRENT_USERNAME}})
+                body:JSON.stringify({action:"deleteTask",data:{taskId:taskId,username:CURRENT_USERNAME,officerName:normalize(currentOfficer.Name)}})
             });
             if (!response.ok) throw new Error("Task deletion request failed.");
             const result = await response.json();
@@ -4913,11 +4926,14 @@
         }
         const tasksList = document.getElementById("tasksList");
         if (tasksList && !tasksList.dataset.statusBound) {
-            tasksList.addEventListener("change", function(event){
-                const control=event.target.closest(".task-status-select");
-                if(control) updateAssignedTaskStatus(control.dataset.taskId,control.value);
-            });
             tasksList.addEventListener("click", function(event){
+                const statusButton = event.target.closest(".task-status-option[data-status]");
+                if (statusButton && !statusButton.disabled) {
+                    const control = statusButton.closest(".task-status-control");
+                    if (control) updateAssignedTaskStatus(control.dataset.taskId, statusButton.dataset.status);
+                    return;
+                }
+
                 const button = event.target.closest(".task-delete-button");
                 if(button) deleteAssignedTask(button.dataset.taskId);
             });
