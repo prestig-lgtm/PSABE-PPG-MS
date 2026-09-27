@@ -3843,10 +3843,13 @@
                 */
                 statusControl =
                     '<div class="task-status-control" data-task-id="' + escapeHtml(taskId) + '">' +
-                        '<button type="button" class="task-status-option pending' + (normalizedStatus === "pending" ? " active" : "") + '" disabled>Pending</button>' +
-                        '<button type="button" class="task-status-option in-progress' + (normalizedStatus === "in-progress" ? " active" : "") + '" data-status="In Progress">In Progress</button>' +
-                        '<button type="button" class="task-status-option for-checking' + (normalizedStatus === "for-checking" ? " active" : "") + '" data-status="For Checking">For Checking</button>' +
-                        '<button type="button" class="task-status-option completed' + (normalizedStatus === "completed" ? " active" : "") + '" data-status="Completed">Completed</button>' +
+                        '<label class="task-status-label" for="task-status-' + escapeHtml(taskId) + '">STATUS</label>' +
+                        '<select id="task-status-' + escapeHtml(taskId) + '" class="task-status-select-officer" aria-label="Update task status" data-task-id="' + escapeHtml(taskId) + '">' +
+                            '<option value="Pending"' + (normalizedStatus === "pending" ? " selected" : "") + '>Pending</option>' +
+                            '<option value="In Progress"' + (normalizedStatus === "in-progress" ? " selected" : "") + '>In Progress</option>' +
+                            '<option value="For Checking"' + (normalizedStatus === "for-checking" ? " selected" : "") + '>For Checking</option>' +
+                            '<option value="Completed"' + (normalizedStatus === "completed" ? " selected" : "") + '>Completed</option>' +
+                        '</select>' +
                     '</div>';
             } else {
                 statusControl =
@@ -4012,17 +4015,43 @@
         } catch (error) { console.error("Calendar data loading error:", error); }
     }
 
-    async function updateAssignedTaskStatus(taskId, statusValue) {
-        if (!taskId || !statusValue) return;
+    async function updateAssignedTaskStatus(taskId, statusValue, selectElement) {
+        if (!taskId || !statusValue || statusValue === "Pending") {
+            if (selectElement && statusValue === "Pending") selectElement.value = selectElement.dataset.previousStatus || "Pending";
+            return;
+        }
+
+        const previousStatus = selectElement ? (selectElement.dataset.previousStatus || "Pending") : "Pending";
+        if (selectElement) {
+            selectElement.disabled = true;
+            selectElement.classList.add("saving");
+        }
+
         try {
-            const response = await fetch(API_URL, {method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"updateTaskStatus",data:{taskId:taskId,username:CURRENT_USERNAME,officerName:normalize(currentOfficer.Name),status:statusValue}})});
+            const response = await fetch(API_URL, {
+                method:"POST",
+                headers:{"Content-Type":"text/plain;charset=utf-8"},
+                body:JSON.stringify({action:"updateTaskStatus",data:{taskId:taskId,username:CURRENT_USERNAME,officerName:normalize(currentOfficer.Name),status:statusValue}})
+            });
             if (!response.ok) throw new Error("Task status request failed.");
             const result = await response.json();
             if (!result.success) throw new Error(result.message || "Task status could not be updated.");
             await loadTasks();
             await loadCalendarData();
             await loadDashboardData();
-        } catch (error) { console.error("Task status update error:",error); alert(error.message || "Task status could not be updated."); await loadTasks(); }
+        } catch (error) {
+            console.error("Task status update error:",error);
+            if (selectElement) {
+                selectElement.value = previousStatus;
+                selectElement.dataset.previousStatus = previousStatus;
+            }
+            alert(error.message || "Task status could not be updated.");
+        } finally {
+            if (selectElement) {
+                selectElement.disabled = false;
+                selectElement.classList.remove("saving");
+            }
+        }
     }
 
     async function deleteAssignedTask(taskId) {
@@ -4926,14 +4955,24 @@
         }
         const tasksList = document.getElementById("tasksList");
         if (tasksList && !tasksList.dataset.statusBound) {
-            tasksList.addEventListener("click", function(event){
-                const statusButton = event.target.closest(".task-status-option[data-status]");
-                if (statusButton && !statusButton.disabled) {
-                    const control = statusButton.closest(".task-status-control");
-                    if (control) updateAssignedTaskStatus(control.dataset.taskId, statusButton.dataset.status);
-                    return;
+            tasksList.addEventListener("change", function(event){
+                const select = event.target.closest(".task-status-select-officer[data-task-id]");
+                if (select) {
+                    const newStatus = select.value;
+                    const currentStatus = select.dataset.previousStatus || "";
+                    if (newStatus === "Pending" && currentStatus !== "Pending") {
+                        select.value = currentStatus || "Pending";
+                        return;
+                    }
+                    select.dataset.previousStatus = newStatus;
+                    updateAssignedTaskStatus(select.dataset.taskId, newStatus, select);
                 }
-
+            });
+            tasksList.addEventListener("focusin", function(event){
+                const select = event.target.closest(".task-status-select-officer[data-task-id]");
+                if (select) select.dataset.previousStatus = select.value;
+            });
+            tasksList.addEventListener("click", function(event){
                 const button = event.target.closest(".task-delete-button");
                 if(button) deleteAssignedTask(button.dataset.taskId);
             });
