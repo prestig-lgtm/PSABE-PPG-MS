@@ -3729,12 +3729,15 @@ body.dashboard-data-loading .dashboard-content {
                 statusControl =
                     '<div class="task-status-control" data-task-id="' + escapeHtml(taskId) + '">' +
                         '<label class="task-status-label" for="task-status-' + escapeHtml(taskId) + '">STATUS</label>' +
-                        '<select id="task-status-' + escapeHtml(taskId) + '" class="task-status-select-officer" aria-label="Update task status" data-task-id="' + escapeHtml(taskId) + '">' +
-                            '<option value="Pending"' + (normalizedStatus === "pending" ? " selected" : "") + '>Pending</option>' +
-                            '<option value="In Progress"' + (normalizedStatus === "in-progress" ? " selected" : "") + '>In Progress</option>' +
-                            '<option value="For Checking"' + (normalizedStatus === "for-checking" ? " selected" : "") + '>For Checking</option>' +
-                            '<option value="Completed"' + (normalizedStatus === "completed" ? " selected" : "") + '>Completed</option>' +
-                        '</select>' +
+                        '<div class="task-status-select-wrap">' +
+                            '<select id="task-status-' + escapeHtml(taskId) + '" class="task-status-select-officer" aria-label="Update task status" data-task-id="' + escapeHtml(taskId) + '">' +
+                                '<option value="Pending"' + (normalizedStatus === "pending" ? " selected" : "") + '>Pending</option>' +
+                                '<option value="In Progress"' + (normalizedStatus === "in-progress" ? " selected" : "") + '>In Progress</option>' +
+                                '<option value="For Checking"' + (normalizedStatus === "for-checking" ? " selected" : "") + '>For Checking</option>' +
+                                '<option value="Completed"' + (normalizedStatus === "completed" ? " selected" : "") + '>Completed</option>' +
+                            '</select>' +
+                            '<span class="task-status-chevron" aria-hidden="true"><i data-lucide="chevron-down"></i></span>' +
+                        '</div>' +
                     '</div>';
             } else {
                 statusControl =
@@ -3747,7 +3750,7 @@ body.dashboard-data-loading .dashboard-content {
             const canDelete = isCurrentOfficer(assignedBy);
 
             const deleteControl = canDelete
-                ? '<button type="button" class="task-delete-button" data-task-id="' + escapeHtml(taskId) + '" aria-label="Delete task" title="Delete task"><i data-lucide="trash-2"></i></button>'
+                ? '<button type="button" class="task-delete-button" data-task-id="' + escapeHtml(taskId) + '" aria-label="Delete task" title="Delete task"><i data-lucide="trash-2"></i><span>DELETE</span></button>'
                 : '';
 
             return '<article class="task-row">' +
