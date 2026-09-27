@@ -6261,3 +6261,169 @@ body.availability-modal-open {
         font-size: 12px;
     }
 }
+
+/* =========================================================
+   OFFICER DIRECTORY
+========================================================= */
+.officers-page-header{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:24px;
+    margin-bottom:22px;
+}
+.officers-page-header h1{
+    margin:5px 0 7px;
+    color:#f8f3df;
+    font-size:30px;
+    line-height:1.08;
+}
+.officers-page-header p:not(.eyebrow){
+    margin:0;
+    color:rgba(225,239,233,.68);
+    font-size:13px;
+    line-height:1.5;
+}
+.officers-directory-count{
+    flex-shrink:0;
+    padding:10px 13px;
+    border:1px solid rgba(0,216,181,.22);
+    border-radius:9px;
+    background:rgba(0,216,181,.07);
+    color:#d7ebe4;
+    font-size:10px;
+    font-weight:900;
+    letter-spacing:.08em;
+}
+.officers-directory-panel{padding:0;overflow:hidden;}
+.officers-toolbar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:17px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+}
+.officers-search-wrap{
+    position:relative;
+    flex:1;
+    min-width:180px;
+}
+.officers-search-wrap svg{
+    position:absolute;
+    left:12px;
+    top:50%;
+    width:16px;
+    height:16px;
+    transform:translateY(-50%);
+    color:rgba(255,255,255,.48);
+    pointer-events:none;
+}
+.officers-search-wrap input,
+.officer-filter-select{
+    width:100%;
+    height:42px;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:9px;
+    background:rgba(5,31,25,.65);
+    color:#fff;
+    font:inherit;
+    font-size:12px;
+    outline:none;
+}
+.officers-search-wrap input{padding:0 12px 0 38px;}
+.officer-filter-select{width:auto;min-width:135px;padding:0 34px 0 12px;cursor:pointer;}
+.officers-search-wrap input::placeholder{color:rgba(255,255,255,.38);}
+.officers-search-wrap input:focus,
+.officer-filter-select:focus{border-color:rgba(0,216,181,.55);box-shadow:0 0 0 3px rgba(0,216,181,.08);}
+.officer-filter-select option{background:#0d342c;color:#fff;}
+.officer-directory-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+    padding:17px;
+}
+.officer-directory-card{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    min-width:0;
+    padding:16px;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:13px;
+    background:rgba(7,42,34,.58);
+    transition:.18s ease;
+}
+.officer-directory-card:hover{
+    border-color:rgba(0,216,181,.28);
+    background:rgba(8,50,41,.72);
+    transform:translateY(-1px);
+}
+.officer-directory-avatar{
+    width:48px;
+    height:48px;
+    flex:0 0 48px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid rgba(202,166,84,.38);
+    border-radius:50%;
+    background:rgba(202,166,84,.10);
+    color:#f3e8c6;
+    font-size:13px;
+    font-weight:900;
+    letter-spacing:.04em;
+}
+.officer-directory-info{min-width:0;}
+.officer-directory-info h3{
+    margin:0;
+    color:#fff;
+    font-size:14px;
+    font-weight:800;
+    line-height:1.3;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+.officer-directory-info p{
+    margin:4px 0 8px;
+    color:rgba(225,239,233,.66);
+    font-size:12px;
+    line-height:1.35;
+}
+.officer-directory-status{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    color:rgba(255,255,255,.72);
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+}
+.officer-directory-status span{
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:rgba(255,255,255,.4);
+}
+.officer-directory-status.active span{background:#55d9a4;box-shadow:0 0 0 3px rgba(85,217,164,.10);}
+.officer-directory-status.inactive span{background:#df8b83;box-shadow:0 0 0 3px rgba(223,139,131,.10);}
+.officers-directory-empty{
+    grid-column:1 / -1;
+    min-height:210px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:7px;
+    text-align:center;
+}
+.officers-directory-empty strong{color:#fff;font-size:13px;}
+.officers-directory-empty span{color:rgba(225,239,233,.55);font-size:12px;}
+@media (max-width:760px){
+    .officers-page-header{align-items:flex-start;flex-direction:column;gap:12px;}
+    .officers-toolbar{align-items:stretch;flex-wrap:wrap;}
+    .officers-search-wrap{flex-basis:100%;}
+    .officer-filter-select{flex:1;}
+    .officer-directory-grid{grid-template-columns:1fr;padding:12px;}
+}
