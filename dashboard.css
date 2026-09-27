@@ -6148,3 +6148,116 @@ body.availability-modal-open {
     .task-status-select-wrap,.task-status-select-officer{min-width:150px;}
     .task-delete-button{min-width:92px;height:40px;}
 }
+
+/* =========================================================
+   READABILITY IMPROVEMENTS
+   Increase small interface text without changing the layout.
+========================================================= */
+
+/* General small labels and supporting text */
+.eyebrow,
+.panel-label,
+.summary-info > span,
+.top-bar-title span,
+.brand-text small,
+.profile-text span,
+.task-chip,
+.task-status,
+.task-status-option,
+.steering-badge,
+.task-field label,
+.event-field label,
+.modal-label,
+.tasks-toolbar-title span {
+    font-size: 11px;
+}
+
+/* Main supporting text */
+.welcome-description,
+.task-main p,
+.tasks-empty span,
+.task-modal-header p,
+.event-modal-header p,
+.availability-status small,
+.announcement-content p,
+.information-content p {
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+/* Activity and dashboard details */
+.activity-time strong,
+.activity-time span,
+.activity-type,
+.activity-details p,
+.next-event-info > span,
+.next-event-info p,
+.availability-status strong,
+.availability-status small,
+.text-button,
+.panel-link {
+    font-size: 12px;
+}
+
+/* Keep important headings clearly larger */
+.activity-details h3,
+.next-event-info h3,
+.availability-preview h3,
+.summary-info small {
+    font-size: 13px;
+}
+
+/* Task controls */
+.task-status-select,
+.task-status-option,
+.task-delete-button,
+.task-actions .task-id-chip {
+    font-size: 11px;
+}
+
+.task-status-select {
+    min-height: 40px;
+    padding: 9px 34px 9px 12px;
+}
+
+/* Improve contrast of secondary text */
+.task-main p,
+.activity-details p,
+.next-event-info p,
+.tasks-empty span,
+.welcome-description,
+.availability-status small,
+.summary-info small,
+.announcement-content p,
+.information-content p {
+    color: rgba(255,255,255,.72);
+}
+
+/* Sidebar supporting text */
+.brand-text small {
+    color: rgba(215,235,228,.78);
+}
+
+.profile-text span {
+    font-size: 11px;
+}
+
+@media (max-width: 720px) {
+    .task-main p,
+    .activity-details p,
+    .next-event-info p,
+    .availability-status small,
+    .welcome-description,
+    .summary-info small,
+    .announcement-content p {
+        font-size: 13px;
+    }
+
+    .activity-time strong,
+    .activity-time span,
+    .activity-type,
+    .text-button,
+    .panel-link {
+        font-size: 12px;
+    }
+}
