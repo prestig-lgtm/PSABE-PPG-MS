@@ -3679,7 +3679,6 @@
                 activityList.innerHTML =
                     '<div class="dashboard-empty-activity">' +
                     '<strong>No activities scheduled for today.</strong>' +
-                    '<span>Your dashboard will update automatically when tasks or activities are added.</span>' +
                     '</div>';
             } else {
                 activityList.innerHTML = activities.slice(0, 6).map(dashboardActivityHtml).join("");
