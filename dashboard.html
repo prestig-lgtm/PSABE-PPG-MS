@@ -3866,66 +3866,56 @@ body.dashboard-data-loading .dashboard-content {
         const client = window.psabeSupabase;
         if (!client) throw new Error("Supabase is not initialized.");
 
-        /*
-           Always verify that the dashboard has an authenticated Supabase
-           session before requesting the events table. The login page already
-           established this session, and the dashboard startup waits for it.
-        */
-        const sessionResult = await client.auth.getSession();
-        const session = sessionResult && sessionResult.data
-            ? sessionResult.data.session
-            : null;
-
-        if (!session || !session.access_token) {
-            throw new Error("The Supabase session is not available.");
-        }
-
         const columns = [
-            "event_id",
-            "title",
-            "description",
-            "event_date",
-            "start_time",
-            "end_time",
-            "location",
-            "type",
-            "status",
-            "created_by"
+            "event_id", "title", "description", "event_date",
+            "start_time", "end_time", "location", "type",
+            "status", "created_by"
         ].join(",");
 
-        /* Primary path: authenticated Supabase client. */
-        const result = await client
-            .from("events")
-            .select(columns)
-            .order("event_date", { ascending: true })
-            .order("start_time", { ascending: true });
+        /* Primary path: Supabase JS client using the already authenticated session. */
+        try {
+            const result = await client
+                .from("events")
+                .select(columns)
+                .order("event_date", { ascending: true })
+                .order("start_time", { ascending: true });
 
-        if (!result.error) {
-            const rows = Array.isArray(result.data) ? result.data : [];
-            console.info("PSABE calendar: Supabase events loaded", rows.length);
-            return rows.map(mapSupabaseEvent).filter(Boolean);
+            if (!result.error) {
+                const rows = Array.isArray(result.data) ? result.data : [];
+                console.info("PSABE calendar: Supabase client returned", rows.length, rows);
+                return rows.map(mapSupabaseEvent).filter(Boolean);
+            }
+
+            console.warn("PSABE calendar: Supabase client error", result.error);
+        } catch (clientError) {
+            console.warn("PSABE calendar: Supabase client request failed", clientError);
         }
 
-        console.warn("PSABE calendar: Supabase client query failed", result.error);
-
-        /*
-           Fallback: authenticated REST request. Unlike the previous fallback,
-           this sends the real access token as well as the publishable key, so
-           PostgREST receives the same authenticated identity as the Supabase
-           client.
-        */
+        /* Fallback: PostgREST. Do not add custom headers that can trigger a CORS preflight. */
         const endpoint =
             "https://dwzcyupoenjafgtdijla.supabase.co/rest/v1/events" +
             "?select=" + encodeURIComponent(columns) +
-            "&order=event_date.asc,start_time.asc";
+            "&order=event_date.asc,start_time.asc" +
+            "&_psabe=" + Date.now();
+
+        const headers = {
+            "apikey": SUPABASE_PUBLISHABLE_KEY,
+            "Accept": "application/json"
+        };
+
+        try {
+            const sessionResult = await client.auth.getSession();
+            const session = sessionResult && sessionResult.data
+                ? sessionResult.data.session
+                : null;
+            if (session && session.access_token) {
+                headers.Authorization = "Bearer " + session.access_token;
+            }
+        } catch (_) {}
 
         const response = await fetch(endpoint, {
             method: "GET",
-            headers: {
-                "apikey": SUPABASE_PUBLISHABLE_KEY,
-                "Authorization": "Bearer " + session.access_token,
-                "Accept": "application/json"
-            },
+            headers: headers,
             cache: "no-store"
         });
 
@@ -3940,7 +3930,7 @@ body.dashboard-data-loading .dashboard-content {
 
         const data = await response.json();
         const rows = Array.isArray(data) ? data : [];
-        console.info("PSABE calendar: REST events loaded", rows.length);
+        console.info("PSABE calendar: PostgREST returned", rows.length, rows);
         return rows.map(mapSupabaseEvent).filter(Boolean);
     }
 
