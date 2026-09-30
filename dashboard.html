@@ -3863,25 +3863,37 @@ body.dashboard-data-loading .dashboard-content {
     }
 
     async function loadSupabaseEvents() {
-        if (!window.psabeSupabase) {
-            throw new Error("Supabase is not initialized.");
+        const client = window.psabeSupabase;
+        if (!client) throw new Error("Supabase is not initialized.");
+
+        /*
+           Primary path: use the Supabase client directly. Because the events
+           table has an authenticated SELECT policy, this is the simplest and
+           most reliable browser path.
+        */
+        try {
+            const result = await client
+                .from("events")
+                .select("event_id,title,description,event_date,start_time,end_time,location,type,status,created_by")
+                .order("event_date", { ascending: true })
+                .order("start_time", { ascending: true });
+
+            if (!result.error) {
+                return (Array.isArray(result.data) ? result.data : [])
+                    .map(mapSupabaseEvent)
+                    .filter(Boolean);
+            }
+
+            console.warn("Supabase client event query failed:", result.error);
+        } catch (clientError) {
+            console.warn("Supabase client event query threw an error:", clientError);
         }
 
         /*
-           Read the authenticated session first, then request only the fields
-           the calendar actually needs. This avoids the calendar depending on
-           any unrelated table or Google Apps Script request.
+           Fallback path: use the REST endpoint with the publishable key.
+           The project currently also has an anon SELECT policy on events,
+           so this remains a valid fallback if the client request fails.
         */
-        const { data: sessionData, error: sessionError } =
-            await window.psabeSupabase.auth.getSession();
-
-        if (sessionError) throw sessionError;
-
-        const session = sessionData && sessionData.session;
-        if (!session || !session.access_token) {
-            throw new Error("The authenticated session is not available.");
-        }
-
         const endpoint =
             "https://dwzcyupoenjafgtdijla.supabase.co/rest/v1/events" +
             "?select=event_id,title,description,event_date,start_time,end_time,location,type,status,created_by" +
@@ -3891,7 +3903,6 @@ body.dashboard-data-loading .dashboard-content {
             method: "GET",
             headers: {
                 "apikey": "sb_publishable_s4VaYFDHxE3I9jgK2reWHw_zQ8VPVwd",
-                "Authorization": "Bearer " + session.access_token,
                 "Accept": "application/json"
             },
             cache: "no-store"
@@ -3907,7 +3918,9 @@ body.dashboard-data-loading .dashboard-content {
         }
 
         const data = await response.json();
-        return Array.isArray(data) ? data.map(mapSupabaseEvent).filter(Boolean) : [];
+        return (Array.isArray(data) ? data : [])
+            .map(mapSupabaseEvent)
+            .filter(Boolean);
     }
 
     async function loadDashboardData() {
@@ -4291,76 +4304,72 @@ body.dashboard-data-loading .dashboard-content {
     }
 
     async function loadCalendarData() {
+        let events = [];
+
         try {
-            /* Events are the primary calendar source and come directly from Supabase. */
-            const events = await loadSupabaseEvents();
+            events = await loadSupabaseEvents();
+        } catch (error) {
+            console.error("Supabase events could not be loaded:", error);
+            return;
+        }
 
-            calendarActivities = {};
-            calendarEventsData = Array.isArray(events) ? events.slice() : [];
+        /* Events are the authoritative calendar source. */
+        calendarEventsData = Array.isArray(events) ? events.slice() : [];
+        calendarActivities = {};
 
-            calendarEventsData.forEach(function (event) {
-                const status = normalize(getRecordValue(event, "Status")).toLowerCase();
-                if (status && status !== "active") return;
+        calendarEventsData.forEach(function (event) {
+            const status = normalize(getRecordValue(event, "Status")).toLowerCase();
+            if (status && status !== "active") return;
 
-                const eventDate = normalizeCalendarDate(getRecordValue(event, "Date"));
-                if (!eventDate) return;
+            const eventDate = normalizeCalendarDate(getRecordValue(event, "Date"));
+            if (!eventDate) return;
 
-                const start = normalize(getRecordValue(event, "Start Time"));
-                const end = normalize(getRecordValue(event, "End Time"));
+            const start = normalize(getRecordValue(event, "Start Time"));
+            const end = normalize(getRecordValue(event, "End Time"));
 
-                addCalendarActivity(eventDate, {
-                    eventId: getRecordValue(event, "Event ID"),
-                    type: "event",
-                    title: getRecordValue(event, "Title") || "Untitled event",
-                    description:
-                        getRecordValue(event, "Description") ||
-                        getRecordValue(event, "Location") ||
-                        "No description provided.",
-                    location: getRecordValue(event, "Location") || "",
-                    time:
-                        start && end
-                            ? start + " – " + end
-                            : (start || "Scheduled activity")
+            addCalendarActivity(eventDate, {
+                eventId: getRecordValue(event, "Event ID"),
+                type: "event",
+                title: getRecordValue(event, "Title") || "Untitled event",
+                description:
+                    getRecordValue(event, "Description") ||
+                    getRecordValue(event, "Location") ||
+                    "No description provided.",
+                location: getRecordValue(event, "Location") || "",
+                time:
+                    start && end
+                        ? start + " – " + end
+                        : (start || "Scheduled activity")
+            });
+        });
+
+        /* Tasks are supplementary. They can never remove or block events. */
+        try {
+            const tasksResult = await fetchJson("getTasks");
+            const tasks = Array.isArray(tasksResult.data) ? tasksResult.data : [];
+
+            tasks.forEach(function (task) {
+                const assignedTo = normalizeUsername(getRecordValue(task, "Assigned To"));
+                if (!IS_STEERING && assignedTo !== normalizeUsername(CURRENT_USERNAME)) return;
+
+                const status = normalize(getRecordValue(task, "Status")).toLowerCase();
+                if (status === "complete" || status === "completed") return;
+
+                const dueDate = normalizeCalendarDate(getRecordValue(task, "Due Date"));
+                if (!dueDate) return;
+
+                addCalendarActivity(dueDate, {
+                    type: "task",
+                    title: getRecordValue(task, "Task Title") || "Task",
+                    description: getRecordValue(task, "Description") || "Assigned task",
+                    time: "Due date"
                 });
             });
-
-            /* Tasks remain on the existing source for now. A task failure must
-               never prevent Supabase events from appearing on the calendar. */
-            try {
-                const tasksResult = await fetchJson("getTasks");
-                const tasks = Array.isArray(tasksResult.data) ? tasksResult.data : [];
-
-                tasks.forEach(function (task) {
-                    const assignedTo = normalizeUsername(getRecordValue(task, "Assigned To"));
-                    if (!IS_STEERING && assignedTo !== normalizeUsername(CURRENT_USERNAME)) return;
-
-                    const status = normalize(getRecordValue(task, "Status")).toLowerCase();
-                    if (status === "complete" || status === "completed") return;
-
-                    const dueDate = normalizeCalendarDate(getRecordValue(task, "Due Date"));
-                    if (!dueDate) return;
-
-                    addCalendarActivity(dueDate, {
-                        type: "task",
-                        title: getRecordValue(task, "Task Title") || "Task",
-                        description: getRecordValue(task, "Description") || "Assigned task",
-                        time: "Due date"
-                    });
-                });
-            } catch (taskError) {
-                console.warn("Task data could not be loaded for the calendar:", taskError);
-            }
-
-            renderCalendar();
-        } catch (error) {
-            console.error("Calendar data loading error:", error);
-            /* Preserve already-loaded events instead of clearing the calendar. */
-            if (!Array.isArray(calendarEventsData)) calendarEventsData = [];
-            if (!calendarActivities || typeof calendarActivities !== "object") {
-                calendarActivities = {};
-            }
-            renderCalendar();
+        } catch (taskError) {
+            console.warn("Task data could not be loaded for the calendar:", taskError);
         }
+
+        renderCalendar();
     }
 
     async function updateAssignedTaskStatus(taskId, statusValue, selectElement) {
