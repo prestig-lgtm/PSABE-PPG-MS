@@ -3019,234 +3019,153 @@ body.dashboard-data-loading .dashboard-content {
 
                 function updateSelectedDay() {
 
-                    const date =
-                        parseDateKey(
-                            selectedDate
-                        );
+                    const date = parseDateKey(selectedDate);
+                    if (!date) return;
 
+                    selectedDateTitle.textContent = date.toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "numeric"
+                    });
 
-                    if (
-                        !date
-                    ) {
+                    selectedDateDay.textContent = date.toLocaleDateString("en-US", {
+                        weekday: "long"
+                    });
 
+                    selectedDateNumber.textContent = date.getDate();
+
+                    if (!selectedActivities) {
+                        console.error("Calendar error: #selectedActivities was not found.");
                         return;
-
                     }
 
-
-                    selectedDateTitle.textContent =
-                        date.toLocaleDateString(
-                            "en-US",
-                            {
-                                month:
-                                    "long",
-                                day:
-                                    "numeric"
-                            }
-                        );
-
-
-                    selectedDateDay.textContent =
-                        date.toLocaleDateString(
-                            "en-US",
-                            {
-                                weekday:
-                                    "long"
-                            }
-                        );
-
-
-                    selectedDateNumber.textContent =
-                        date.getDate();
-
-
-
-                    const selectedDateKey =
-                        normalizeCalendarDate(selectedDate);
+                    const selectedDateKey = makeDateKey(
+                        date.getFullYear(),
+                        date.getMonth(),
+                        date.getDate()
+                    );
 
                     /*
-                       The calendarActivities cache is the single source
-                       for the selected-date panel. It is populated from
-                       the same records used to draw the calendar markers,
-                       so the details cannot get out of sync with the cell.
-                    */
-                    const activities =
-                        (calendarActivities[selectedDateKey] || []).slice();
+                     * Build the selected-day list directly from the same
+                     * Supabase event records used by the calendar. This
+                     * avoids relying on a second/intermediate date lookup.
+                     */
+                    const activities = [];
+                    const seenEventIds = new Set();
+
+                    (Array.isArray(calendarEventsData) ? calendarEventsData : []).forEach(function (event) {
+                        const status = normalize(getRecordValue(event, "Status")).toLowerCase();
+                        if (status && status !== "active") return;
+
+                        const eventDate = normalizeCalendarDate(getRecordValue(event, "Date"));
+                        if (eventDate !== selectedDateKey) return;
+
+                        const eventId = normalize(getRecordValue(event, "Event ID"));
+                        if (eventId && seenEventIds.has(eventId)) return;
+                        if (eventId) seenEventIds.add(eventId);
+
+                        const start = normalize(getRecordValue(event, "Start Time"));
+                        const end = normalize(getRecordValue(event, "End Time"));
+                        const location = normalize(getRecordValue(event, "Location"));
+
+                        activities.push({
+                            eventId: eventId,
+                            type: "event",
+                            title: normalize(getRecordValue(event, "Title")) || "Untitled event",
+                            description: normalize(getRecordValue(event, "Description")) || "No description provided.",
+                            location: location,
+                            time: start && end ? start + " – " + end : (start || "Scheduled activity")
+                        });
+                    });
+
+                    /* Include non-event activities already prepared by the calendar. */
+                    const cachedActivities = calendarActivities[selectedDateKey] || [];
+                    cachedActivities.forEach(function (activity) {
+                        if (!activity || activity.type === "event") return;
+                        activities.push(activity);
+                    });
 
                     selectedActivities.innerHTML = "";
 
+                    if (activities.length === 0) {
+                        const empty = document.createElement("div");
+                        empty.className = "empty-day";
 
+                        const icon = document.createElement("div");
+                        icon.className = "empty-day-icon";
+                        icon.innerHTML = '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="9" x2="21" y2="9"></line></svg>';
 
-                    if (
-                        activities.length === 0
-                    ) {
+                        const strong = document.createElement("strong");
+                        strong.textContent = "No scheduled activities";
 
-                        const empty =
-                            document.createElement(
-                                "div"
-                            );
+                        const p = document.createElement("p");
+                        p.textContent = "There are no tasks, events, or meetings scheduled for this date.";
 
-
-                        empty.className =
-                            "empty-day";
-
-
-                        empty.innerHTML = `
-                            <div class="empty-day-icon">
-                                <svg viewBox="0 0 24 24">
-                                    <rect
-                                        x="3"
-                                        y="4"
-                                        width="18"
-                                        height="17"
-                                        rx="2"
-                                    ></rect>
-                                    <line
-                                        x1="16"
-                                        y1="2"
-                                        x2="16"
-                                        y2="6"
-                                    ></line>
-                                    <line
-                                        x1="8"
-                                        y1="2"
-                                        x2="8"
-                                        y2="6"
-                                    ></line>
-                                    <line
-                                        x1="3"
-                                        y1="9"
-                                        x2="21"
-                                        y2="9"
-                                    ></line>
-                                </svg>
-                            </div>
-
-                            <strong>
-                                No scheduled activities
-                            </strong>
-
-                            <p>
-                                There are no tasks, events,
-                                or meetings scheduled for
-                                this date.
-                            </p>
-                        `;
-
-
-                        selectedActivities.appendChild(
-                            empty
-                        );
-
-
+                        empty.appendChild(icon);
+                        empty.appendChild(strong);
+                        empty.appendChild(p);
+                        selectedActivities.appendChild(empty);
                         return;
-
                     }
 
+                    activities.forEach(function (activity) {
+                        const card = document.createElement("div");
+                        card.className = "selected-activity " + normalize(activity.type || "event");
 
+                        const typeRow = document.createElement("div");
+                        typeRow.className = "selected-activity-type";
 
-                    activities.forEach(
-                        function (activity) {
+                        const dot = document.createElement("span");
+                        dot.className = "activity-status-dot";
+                        typeRow.appendChild(dot);
 
-                            const card =
-                                document.createElement(
-                                    "div"
-                                );
+                        const typeText = document.createElement("span");
+                        typeText.textContent = normalize(activity.type || "event").toUpperCase();
+                        typeRow.appendChild(typeText);
 
+                        const title = document.createElement("h3");
+                        title.textContent = activity.title || "Untitled activity";
 
-                            card.className =
-                                "selected-activity " +
-                                activity.type;
+                        const description = document.createElement("p");
+                        description.textContent = activity.description || "No description provided.";
 
+                        card.appendChild(typeRow);
+                        card.appendChild(title);
+                        card.appendChild(description);
 
-                            const typeLabel =
-                                activity.type
-                                    .toUpperCase();
-
-
-
-                            card.innerHTML = `
-
-                                <div class="selected-activity-type">
-
-                                    <span class="activity-status-dot"></span>
-
-                                    ${escapeHtml(typeLabel)}
-
-                                </div>
-
-                                <h3>
-                                    ${escapeHtml(activity.title || "Untitled activity")}
-                                </h3>
-
-                                <p>
-                                    ${escapeHtml(activity.description || "No description provided.")}
-                                </p>
-
-                                ${
-                                    activity.type === "event" &&
-                                    activity.location
-                                        ? `
-                                            <div class="selected-activity-time">
-                                                <svg viewBox="0 0 24 24">
-                                                    <path d="M12 21s7-5.4 7-12a7 7 0 1 0-14 0c0 6.6 7 12 7 12z"></path>
-                                                    <circle cx="12" cy="9" r="2.2"></circle>
-                                                </svg>
-                                                ${escapeHtml(activity.location)}
-                                            </div>
-                                          `
-                                        : ""
-                                }
-
-                                <div class="selected-activity-time">
-
-                                    <svg viewBox="0 0 24 24">
-
-                                        <circle
-                                            cx="12"
-                                            cy="12"
-                                            r="9"
-                                        ></circle>
-
-                                        <polyline
-                                            points="12 7 12 12 15 14"
-                                        ></polyline>
-
-                                    </svg>
-
-                                    ${escapeHtml(activity.time || "")}
-
-                                </div>
-
-                                ${IS_STEERING && activity.type === "event" && activity.eventId ? `
-                                    <button type="button" class="calendar-event-delete-button" data-event-id="${escapeHtml(activity.eventId)}">
-                                        <i data-lucide="trash-2"></i> DELETE EVENT
-                                    </button>
-                                ` : ""}
-
-                            `;
-
-
-                            selectedActivities.appendChild(
-                                card
-                            );
-
-                            if (IS_STEERING && activity.type === "event" && activity.eventId) {
-                                const deleteButton = card.querySelector(".calendar-event-delete-button");
-                                if (deleteButton) {
-                                    deleteButton.addEventListener("click", function () {
-                                        deleteCalendarEvent(activity.eventId);
-                                    });
-                                }
-                            }
-
+                        if (activity.type === "event" && activity.location) {
+                            const locationRow = document.createElement("div");
+                            locationRow.className = "selected-activity-time";
+                            locationRow.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 21s7-5.4 7-12a7 7 0 1 0-14 0c0 6.6 7 12 7 12z"></path><circle cx="12" cy="9" r="2.2"></circle></svg>';
+                            const locationText = document.createElement("span");
+                            locationText.textContent = activity.location;
+                            locationRow.appendChild(locationText);
+                            card.appendChild(locationRow);
                         }
-                    );
+
+                        const timeRow = document.createElement("div");
+                        timeRow.className = "selected-activity-time";
+                        timeRow.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 14"></polyline></svg>';
+                        const timeText = document.createElement("span");
+                        timeText.textContent = activity.time || "";
+                        timeRow.appendChild(timeText);
+                        card.appendChild(timeRow);
+
+                        if (IS_STEERING && activity.type === "event" && activity.eventId) {
+                            const deleteButton = document.createElement("button");
+                            deleteButton.type = "button";
+                            deleteButton.className = "calendar-event-delete-button";
+                            deleteButton.innerHTML = '<i data-lucide="trash-2"></i><span>DELETE EVENT</span>';
+                            deleteButton.addEventListener("click", function () {
+                                deleteCalendarEvent(activity.eventId);
+                            });
+                            card.appendChild(deleteButton);
+                        }
+
+                        selectedActivities.appendChild(card);
+                    });
 
                     if (window.lucide) lucide.createIcons();
-
                 }
-
 
 
                 /* =================================================
