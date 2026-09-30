@@ -3867,42 +3867,63 @@ body.dashboard-data-loading .dashboard-content {
         if (!client) throw new Error("Supabase is not initialized.");
 
         /*
-           Primary path: use the Supabase client directly. Because the events
-           table has an authenticated SELECT policy, this is the simplest and
-           most reliable browser path.
+           Always verify that the dashboard has an authenticated Supabase
+           session before requesting the events table. The login page already
+           established this session, and the dashboard startup waits for it.
         */
-        try {
-            const result = await client
-                .from("events")
-                .select("event_id,title,description,event_date,start_time,end_time,location,type,status,created_by")
-                .order("event_date", { ascending: true })
-                .order("start_time", { ascending: true });
+        const sessionResult = await client.auth.getSession();
+        const session = sessionResult && sessionResult.data
+            ? sessionResult.data.session
+            : null;
 
-            if (!result.error) {
-                return (Array.isArray(result.data) ? result.data : [])
-                    .map(mapSupabaseEvent)
-                    .filter(Boolean);
-            }
-
-            console.warn("Supabase client event query failed:", result.error);
-        } catch (clientError) {
-            console.warn("Supabase client event query threw an error:", clientError);
+        if (!session || !session.access_token) {
+            throw new Error("The Supabase session is not available.");
         }
 
+        const columns = [
+            "event_id",
+            "title",
+            "description",
+            "event_date",
+            "start_time",
+            "end_time",
+            "location",
+            "type",
+            "status",
+            "created_by"
+        ].join(",");
+
+        /* Primary path: authenticated Supabase client. */
+        const result = await client
+            .from("events")
+            .select(columns)
+            .order("event_date", { ascending: true })
+            .order("start_time", { ascending: true });
+
+        if (!result.error) {
+            const rows = Array.isArray(result.data) ? result.data : [];
+            console.info("PSABE calendar: Supabase events loaded", rows.length);
+            return rows.map(mapSupabaseEvent).filter(Boolean);
+        }
+
+        console.warn("PSABE calendar: Supabase client query failed", result.error);
+
         /*
-           Fallback path: use the REST endpoint with the publishable key.
-           The project currently also has an anon SELECT policy on events,
-           so this remains a valid fallback if the client request fails.
+           Fallback: authenticated REST request. Unlike the previous fallback,
+           this sends the real access token as well as the publishable key, so
+           PostgREST receives the same authenticated identity as the Supabase
+           client.
         */
         const endpoint =
             "https://dwzcyupoenjafgtdijla.supabase.co/rest/v1/events" +
-            "?select=event_id,title,description,event_date,start_time,end_time,location,type,status,created_by" +
+            "?select=" + encodeURIComponent(columns) +
             "&order=event_date.asc,start_time.asc";
 
         const response = await fetch(endpoint, {
             method: "GET",
             headers: {
-                "apikey": "sb_publishable_s4VaYFDHxE3I9jgK2reWHw_zQ8VPVwd",
+                "apikey": SUPABASE_PUBLISHABLE_KEY,
+                "Authorization": "Bearer " + session.access_token,
                 "Accept": "application/json"
             },
             cache: "no-store"
@@ -3918,9 +3939,9 @@ body.dashboard-data-loading .dashboard-content {
         }
 
         const data = await response.json();
-        return (Array.isArray(data) ? data : [])
-            .map(mapSupabaseEvent)
-            .filter(Boolean);
+        const rows = Array.isArray(data) ? data : [];
+        console.info("PSABE calendar: REST events loaded", rows.length);
+        return rows.map(mapSupabaseEvent).filter(Boolean);
     }
 
     async function loadDashboardData() {
