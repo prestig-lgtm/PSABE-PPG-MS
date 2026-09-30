@@ -3060,10 +3060,11 @@ body.dashboard-data-loading .dashboard-content {
 
 
 
+                    const selectedDateKey =
+                        normalizeCalendarDate(selectedDate);
+
                     const activities =
-                        calendarActivities[
-                            selectedDate
-                        ] || [];
+                        calendarActivities[selectedDateKey] || [];
 
 
 
@@ -4298,10 +4299,18 @@ body.dashboard-data-loading .dashboard-content {
     /* =====================================================
        CALENDAR DATA
     ===================================================== */
+    function normalizeCalendarDate(value) {
+        const text = normalize(value);
+        if (!text) return "";
+        const match = text.match(/^(\d{4}-\d{2}-\d{2})/);
+        return match ? match[1] : text;
+    }
+
     function addCalendarActivity(date, activity) {
-        if (!date) return;
-        if (!calendarActivities[date]) calendarActivities[date] = [];
-        calendarActivities[date].push(activity);
+        const dateKey = normalizeCalendarDate(date);
+        if (!dateKey) return;
+        if (!calendarActivities[dateKey]) calendarActivities[dateKey] = [];
+        calendarActivities[dateKey].push(activity);
     }
 
     async function loadCalendarData() {
