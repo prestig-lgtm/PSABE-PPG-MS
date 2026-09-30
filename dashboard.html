@@ -3065,111 +3065,13 @@ body.dashboard-data-loading .dashboard-content {
                         normalizeCalendarDate(selectedDate);
 
                     /*
-                       Build the selected-date list directly from the
-                       loaded event cache first. This keeps the detail
-                       panel independent from the calendar marker render.
+                       The calendarActivities cache is the single source
+                       for the selected-date panel. It is populated from
+                       the same records used to draw the calendar markers,
+                       so the details cannot get out of sync with the cell.
                     */
-                    let activities =
+                    const activities =
                         (calendarActivities[selectedDateKey] || []).slice();
-
-                    if (
-                        Array.isArray(calendarEventsData) &&
-                        calendarEventsData.length
-                    ) {
-                        const eventActivities =
-                            calendarEventsData
-                                .filter(function (event) {
-                                    const status =
-                                        normalize(
-                                            getRecordValue(
-                                                event,
-                                                "Status"
-                                            )
-                                        ).toLowerCase();
-
-                                    if (
-                                        status &&
-                                        status !== "active"
-                                    ) {
-                                        return false;
-                                    }
-
-                                    return (
-                                        normalizeCalendarDate(
-                                            getRecordValue(
-                                                event,
-                                                "Date"
-                                            )
-                                        ) === selectedDateKey
-                                    );
-                                })
-                                .map(function (event) {
-                                    const start =
-                                        normalize(
-                                            getRecordValue(
-                                                event,
-                                                "Start Time"
-                                            )
-                                        );
-
-                                    const end =
-                                        normalize(
-                                            getRecordValue(
-                                                event,
-                                                "End Time"
-                                            )
-                                        );
-
-                                    return {
-                                        eventId:
-                                            getRecordValue(
-                                                event,
-                                                "Event ID"
-                                            ),
-                                        type: "event",
-                                        title:
-                                            getRecordValue(
-                                                event,
-                                                "Title"
-                                            ) ||
-                                            "Untitled event",
-                                        description:
-                                            getRecordValue(
-                                                event,
-                                                "Description"
-                                            ) ||
-                                            getRecordValue(
-                                                event,
-                                                "Location"
-                                            ) ||
-                                            "No description provided.",
-                                        location:
-                                            getRecordValue(
-                                                event,
-                                                "Location"
-                                            ) || "",
-                                        time:
-                                            start && end
-                                                ? start +
-                                                  " – " +
-                                                  end
-                                                : (
-                                                    start ||
-                                                    "Scheduled activity"
-                                                )
-                                    };
-                                });
-
-                        const nonEventActivities =
-                            activities.filter(function (item) {
-                                return item.type !== "event";
-                            });
-
-                        activities =
-                            eventActivities.concat(
-                                nonEventActivities
-                            );
-                    }
 
                     selectedActivities.innerHTML = "";
 
