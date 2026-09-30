@@ -3868,17 +3868,43 @@ body.dashboard-data-loading .dashboard-content {
         updateDashboardAnnouncement();
     }
 
+    function mapSupabaseEvent(row) {
+        if (!row) return null;
+        return {
+            "Event ID": row.event_id || "",
+            "Title": row.title || "",
+            "Description": row.description || "",
+            "Date": row.event_date || "",
+            "Start Time": row.start_time || "",
+            "End Time": row.end_time || "",
+            "Location": row.location || "",
+            "Type": row.type || "Event",
+            "Status": row.status || "Active",
+            "Created By": row.created_by || ""
+        };
+    }
+
+    async function loadSupabaseEvents() {
+        if (!window.psabeSupabase) throw new Error("Supabase is not initialized.");
+        const { data, error } = await window.psabeSupabase
+            .from("events")
+            .select("event_id,title,description,event_date,start_time,end_time,location,type,status,created_by,created_at,updated_at")
+            .order("event_date", { ascending: true })
+            .order("start_time", { ascending: true });
+        if (error) throw error;
+        return Array.isArray(data) ? data.map(mapSupabaseEvent).filter(Boolean) : [];
+    }
+
     async function loadDashboardData() {
         updateDashboardGreeting();
 
         try {
-            const results = await Promise.all([
+            const [tasksResult, events] = await Promise.all([
                 fetchJson("getTasks"),
-                fetchJson("getEvents")
+                loadSupabaseEvents()
             ]);
 
-            const tasks = Array.isArray(results[0].data) ? results[0].data : [];
-            const events = Array.isArray(results[1].data) ? results[1].data : [];
+            const tasks = Array.isArray(tasksResult.data) ? tasksResult.data : [];
 
             renderLiveDashboard(tasks, events);
         } catch (error) {
@@ -4243,9 +4269,8 @@ body.dashboard-data-loading .dashboard-content {
 
     async function loadCalendarData() {
         try {
-            const [eventsResult, tasksResult] = await Promise.all([fetchJson("getEvents"), fetchJson("getTasks")]);
+            const [events, tasksResult] = await Promise.all([loadSupabaseEvents(), fetchJson("getTasks")]);
             calendarActivities = {};
-            const events = Array.isArray(eventsResult.data) ? eventsResult.data : [];
             const tasks = Array.isArray(tasksResult.data) ? tasksResult.data : [];
             events.forEach(function(event) {
                 const status = normalize(getRecordValue(event, "Status")).toLowerCase();
@@ -4358,13 +4383,63 @@ body.dashboard-data-loading .dashboard-content {
         modal.classList.add("show"); if (window.lucide) lucide.createIcons();
     }
     function closeScheduleEventModal(){const modal=document.getElementById("scheduleEventModal");if(modal)modal.classList.remove("show");}
+    function mapSupabaseEvent(row) {
+        if (!row) return null;
+        return {
+            "Event ID": row.event_id || "",
+            "Title": row.title || "",
+            "Description": row.description || "",
+            "Date": row.event_date || "",
+            "Start Time": row.start_time || "",
+            "End Time": row.end_time || "",
+            "Location": row.location || "",
+            "Type": row.type || "Event",
+            "Status": row.status || "Active",
+            "Created By": row.created_by || ""
+        };
+    }
+
+    async function loadSupabaseEvents() {
+        if (!window.psabeSupabase) throw new Error("Supabase is not initialized.");
+
+        const { data, error } = await window.psabeSupabase
+            .from("events")
+            .select("event_id,title,description,event_date,start_time,end_time,location,type,status,created_by,created_at,updated_at")
+            .order("event_date", { ascending: true })
+            .order("start_time", { ascending: true });
+
+        if (error) throw error;
+
+        return Array.isArray(data) ? data.map(mapSupabaseEvent).filter(Boolean) : [];
+    }
+
     async function submitScheduledEvent(event){
         event.preventDefault(); if(!IS_STEERING)return;
         const status=document.getElementById("eventFormStatus"), saveButton=document.getElementById("saveScheduleEventButton");
-        const payload={action:"saveEvent",data:{title:normalize(document.getElementById("eventTitleInput")?.value),description:normalize(document.getElementById("eventDescriptionInput")?.value),date:normalize(document.getElementById("eventDateInput")?.value),startTime:normalize(document.getElementById("eventStartTimeInput")?.value),endTime:normalize(document.getElementById("eventEndTimeInput")?.value),location:normalize(document.getElementById("eventLocationInput")?.value),type:normalize(document.getElementById("eventTypeInput")?.value)||"Event",createdBy:CURRENT_USERNAME}};
-        if(!payload.data.title||!payload.data.date){if(status)status.textContent="Activity title and date are required.";return;}
+        const data={title:normalize(document.getElementById("eventTitleInput")?.value),description:normalize(document.getElementById("eventDescriptionInput")?.value),date:normalize(document.getElementById("eventDateInput")?.value),startTime:normalize(document.getElementById("eventStartTimeInput")?.value),endTime:normalize(document.getElementById("eventEndTimeInput")?.value),location:normalize(document.getElementById("eventLocationInput")?.value),type:normalize(document.getElementById("eventTypeInput")?.value)||"Event"};
+        if(!data.title||!data.date){if(status)status.textContent="Activity title and date are required.";return;}
+        if(!window.psabeSupabase){if(status)status.textContent="Unable to connect. Please try again.";return;}
         if(saveButton)saveButton.disabled=true;if(status)status.textContent="Scheduling activity...";
-        try{const response=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});if(!response.ok)throw new Error("Activity request failed.");const result=await response.json();if(!result.success)throw new Error(result.message||"The activity could not be scheduled.");if(status)status.textContent="Activity scheduled successfully.";await loadCalendarData();setTimeout(closeScheduleEventModal,500);}catch(error){console.error("Activity scheduling error:",error);if(status)status.textContent=error.message||"The activity could not be scheduled.";}finally{if(saveButton)saveButton.disabled=false;}
+        try{
+            const eventId = "EVT-" + new Date().toISOString().replace(/[-:TZ.]/g, "").slice(0, 14) + "-" + Math.random().toString(36).slice(2, 7).toUpperCase();
+            const { error } = await window.psabeSupabase.from("events").insert({
+                event_id:eventId,
+                title:data.title,
+                description:data.description || null,
+                event_date:data.date,
+                start_time:data.startTime || null,
+                end_time:data.endTime || null,
+                location:data.location || null,
+                type:data.type,
+                status:"Active",
+                created_by:CURRENT_USERNAME
+            });
+            if(error) throw error;
+            if(status)status.textContent="Activity scheduled successfully.";
+            await loadCalendarData();
+            await loadDashboardData();
+            setTimeout(closeScheduleEventModal,500);
+        }catch(error){console.error("Activity scheduling error:",error);if(status)status.textContent=error.message||"The activity could not be scheduled.";}finally{if(saveButton)saveButton.disabled=false;}
     }
 
     /* =====================================================
