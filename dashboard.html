@@ -2164,7 +2164,11 @@ body.dashboard-data-loading .dashboard-content {
                             "calendar"
                         );
 
-                        renderCalendar();
+                        if (typeof window.loadCalendarData === "function") {
+                            window.loadCalendarData();
+                        } else {
+                            renderCalendar();
+                        }
 
                     }
 
@@ -3458,6 +3462,14 @@ body.dashboard-data-loading .dashboard-content {
     }
 
 
+    /*
+       Keep identical GET requests from being sent more than once while
+       the first request is still in progress. This is especially important
+       during initial loading because several dashboard functions request the
+       same Google Sheets data at the same time.
+    */
+    const apiInFlightRequests = new Map();
+
     async function fetchJson(action) {
 
         if (!isApiConfigured()) {
@@ -3466,31 +3478,47 @@ body.dashboard-data-loading .dashboard-content {
             );
         }
 
-        const response = await fetch(
-            getApiUrl(action),
-            {
-                method: "GET",
-                cache: "no-store"
+        const requestKey = String(action || "").trim();
+
+        if (apiInFlightRequests.has(requestKey)) {
+            return apiInFlightRequests.get(requestKey);
+        }
+
+        const requestPromise = (async function () {
+            const response = await fetch(
+                getApiUrl(requestKey),
+                {
+                    method: "GET",
+                    cache: "no-store"
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    "API request failed with status " +
+                    response.status + "."
+                );
             }
-        );
 
-        if (!response.ok) {
-            throw new Error(
-                "API request failed with status " +
-                response.status + "."
-            );
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(
+                    result.message ||
+                    "The API returned an unsuccessful response."
+                );
+            }
+
+            return result;
+        })();
+
+        apiInFlightRequests.set(requestKey, requestPromise);
+
+        try {
+            return await requestPromise;
+        } finally {
+            apiInFlightRequests.delete(requestKey);
         }
-
-        const result = await response.json();
-
-        if (!result.success) {
-            throw new Error(
-                result.message ||
-                "The API returned an unsuccessful response."
-            );
-        }
-
-        return result;
     }
 
 
@@ -4296,6 +4324,8 @@ body.dashboard-data-loading .dashboard-content {
         if(saveButton)saveButton.disabled=true;if(status)status.textContent="Scheduling activity...";
         try{const response=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});if(!response.ok)throw new Error("Activity request failed.");const result=await response.json();if(!result.success)throw new Error(result.message||"The activity could not be scheduled.");if(status)status.textContent="Activity scheduled successfully.";await loadCalendarData();setTimeout(closeScheduleEventModal,500);}catch(error){console.error("Activity scheduling error:",error);if(status)status.textContent=error.message||"The activity could not be scheduled.";}finally{if(saveButton)saveButton.disabled=false;}
     }
+
+    window.loadCalendarData = loadCalendarData;
 
     /* =====================================================
        LOAD OFFICER PROFILE
@@ -5549,11 +5579,16 @@ body.dashboard-data-loading .dashboard-content {
            Load real data from Google Sheets after the page is ready.
         */
 
+        /*
+           Load only the data needed to make the dashboard usable first.
+           Calendar data is intentionally deferred until the Calendar page is
+           opened because the dashboard already gets the same Events/Tasks
+           data through loadDashboardData().
+        */
         Promise.all([
             loadOfficerProfile(),
             loadAvailability(),
             loadTasks(),
-            loadCalendarData(),
             loadDashboardData(),
             loadAnnouncements()
         ]).then(function () {
@@ -5566,8 +5601,8 @@ body.dashboard-data-loading .dashboard-content {
 
         }).finally(function () {
 
-            // Only reveal dashboard content after the initial live-data pass
-            // has finished, preventing old hard-coded values from flashing.
+            // Reveal the dashboard as soon as the data required by the
+            // visible dashboard has finished loading.
             document.body.classList.remove("dashboard-data-loading");
 
         });
