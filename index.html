@@ -21,6 +21,8 @@
 
     <link rel="stylesheet" href="style.css">
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 </head>
 
 <body class="loading-active">
@@ -151,6 +153,7 @@
                         <option value="4th Year Representative">4th Year Representative</option>
 
                         <option value="Committee Head">Committee Head</option>
+                        <option value="Property Custodian">Property Custodian</option>
                     </select>
 
                     <div class="select-arrow">
@@ -274,33 +277,35 @@
             });
 
             /* =====================================================
-               GOOGLE APPS SCRIPT LOGIN CONNECTION
+               SUPABASE AUTHENTICATION
             ===================================================== */
 
-            const WEB_APP_URL =
-                "https://script.google.com/macros/s/AKfycbzTZORNDMsHLxoPeOLNAHurKurC14whoFKxT10RVPyCxP-z9H03slRLTUyhVx7tkyMW/exec";
+            const SUPABASE_URL =
+                "https://dwzcyupoenjafgtdijla.supabase.co";
+
+            const SUPABASE_PUBLISHABLE_KEY =
+                "sb_publishable_s4VaYFDHxE3I9jgK2reWHw_zQ8VPVwd";
+
+            const supabaseClient = window.supabase.createClient(
+                SUPABASE_URL,
+                SUPABASE_PUBLISHABLE_KEY
+            );
 
             loginForm.addEventListener("submit", async function (event) {
+
                 event.preventDefault();
 
                 const enteredUsername = username.value.trim();
                 const enteredPassword = password.value;
                 const selectedPosition = position.value;
 
-                if (!enteredUsername || !enteredPassword || !selectedPosition) {
-                    showMessage(
-                        "Please complete all login fields.",
-                        "error"
-                    );
-                    return;
-                }
-
                 if (
-                    !WEB_APP_URL ||
-                    WEB_APP_URL === "YOUR_GOOGLE_APPS_SCRIPT_EXEC_URL"
+                    !enteredUsername ||
+                    !enteredPassword ||
+                    !selectedPosition
                 ) {
                     showMessage(
-                        "The Google Sheets login connection has not been configured yet.",
+                        "Please complete all login fields.",
                         "error"
                     );
                     return;
@@ -316,63 +321,159 @@
 
                 if (signInButton) {
                     signInButton.disabled = true;
-                    signInButton.innerHTML = "<span>Signing In...</span>";
+                    signInButton.innerHTML =
+                        "<span>Signing In...</span>";
                 }
 
                 try {
 
-                    const response = await fetch(
-                        WEB_APP_URL,
-                        {
-                            method: "POST",
+                    /* ================================================
+                       CONVERT USERNAME TO INTERNAL SUPABASE EMAIL
+                    ================================================= */
 
-                            headers: {
-                                "Content-Type": "text/plain;charset=utf-8"
-                            },
+                    let authEmail = enteredUsername.trim().toLowerCase();
 
-                            body: JSON.stringify({
-                                action: "login",
-
-                                data: {
-                                    username: enteredUsername,
-                                    password: enteredPassword,
-                                    position: selectedPosition
-                                }
-                            })
-                        }
-                    );
-
-                    if (!response.ok) {
-                        throw new Error(
-                            "Server returned status " +
-                            response.status +
-                            "."
-                        );
+                    if (!authEmail.includes("@")) {
+                        authEmail += "@psabeppg.local";
                     }
 
-                    const result = await response.json();
 
-                    if (!result.success) {
+                    /* ================================================
+                       SUPABASE AUTH LOGIN
+                    ================================================= */
+
+                    const {
+                        data: authData,
+                        error: authError
+                    } =
+                        await supabaseClient.auth.signInWithPassword({
+                            email: authEmail,
+                            password: enteredPassword
+                        });
+
+
+                    if (authError) {
+
+                        console.error(
+                            "Supabase login error:",
+                            authError
+                        );
+
                         showMessage(
-                            result.message ||
                             "Incorrect username or password.",
                             "error"
                         );
+
                         return;
                     }
 
-                    const user = result.user || {};
+
+                    if (!authData || !authData.user) {
+
+                        showMessage(
+                            "Unable to verify your account.",
+                            "error"
+                        );
+
+                        return;
+                    }
+
+
+                    /* ================================================
+                       GET OFFICER PROFILE
+                    ================================================= */
+
+                    const {
+                        data: officer,
+                        error: officerError
+                    } =
+                        await supabaseClient
+                            .from("officers")
+                            .select(`
+                                username,
+                                name,
+                                position,
+                                status,
+                                access_level,
+                                auth_user_id
+                            `)
+                            .eq("auth_user_id", authData.user.id)
+                            .single();
+
+
+                    if (officerError || !officer) {
+
+                        console.error(
+                            "Officer profile error:",
+                            officerError
+                        );
+
+                        await supabaseClient.auth.signOut();
+
+                        showMessage(
+                            "Your account is not properly linked to an officer record.",
+                            "error"
+                        );
+
+                        return;
+                    }
+
+
+                    /* ================================================
+                       VERIFY ACCOUNT STATUS
+                    ================================================= */
+
+                    if (
+                        officer.status &&
+                        officer.status.toLowerCase() !== "active"
+                    ) {
+
+                        await supabaseClient.auth.signOut();
+
+                        showMessage(
+                            "Your officer account is currently inactive.",
+                            "error"
+                        );
+
+                        return;
+                    }
+
+
+                    /* ================================================
+                       VERIFY SELECTED POSITION
+                    ================================================= */
+
+                    if (
+                        officer.position &&
+                        officer.position.trim().toLowerCase() !==
+                        selectedPosition.trim().toLowerCase()
+                    ) {
+
+                        await supabaseClient.auth.signOut();
+
+                        showMessage(
+                            "The selected position does not match your officer account.",
+                            "error"
+                        );
+
+                        return;
+                    }
+
+
+                    /* ================================================
+                       REMEMBER ME
+                    ================================================= */
 
                     if (rememberMe.checked) {
 
                         localStorage.setItem(
                             "psabeRememberedUsername",
-                            enteredUsername
+                            officer.username
                         );
 
                         localStorage.setItem(
                             "psabeRememberedPosition",
-                            user.position || selectedPosition
+                            officer.position || selectedPosition
                         );
 
                     } else {
@@ -384,11 +485,11 @@
                         localStorage.removeItem(
                             "psabeRememberedPosition"
                         );
-
                     }
 
-                    /* =================================================
-                       LOGIN SESSION DATA
+
+                    /* ================================================
+                       COMPATIBILITY SESSION DATA
                     ================================================= */
 
                     sessionStorage.setItem(
@@ -398,53 +499,70 @@
 
                     sessionStorage.setItem(
                         "psabeUsername",
-                        user.username || enteredUsername
+                        officer.username
                     );
 
                     sessionStorage.setItem(
                         "psabeName",
-                        user.name || ""
+                        officer.name || ""
                     );
 
                     sessionStorage.setItem(
                         "psabePosition",
-                        user.position || selectedPosition
+                        officer.position || ""
                     );
 
                     sessionStorage.setItem(
                         "psabeStatus",
-                        user.status || ""
+                        officer.status || ""
                     );
 
                     sessionStorage.setItem(
                         "psabeAccessLevel",
-                        user.accessLevel || "Officer"
+                        officer.access_level || "Officer"
                     );
+
+
+                    /* ================================================
+                       SUCCESS
+                    ================================================= */
 
                     showMessage(
                         "Login successful. Opening management system...",
                         "success"
                     );
 
+
                     setTimeout(function () {
-                        window.location.href = "dashboard.html";
+
+                        window.location.href =
+                            "dashboard.html";
+
                     }, 900);
+
 
                 } catch (error) {
 
-                    console.error("Login error:", error);
+                    console.error(
+                        "Authentication error:",
+                        error
+                    );
 
                     showMessage(
-                        "Unable to connect to the login server. Please try again.",
+                        "Unable to connect to the authentication server. Please try again.",
                         "error"
                     );
 
                 } finally {
 
                     if (signInButton) {
+
                         signInButton.disabled = false;
-                        signInButton.innerHTML = originalButtonText;
+                        signInButton.innerHTML =
+                            originalButtonText;
+
                     }
+
                 }
             });
 
