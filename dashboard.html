@@ -3020,7 +3020,7 @@ body.dashboard-data-loading .dashboard-content {
                 function updateSelectedDay() {
 
                     const date = parseDateKey(selectedDate);
-                    if (!date) return;
+                    if (!date || !selectedActivities) return;
 
                     selectedDateTitle.textContent = date.toLocaleDateString("en-US", {
                         month: "long",
@@ -3033,11 +3033,6 @@ body.dashboard-data-loading .dashboard-content {
 
                     selectedDateNumber.textContent = date.getDate();
 
-                    if (!selectedActivities) {
-                        console.error("Calendar error: #selectedActivities was not found.");
-                        return;
-                    }
-
                     const selectedDateKey = makeDateKey(
                         date.getFullYear(),
                         date.getMonth(),
@@ -3045,14 +3040,50 @@ body.dashboard-data-loading .dashboard-content {
                     );
 
                     /*
-                     * Use the exact same activity collection that powers
-                     * the markers and activity count in the calendar cell.
-                     * If a marker exists for this date, its activity is now
-                     * guaranteed to be the source for this panel as well.
+                     * Events are taken directly from the Supabase event records.
+                     * This intentionally does not depend on the calendar marker
+                     * collection, so the detail panel cannot disagree with the
+                     * event shown on the calendar.
                      */
-                    const activities = Array.isArray(calendarActivities[selectedDateKey])
-                        ? calendarActivities[selectedDateKey].slice()
+                    const eventActivities = Array.isArray(calendarEventsData)
+                        ? calendarEventsData
+                            .filter(function (event) {
+                                const status = normalize(getRecordValue(event, "Status")).toLowerCase();
+                                if (status && status !== "active") return false;
+
+                                return normalizeCalendarDate(
+                                    getRecordValue(event, "Date")
+                                ) === selectedDateKey;
+                            })
+                            .map(function (event) {
+                                const start = normalize(getRecordValue(event, "Start Time"));
+                                const end = normalize(getRecordValue(event, "End Time"));
+
+                                return {
+                                    eventId: getRecordValue(event, "Event ID"),
+                                    type: "event",
+                                    title: getRecordValue(event, "Title") || "Untitled event",
+                                    description:
+                                        getRecordValue(event, "Description") ||
+                                        getRecordValue(event, "Location") ||
+                                        "No description provided.",
+                                    location: getRecordValue(event, "Location") || "",
+                                    time:
+                                        start && end
+                                            ? start + " – " + end
+                                            : (start || "Scheduled activity")
+                                };
+                            })
                         : [];
+
+                    /* Keep task activities from the existing calendar collection. */
+                    const otherActivities = Array.isArray(calendarActivities[selectedDateKey])
+                        ? calendarActivities[selectedDateKey].filter(function (activity) {
+                            return activity && activity.type !== "event";
+                        })
+                        : [];
+
+                    const activities = eventActivities.concat(otherActivities);
 
                     selectedActivities.innerHTML = "";
 
@@ -4224,47 +4255,31 @@ body.dashboard-data-loading .dashboard-content {
 
     async function loadCalendarData() {
         try {
-            const [events, tasksResult] = await Promise.all([
-                loadSupabaseEvents(),
-                fetchJson("getTasks")
-            ]);
+            /* Events are the primary calendar source and come directly from Supabase. */
+            const events = await loadSupabaseEvents();
 
             calendarActivities = {};
             calendarEventsData = Array.isArray(events) ? events.slice() : [];
 
-            const tasks = Array.isArray(tasksResult.data)
-                ? tasksResult.data
-                : [];
-
             calendarEventsData.forEach(function (event) {
-                const status =
-                    normalize(getRecordValue(event, "Status")).toLowerCase();
-
+                const status = normalize(getRecordValue(event, "Status")).toLowerCase();
                 if (status && status !== "active") return;
 
-                const eventDate =
-                    normalizeCalendarDate(getRecordValue(event, "Date"));
-
+                const eventDate = normalizeCalendarDate(getRecordValue(event, "Date"));
                 if (!eventDate) return;
 
-                const start =
-                    normalize(getRecordValue(event, "Start Time"));
-
-                const end =
-                    normalize(getRecordValue(event, "End Time"));
+                const start = normalize(getRecordValue(event, "Start Time"));
+                const end = normalize(getRecordValue(event, "End Time"));
 
                 addCalendarActivity(eventDate, {
                     eventId: getRecordValue(event, "Event ID"),
                     type: "event",
-                    title:
-                        getRecordValue(event, "Title") ||
-                        "Untitled event",
+                    title: getRecordValue(event, "Title") || "Untitled event",
                     description:
                         getRecordValue(event, "Description") ||
                         getRecordValue(event, "Location") ||
                         "No description provided.",
-                    location:
-                        getRecordValue(event, "Location") || "",
+                    location: getRecordValue(event, "Location") || "",
                     time:
                         start && end
                             ? start + " – " + end
@@ -4272,55 +4287,39 @@ body.dashboard-data-loading .dashboard-content {
                 });
             });
 
-            tasks.forEach(function (task) {
-                const assignedTo =
-                    normalizeUsername(
-                        getRecordValue(task, "Assigned To")
-                    );
+            /* Tasks remain on the existing source for now. A task failure must
+               never prevent Supabase events from appearing on the calendar. */
+            try {
+                const tasksResult = await fetchJson("getTasks");
+                const tasks = Array.isArray(tasksResult.data) ? tasksResult.data : [];
 
-                if (
-                    !IS_STEERING &&
-                    assignedTo !== normalizeUsername(CURRENT_USERNAME)
-                ) {
-                    return;
-                }
+                tasks.forEach(function (task) {
+                    const assignedTo = normalizeUsername(getRecordValue(task, "Assigned To"));
+                    if (!IS_STEERING && assignedTo !== normalizeUsername(CURRENT_USERNAME)) return;
 
-                const status =
-                    normalize(getRecordValue(task, "Status")).toLowerCase();
+                    const status = normalize(getRecordValue(task, "Status")).toLowerCase();
+                    if (status === "complete" || status === "completed") return;
 
-                if (
-                    status === "complete" ||
-                    status === "completed"
-                ) {
-                    return;
-                }
+                    const dueDate = normalizeCalendarDate(getRecordValue(task, "Due Date"));
+                    if (!dueDate) return;
 
-                const dueDate =
-                    normalizeCalendarDate(
-                        getRecordValue(task, "Due Date")
-                    );
-
-                if (!dueDate) return;
-
-                addCalendarActivity(dueDate, {
-                    type: "task",
-                    title:
-                        getRecordValue(task, "Task Title") ||
-                        "Task",
-                    description:
-                        getRecordValue(task, "Description") ||
-                        "Assigned task",
-                    time: "Due date"
+                    addCalendarActivity(dueDate, {
+                        type: "task",
+                        title: getRecordValue(task, "Task Title") || "Task",
+                        description: getRecordValue(task, "Description") || "Assigned task",
+                        time: "Due date"
+                    });
                 });
-            });
+            } catch (taskError) {
+                console.warn("Task data could not be loaded for the calendar:", taskError);
+            }
 
             renderCalendar();
-
         } catch (error) {
-            console.error(
-                "Calendar data loading error:",
-                error
-            );
+            console.error("Calendar data loading error:", error);
+            calendarEventsData = [];
+            calendarActivities = {};
+            renderCalendar();
         }
     }
 
