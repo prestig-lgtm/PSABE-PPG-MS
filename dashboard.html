@@ -3045,44 +3045,14 @@ body.dashboard-data-loading .dashboard-content {
                     );
 
                     /*
-                     * Build the selected-day list directly from the same
-                     * Supabase event records used by the calendar. This
-                     * avoids relying on a second/intermediate date lookup.
+                     * Use the exact same activity collection that powers
+                     * the markers and activity count in the calendar cell.
+                     * If a marker exists for this date, its activity is now
+                     * guaranteed to be the source for this panel as well.
                      */
-                    const activities = [];
-                    const seenEventIds = new Set();
-
-                    (Array.isArray(calendarEventsData) ? calendarEventsData : []).forEach(function (event) {
-                        const status = normalize(getRecordValue(event, "Status")).toLowerCase();
-                        if (status && status !== "active") return;
-
-                        const eventDate = normalizeCalendarDate(getRecordValue(event, "Date"));
-                        if (eventDate !== selectedDateKey) return;
-
-                        const eventId = normalize(getRecordValue(event, "Event ID"));
-                        if (eventId && seenEventIds.has(eventId)) return;
-                        if (eventId) seenEventIds.add(eventId);
-
-                        const start = normalize(getRecordValue(event, "Start Time"));
-                        const end = normalize(getRecordValue(event, "End Time"));
-                        const location = normalize(getRecordValue(event, "Location"));
-
-                        activities.push({
-                            eventId: eventId,
-                            type: "event",
-                            title: normalize(getRecordValue(event, "Title")) || "Untitled event",
-                            description: normalize(getRecordValue(event, "Description")) || "No description provided.",
-                            location: location,
-                            time: start && end ? start + " – " + end : (start || "Scheduled activity")
-                        });
-                    });
-
-                    /* Include non-event activities already prepared by the calendar. */
-                    const cachedActivities = calendarActivities[selectedDateKey] || [];
-                    cachedActivities.forEach(function (activity) {
-                        if (!activity || activity.type === "event") return;
-                        activities.push(activity);
-                    });
+                    const activities = Array.isArray(calendarActivities[selectedDateKey])
+                        ? calendarActivities[selectedDateKey].slice()
+                        : [];
 
                     selectedActivities.innerHTML = "";
 
@@ -3108,6 +3078,8 @@ body.dashboard-data-loading .dashboard-content {
                     }
 
                     activities.forEach(function (activity) {
+                        if (!activity) return;
+
                         const card = document.createElement("div");
                         card.className = "selected-activity " + normalize(activity.type || "event");
 
@@ -3123,21 +3095,21 @@ body.dashboard-data-loading .dashboard-content {
                         typeRow.appendChild(typeText);
 
                         const title = document.createElement("h3");
-                        title.textContent = activity.title || "Untitled activity";
+                        title.textContent = normalize(activity.title) || "Untitled activity";
 
                         const description = document.createElement("p");
-                        description.textContent = activity.description || "No description provided.";
+                        description.textContent = normalize(activity.description) || "No description provided.";
 
                         card.appendChild(typeRow);
                         card.appendChild(title);
                         card.appendChild(description);
 
-                        if (activity.type === "event" && activity.location) {
+                        if (activity.type === "event" && normalize(activity.location)) {
                             const locationRow = document.createElement("div");
                             locationRow.className = "selected-activity-time";
                             locationRow.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 21s7-5.4 7-12a7 7 0 1 0-14 0c0 6.6 7 12 7 12z"></path><circle cx="12" cy="9" r="2.2"></circle></svg>';
                             const locationText = document.createElement("span");
-                            locationText.textContent = activity.location;
+                            locationText.textContent = normalize(activity.location);
                             locationRow.appendChild(locationText);
                             card.appendChild(locationRow);
                         }
@@ -3146,11 +3118,11 @@ body.dashboard-data-loading .dashboard-content {
                         timeRow.className = "selected-activity-time";
                         timeRow.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 14"></polyline></svg>';
                         const timeText = document.createElement("span");
-                        timeText.textContent = activity.time || "";
+                        timeText.textContent = normalize(activity.time) || "Scheduled activity";
                         timeRow.appendChild(timeText);
                         card.appendChild(timeRow);
 
-                        if (IS_STEERING && activity.type === "event" && activity.eventId) {
+                        if (IS_STEERING && activity.type === "event" && normalize(activity.eventId)) {
                             const deleteButton = document.createElement("button");
                             deleteButton.type = "button";
                             deleteButton.className = "calendar-event-delete-button";
@@ -3166,7 +3138,6 @@ body.dashboard-data-loading .dashboard-content {
 
                     if (window.lucide) lucide.createIcons();
                 }
-
 
                 /* =================================================
                    PARSE DATE KEY
