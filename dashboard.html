@@ -44,7 +44,6 @@
         href="dashboard.css"
     >
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
 
@@ -78,80 +77,11 @@ body.dashboard-data-loading .dashboard-content {
 
 <body class="dashboard-data-loading">
 <script>
-/* =========================================================
-   SUPABASE DASHBOARD AUTHENTICATION
-   Verifies the real Supabase session and loads the
-   authenticated officer profile before the dashboard
-   is allowed to display.
-========================================================= */
-(function () {
-    const SUPABASE_URL =
-        "https://dwzcyupoenjafgtdijla.supabase.co";
-
-    const SUPABASE_PUBLISHABLE_KEY =
-        "sb_publishable_s4VaYFDHxE3I9jgK2reWHw_zQ8VPVwd";
-
-    const supabaseClient = window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_PUBLISHABLE_KEY
-    );
-
-    window.psabeSupabase = supabaseClient;
-    window.psabeAuthProfile = null;
-
-    window.psabeAuthReady = (async function () {
-        try {
-            const { data: sessionData, error: sessionError } =
-                await supabaseClient.auth.getSession();
-
-            if (sessionError || !sessionData || !sessionData.session) {
-                window.location.replace("index.html");
-                return false;
-            }
-
-            const user = sessionData.session.user;
-
-            const { data: officer, error: officerError } =
-                await supabaseClient
-                    .from("officers")
-                    .select("username, name, position, status, access_level, auth_user_id")
-                    .eq("auth_user_id", user.id)
-                    .single();
-
-            if (officerError || !officer) {
-                console.error("Unable to load authenticated officer profile:", officerError);
-                await supabaseClient.auth.signOut();
-                sessionStorage.clear();
-                window.location.replace("index.html");
-                return false;
-            }
-
-            if (officer.status && officer.status.toLowerCase() !== "active") {
-                await supabaseClient.auth.signOut();
-                sessionStorage.clear();
-                window.location.replace("index.html");
-                return false;
-            }
-
-            window.psabeAuthProfile = officer;
-
-            /* Keep the existing session keys for compatibility with the
-               dashboard while Supabase becomes the actual auth source. */
-            sessionStorage.setItem("psabeLoggedIn", "true");
-            sessionStorage.setItem("psabeUsername", officer.username || "");
-            sessionStorage.setItem("psabeName", officer.name || "");
-            sessionStorage.setItem("psabePosition", officer.position || "");
-            sessionStorage.setItem("psabeStatus", officer.status || "");
-            sessionStorage.setItem("psabeAccessLevel", officer.access_level || "Officer");
-
-            return true;
-        } catch (error) {
-            console.error("Dashboard authentication error:", error);
+    (function () {
+        if (sessionStorage.getItem("psabeLoggedIn") !== "true") {
             window.location.replace("index.html");
-            return false;
         }
     })();
-})();
 </script>
 
 
@@ -1665,7 +1595,7 @@ body.dashboard-data-loading .dashboard-content {
                     </div>
                     <div class="officer-availability-body">
                         <div class="officer-availability-summary">
-                            <span class="officer-directory-status active"><span></span>Officer Availability</span>
+                            <span class="officer-directory-status active"><span></span>LIVE FROM GOOGLE SHEETS</span>
                         </div>
                         <div class="officer-week-grid" id="officerAvailabilityGrid"></div>
                     </div>
@@ -1932,6 +1862,40 @@ body.dashboard-data-loading .dashboard-content {
         ===================================================== */
 
         let calendarActivities = {};
+
+
+        /* Shared calendar helpers.
+           The calendar script is separate from the Supabase data script, so
+           these helpers must exist in this script's scope as well. */
+        function normalize(value) {
+            return String(value == null ? "" : value).trim();
+        }
+
+        function getRecordValue(record, key) {
+            if (!record || typeof record !== "object") return "";
+            if (Object.prototype.hasOwnProperty.call(record, key)) return record[key];
+            const target = String(key).trim().toLowerCase();
+            const foundKey = Object.keys(record).find(function (item) {
+                return String(item).trim().toLowerCase() === target;
+            });
+            return foundKey ? record[foundKey] : "";
+        }
+
+        function normalizeCalendarDate(value) {
+            const text = normalize(value);
+            if (!text) return "";
+
+            if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+
+            const d = new Date(text);
+            if (Number.isNaN(d.getTime())) return "";
+
+            return [
+                d.getFullYear(),
+                String(d.getMonth() + 1).padStart(2, "0"),
+                String(d.getDate()).padStart(2, "0")
+            ].join("-");
+        }
 
 
 
@@ -3316,7 +3280,7 @@ body.dashboard-data-loading .dashboard-content {
 
                 logoutButton.addEventListener(
                     "click",
-                    async function () {
+                    function () {
 
                         const confirmLogout =
                             confirm(
@@ -3327,16 +3291,10 @@ body.dashboard-data-loading .dashboard-content {
                         if (
                             confirmLogout
                         ) {
-                            try {
-                                if (window.psabeSupabase) {
-                                    await window.psabeSupabase.auth.signOut();
-                                }
-                            } catch (error) {
-                                console.error("Supabase sign-out error:", error);
-                            } finally {
-                                sessionStorage.clear();
-                                window.location.href = "index.html";
-                            }
+
+                            window.location.href =
+                                "index.html";
+
                         }
 
                     }
@@ -3362,9 +3320,10 @@ body.dashboard-data-loading .dashboard-content {
        LOGIN SESSION
     ===================================================== */
 
-    /* Supabase authentication is verified by the bootstrap above.
-       Initialization waits for that verification before reading
-       the authenticated officer profile. */
+    if (sessionStorage.getItem("psabeLoggedIn") !== "true") {
+        window.location.replace("index.html");
+        return;
+    }
 
 
     /* =====================================================
@@ -3380,20 +3339,20 @@ body.dashboard-data-loading .dashboard-content {
        Officer        = regular access
     ===================================================== */
 
-    let CURRENT_ACCESS_LEVEL =
+    const CURRENT_ACCESS_LEVEL =
         (sessionStorage.getItem("psabeAccessLevel") || "Officer").trim();
 
-    let IS_STEERING =
+    const IS_STEERING =
         CURRENT_ACCESS_LEVEL.toLowerCase() === "steering";
 
-    let IS_COMMITTEE_HEAD =
+    const IS_COMMITTEE_HEAD =
         CURRENT_ACCESS_LEVEL.toLowerCase() === "committee head";
 
-    let IS_OFFICER =
+    const IS_OFFICER =
         CURRENT_ACCESS_LEVEL.toLowerCase() === "officer";
 
-    let CURRENT_USERNAME =
-        sessionStorage.getItem("psabeUsername") || "";
+    const CURRENT_USERNAME =
+        sessionStorage.getItem("psabeUsername") || "Mac";
 
 
     /* =====================================================
@@ -3446,10 +3405,15 @@ body.dashboard-data-loading .dashboard-content {
     let officersData = [];
     let currentOfficer = {
         Username: CURRENT_USERNAME,
-        Name: sessionStorage.getItem("psabeName") || "Officer",
-        Position: sessionStorage.getItem("psabePosition") || "Officer",
-        Status: sessionStorage.getItem("psabeStatus") || "Active",
-        AccessLevel: sessionStorage.getItem("psabeAccessLevel") || "Officer"
+        Name:
+            sessionStorage.getItem("psabeName") ||
+            "MC RJ Escote",
+        Position:
+            sessionStorage.getItem("psabePosition") ||
+            "Vice President",
+        Status:
+            sessionStorage.getItem("psabeStatus") ||
+            "Active"
     };
 
     let myAvailability = {};
@@ -3868,43 +3832,17 @@ body.dashboard-data-loading .dashboard-content {
         updateDashboardAnnouncement();
     }
 
-    function mapSupabaseEvent(row) {
-        if (!row) return null;
-        return {
-            "Event ID": row.event_id || "",
-            "Title": row.title || "",
-            "Description": row.description || "",
-            "Date": row.event_date || "",
-            "Start Time": row.start_time || "",
-            "End Time": row.end_time || "",
-            "Location": row.location || "",
-            "Type": row.type || "Event",
-            "Status": row.status || "Active",
-            "Created By": row.created_by || ""
-        };
-    }
-
-    async function loadSupabaseEvents() {
-        if (!window.psabeSupabase) throw new Error("Supabase is not initialized.");
-        const { data, error } = await window.psabeSupabase
-            .from("events")
-            .select("event_id,title,description,event_date,start_time,end_time,location,type,status,created_by,created_at,updated_at")
-            .order("event_date", { ascending: true })
-            .order("start_time", { ascending: true });
-        if (error) throw error;
-        return Array.isArray(data) ? data.map(mapSupabaseEvent).filter(Boolean) : [];
-    }
-
     async function loadDashboardData() {
         updateDashboardGreeting();
 
         try {
-            const [tasksResult, events] = await Promise.all([
+            const results = await Promise.all([
                 fetchJson("getTasks"),
-                loadSupabaseEvents()
+                fetchJson("getEvents")
             ]);
 
-            const tasks = Array.isArray(tasksResult.data) ? tasksResult.data : [];
+            const tasks = Array.isArray(results[0].data) ? results[0].data : [];
+            const events = Array.isArray(results[1].data) ? results[1].data : [];
 
             renderLiveDashboard(tasks, events);
         } catch (error) {
@@ -4269,8 +4207,9 @@ body.dashboard-data-loading .dashboard-content {
 
     async function loadCalendarData() {
         try {
-            const [events, tasksResult] = await Promise.all([loadSupabaseEvents(), fetchJson("getTasks")]);
+            const [eventsResult, tasksResult] = await Promise.all([fetchJson("getEvents"), fetchJson("getTasks")]);
             calendarActivities = {};
+            const events = Array.isArray(eventsResult.data) ? eventsResult.data : [];
             const tasks = Array.isArray(tasksResult.data) ? tasksResult.data : [];
             events.forEach(function(event) {
                 const status = normalize(getRecordValue(event, "Status")).toLowerCase();
@@ -4383,63 +4322,13 @@ body.dashboard-data-loading .dashboard-content {
         modal.classList.add("show"); if (window.lucide) lucide.createIcons();
     }
     function closeScheduleEventModal(){const modal=document.getElementById("scheduleEventModal");if(modal)modal.classList.remove("show");}
-    function mapSupabaseEvent(row) {
-        if (!row) return null;
-        return {
-            "Event ID": row.event_id || "",
-            "Title": row.title || "",
-            "Description": row.description || "",
-            "Date": row.event_date || "",
-            "Start Time": row.start_time || "",
-            "End Time": row.end_time || "",
-            "Location": row.location || "",
-            "Type": row.type || "Event",
-            "Status": row.status || "Active",
-            "Created By": row.created_by || ""
-        };
-    }
-
-    async function loadSupabaseEvents() {
-        if (!window.psabeSupabase) throw new Error("Supabase is not initialized.");
-
-        const { data, error } = await window.psabeSupabase
-            .from("events")
-            .select("event_id,title,description,event_date,start_time,end_time,location,type,status,created_by,created_at,updated_at")
-            .order("event_date", { ascending: true })
-            .order("start_time", { ascending: true });
-
-        if (error) throw error;
-
-        return Array.isArray(data) ? data.map(mapSupabaseEvent).filter(Boolean) : [];
-    }
-
     async function submitScheduledEvent(event){
         event.preventDefault(); if(!IS_STEERING)return;
         const status=document.getElementById("eventFormStatus"), saveButton=document.getElementById("saveScheduleEventButton");
-        const data={title:normalize(document.getElementById("eventTitleInput")?.value),description:normalize(document.getElementById("eventDescriptionInput")?.value),date:normalize(document.getElementById("eventDateInput")?.value),startTime:normalize(document.getElementById("eventStartTimeInput")?.value),endTime:normalize(document.getElementById("eventEndTimeInput")?.value),location:normalize(document.getElementById("eventLocationInput")?.value),type:normalize(document.getElementById("eventTypeInput")?.value)||"Event"};
-        if(!data.title||!data.date){if(status)status.textContent="Activity title and date are required.";return;}
-        if(!window.psabeSupabase){if(status)status.textContent="Unable to connect. Please try again.";return;}
+        const payload={action:"saveEvent",data:{title:normalize(document.getElementById("eventTitleInput")?.value),description:normalize(document.getElementById("eventDescriptionInput")?.value),date:normalize(document.getElementById("eventDateInput")?.value),startTime:normalize(document.getElementById("eventStartTimeInput")?.value),endTime:normalize(document.getElementById("eventEndTimeInput")?.value),location:normalize(document.getElementById("eventLocationInput")?.value),type:normalize(document.getElementById("eventTypeInput")?.value)||"Event",createdBy:CURRENT_USERNAME}};
+        if(!payload.data.title||!payload.data.date){if(status)status.textContent="Activity title and date are required.";return;}
         if(saveButton)saveButton.disabled=true;if(status)status.textContent="Scheduling activity...";
-        try{
-            const eventId = "EVT-" + new Date().toISOString().replace(/[-:TZ.]/g, "").slice(0, 14) + "-" + Math.random().toString(36).slice(2, 7).toUpperCase();
-            const { error } = await window.psabeSupabase.from("events").insert({
-                event_id:eventId,
-                title:data.title,
-                description:data.description || null,
-                event_date:data.date,
-                start_time:data.startTime || null,
-                end_time:data.endTime || null,
-                location:data.location || null,
-                type:data.type,
-                status:"Active",
-                created_by:CURRENT_USERNAME
-            });
-            if(error) throw error;
-            if(status)status.textContent="Activity scheduled successfully.";
-            await loadCalendarData();
-            await loadDashboardData();
-            setTimeout(closeScheduleEventModal,500);
-        }catch(error){console.error("Activity scheduling error:",error);if(status)status.textContent=error.message||"The activity could not be scheduled.";}finally{if(saveButton)saveButton.disabled=false;}
+        try{const response=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});if(!response.ok)throw new Error("Activity request failed.");const result=await response.json();if(!result.success)throw new Error(result.message||"The activity could not be scheduled.");if(status)status.textContent="Activity scheduled successfully.";await loadCalendarData();setTimeout(closeScheduleEventModal,500);}catch(error){console.error("Activity scheduling error:",error);if(status)status.textContent=error.message||"The activity could not be scheduled.";}finally{if(saveButton)saveButton.disabled=false;}
     }
 
     /* =====================================================
@@ -4724,43 +4613,17 @@ body.dashboard-data-loading .dashboard-content {
     async function loadOfficerDirectory() {
         const grid = document.getElementById("officerDirectoryGrid");
         if (grid) {
-            grid.innerHTML = '<div class="officers-directory-empty"><strong>Loading officers...</strong><span>Refreshing the officer directory...</span></div>';
+            grid.innerHTML = '<div class="officers-directory-empty"><strong>Loading officers...</strong><span>Refreshing the officer directory from Google Sheets.</span></div>';
         }
 
         try {
-            if (!window.psabeSupabase) {
-                throw new Error("Supabase is not initialized.");
-            }
-
-            const { data, error } = await window.psabeSupabase
-                .from("officers")
-                .select("username, name, position, status, access_level")
-                .order("name", { ascending: true });
-
-            if (error) {
-                throw error;
-            }
-
-            officersData = Array.isArray(data) ? data.map(function (officer) {
-                return {
-                    Username: officer.username || "",
-                    Name: officer.name || "",
-                    Position: officer.position || "",
-                    Status: officer.status || "Active",
-                    "Access Level": officer.access_level || "Officer"
-                };
-            }) : [];
-
+            const result = await fetchJson("getOfficers");
+            officersData = Array.isArray(result.data) ? result.data : [];
             renderOfficerDirectory();
-
-            // Keep the assignment dropdown synchronized with the live directory.
-            if (typeof populateTaskAssignedToOptions === "function") {
-                populateTaskAssignedToOptions();
-            }
         } catch (error) {
             console.error("Unable to load officer directory:", error);
             if (grid) {
-                grid.innerHTML = '<div class="officers-directory-empty"><strong>Unable to load officers.</strong><span>' + escapeHtml(error.message || "Please try Refresh again.") + '</span></div>';
+                grid.innerHTML = '<div class="officers-directory-empty"><strong>Unable to load officers.</strong><span>Check the Google Sheets connection and try Refresh again.</span></div>';
             }
         }
     }
@@ -4789,41 +4652,40 @@ body.dashboard-data-loading .dashboard-content {
 
 
     async function loadOfficerProfile() {
+
         try {
-            const officer = window.psabeAuthProfile;
 
-            if (officer) {
-                currentOfficer = {
-                    Username: officer.username || CURRENT_USERNAME,
-                    Name: officer.name || "Officer",
-                    Position: officer.position || "Officer",
-                    Status: officer.status || "Active",
-                    "Access Level": officer.access_level || "Officer"
-                };
-                updateOfficerProfile();
-                return currentOfficer;
+            const result =
+                await fetchJson("getOfficers");
+
+            officersData =
+                Array.isArray(result.data)
+                    ? result.data
+                    : [];
+
+            const foundOfficer =
+                officersData.find(function (officer) {
+                    return normalize(officer.Username).toLowerCase() ===
+                        CURRENT_USERNAME.toLowerCase();
+                });
+
+            if (foundOfficer) {
+                currentOfficer = foundOfficer;
             }
 
-            if (window.psabeAuthReady) {
-                const authenticated = await window.psabeAuthReady;
-                if (authenticated && window.psabeAuthProfile) {
-                    const profile = window.psabeAuthProfile;
-                    currentOfficer = {
-                        Username: profile.username || CURRENT_USERNAME,
-                        Name: profile.name || "Officer",
-                        Position: profile.position || "Officer",
-                        Status: profile.status || "Active",
-                        "Access Level": profile.access_level || "Officer"
-                    };
-                }
-            }
+            updateOfficerProfile();
+
         } catch (error) {
-            console.error("Unable to load authenticated officer profile:", error);
-        }
 
-        updateOfficerProfile();
-        return currentOfficer;
+            console.error(
+                "Unable to load officer profile:",
+                error
+            );
+
+            updateOfficerProfile();
+        }
     }
+
 
     /* =====================================================
        BUILD CENTRALIZED AVAILABILITY DATA
@@ -5023,38 +4885,17 @@ body.dashboard-data-loading .dashboard-content {
 
         try {
 
-            if (!window.psabeSupabase) {
-                throw new Error("The availability service is not initialized.");
-            }
+            const result =
+                await fetchJson("getAvailability");
 
-            const { data, error } =
-                await window.psabeSupabase
-                    .from("availability")
-                    .select("id, username, officer_name, position, day, time_slot, status")
-                    .order("id", { ascending: true });
-
-            if (error) {
-                throw error;
-            }
-
-            availabilityRecords = Array.isArray(data)
-                ? data.map(function(record) {
-                    return {
-                        id: record.id,
-                        Username: record.username || "",
-                        "Officer Name": record.officer_name || "",
-                        Position: record.position || "",
-                        Day: record.day || "",
-                        Time: record.time_slot || "",
-                        Status: record.status || "Available"
-                    };
-                })
-                : [];
+            availabilityRecords =
+                Array.isArray(result.data)
+                    ? result.data
+                    : [];
 
             rebuildAvailabilityTableData();
             renderAvailabilityTable();
             renderDashboardAvailability();
-            initializeMyAvailability();
 
         } catch (error) {
 
@@ -5347,22 +5188,44 @@ body.dashboard-data-loading .dashboard-content {
 
 
     /* =====================================================
-       SAVE AVAILABILITY
+       SAVE TO GOOGLE SHEETS
     ===================================================== */
 
     async function saveMyAvailability() {
 
         const saveButton =
-            document.getElementById("saveAvailabilityButton");
+            document.getElementById(
+                "saveAvailabilityButton"
+            );
 
         const status =
-            document.getElementById("saveStatus");
+            document.getElementById(
+                "saveStatus"
+            );
+
+        if (!isApiConfigured()) {
+
+            if (status) {
+                status.textContent =
+                    "Add your Google Apps Script Web App URL first.";
+            }
+
+            console.error(
+                "API_URL is not configured."
+            );
+
+            return;
+        }
+
 
         const records = [];
 
-        timeSlots.forEach(function(time) {
-            days.forEach(function(day) {
+        timeSlots.forEach(function (time) {
+
+            days.forEach(function (day) {
+
                 if (myAvailability[time][day]) {
+
                     records.push({
                         day: day,
                         time: time
@@ -5371,72 +5234,88 @@ body.dashboard-data-loading .dashboard-content {
             });
         });
 
+
         if (saveButton) {
             saveButton.disabled = true;
         }
 
         if (status) {
-            status.textContent = "Saving availability...";
+            status.textContent =
+                "Saving availability...";
         }
+
 
         try {
 
-            if (!window.psabeSupabase || !window.psabeAuthProfile) {
-                throw new Error("Your account session is not ready.");
-            }
+            const payload = {
 
-            const username = normalize(CURRENT_USERNAME);
-            const officerName = normalize(currentOfficer.Name);
-            const position = normalize(currentOfficer.Position);
+                action: "saveAvailability",
 
-            if (!username) {
-                throw new Error("Unable to identify your officer account.");
-            }
-
-            // Replace this officer's saved availability with the current grid.
-            const { error: deleteError } =
-                await window.psabeSupabase
-                    .from("availability")
-                    .delete()
-                    .eq("username", username);
-
-            if (deleteError) {
-                throw deleteError;
-            }
-
-            if (records.length) {
-                const rows = records.map(function(record) {
-                    return {
-                        username: username,
-                        officer_name: officerName,
-                        position: position,
-                        day: record.day,
-                        time_slot: record.time,
-                        status: "Available"
-                    };
-                });
-
-                const { error: insertError } =
-                    await window.psabeSupabase
-                        .from("availability")
-                        .insert(rows);
-
-                if (insertError) {
-                    throw insertError;
+                data: {
+                    username: CURRENT_USERNAME,
+                    officerName:
+                        normalize(currentOfficer.Name) ||
+                        "MC RJ Escote",
+                    position:
+                        normalize(currentOfficer.Position) ||
+                        "Vice President",
+                    records: records
                 }
+            };
+
+
+            const response =
+                await fetch(
+                    API_URL,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "text/plain;charset=utf-8"
+                        },
+                        body: JSON.stringify(payload)
+                    }
+                );
+
+
+            if (!response.ok) {
+                throw new Error(
+                    "Save request failed with status " +
+                    response.status + "."
+                );
             }
 
-            // Update the local data immediately so the UI responds without a reload.
-            availabilityRecords = availabilityRecords.filter(function(record) {
+
+            const result =
+                await response.json();
+
+
+            if (!result.success) {
+                throw new Error(
+                    result.message ||
+                    "The availability could not be saved."
+                );
+            }
+
+
+            /*
+               Update the local availability records immediately.
+               The next page refresh will read the same records from
+               Google Sheets again.
+            */
+
+            availabilityRecords = availabilityRecords.filter(function (record) {
                 return normalizeUsername(getRecordValue(record, "Username")) !==
                     normalizeUsername(CURRENT_USERNAME);
             });
 
-            records.forEach(function(record) {
+            records.forEach(function (record) {
                 availabilityRecords.push({
-                    Username: username,
-                    "Officer Name": officerName,
-                    Position: position,
+                    Username: CURRENT_USERNAME,
+                    "Officer Name":
+                        normalize(currentOfficer.Name) || "MC RJ Escote",
+                    Position:
+                        normalize(currentOfficer.Position) || "Vice President",
                     Day: record.day,
                     Time: record.time,
                     Status: "Available"
@@ -5456,11 +5335,14 @@ body.dashboard-data-loading .dashboard-content {
 
         } catch (error) {
 
-            console.error("Unable to save availability:", error);
+            console.error(
+                "Unable to save availability:",
+                error
+            );
 
             if (status) {
                 status.textContent =
-                    "Unable to save. Please try again.";
+                    "Unable to save. Please check your connection and Web App URL.";
             }
 
         } finally {
@@ -5470,6 +5352,7 @@ body.dashboard-data-loading .dashboard-content {
             }
         }
     }
+
 
     window.renderAvailabilityTable =
         renderAvailabilityTable;
@@ -5697,29 +5580,30 @@ body.dashboard-data-loading .dashboard-content {
 
 
         /*
-           Load remaining live data after the page is ready.
+           Load real data from Google Sheets after the page is ready.
         */
 
-        // Reveal immediately after the Supabase-authenticated profile is ready.
-        // The remaining Google Sheets data loads in the background so network
-        // latency does not hold the dashboard's first display.
-        updateOfficerProfile();
-        updateDashboardGreeting();
-        document.body.classList.remove("dashboard-data-loading");
-
         Promise.all([
-            loadOfficerDirectory(),
+            loadOfficerProfile(),
             loadAvailability(),
             loadTasks(),
             loadCalendarData(),
             loadDashboardData(),
             loadAnnouncements()
         ]).then(function () {
+
+            updateOfficerProfile();
             renderOfficerDirectory();
+            updateDashboardGreeting();
             renderAvailabilityTable();
             renderDashboardAvailability();
-        }).catch(function (error) {
-            console.error("Background dashboard data loading error:", error);
+
+        }).finally(function () {
+
+            // Only reveal dashboard content after the initial live-data pass
+            // has finished, preventing old hard-coded values from flashing.
+            document.body.classList.remove("dashboard-data-loading");
+
         });
 
         // Keep dashboard information current without requiring a page reload.
@@ -5741,32 +5625,16 @@ body.dashboard-data-loading .dashboard-content {
        START
     ===================================================== */
 
-    async function startDashboardAfterAuth() {
-        try {
-            const authenticated = await window.psabeAuthReady;
-
-            if (!authenticated) return;
-
-            await loadOfficerProfile();
-            initializeAvailabilityControls();
-
-        } catch (error) {
-            console.error("Dashboard startup failed:", error);
-            window.location.replace("index.html");
-        }
-    }
-
-
     if (document.readyState === "loading") {
 
         document.addEventListener(
             "DOMContentLoaded",
-            startDashboardAfterAuth
+            initializeAvailabilityControls
         );
 
     } else {
 
-        startDashboardAfterAuth();
+        initializeAvailabilityControls();
     }
 
 })();
