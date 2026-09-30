@@ -4500,19 +4500,7 @@ body.dashboard-data-loading .dashboard-content {
         };
     }
 
-    async function loadSupabaseEvents() {
-        if (!window.psabeSupabase) throw new Error("Supabase is not initialized.");
-
-        const { data, error } = await window.psabeSupabase
-            .from("events")
-            .select("event_id,title,description,event_date,start_time,end_time,location,type,status,created_by,created_at,updated_at")
-            .order("event_date", { ascending: true })
-            .order("start_time", { ascending: true });
-
-        if (error) throw error;
-
-        return Array.isArray(data) ? data.map(mapSupabaseEvent).filter(Boolean) : [];
-    }
+    
 
     async function submitScheduledEvent(event){
         event.preventDefault(); if(!IS_STEERING)return;
