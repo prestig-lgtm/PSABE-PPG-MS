@@ -3863,13 +3863,50 @@ body.dashboard-data-loading .dashboard-content {
     }
 
     async function loadSupabaseEvents() {
-        if (!window.psabeSupabase) throw new Error("Supabase is not initialized.");
-        const { data, error } = await window.psabeSupabase
-            .from("events")
-            .select("event_id,title,description,event_date,start_time,end_time,location,type,status,created_by,created_at,updated_at")
-            .order("event_date", { ascending: true })
-            .order("start_time", { ascending: true });
-        if (error) throw error;
+        if (!window.psabeSupabase) {
+            throw new Error("Supabase is not initialized.");
+        }
+
+        /*
+           Read the authenticated session first, then request only the fields
+           the calendar actually needs. This avoids the calendar depending on
+           any unrelated table or Google Apps Script request.
+        */
+        const { data: sessionData, error: sessionError } =
+            await window.psabeSupabase.auth.getSession();
+
+        if (sessionError) throw sessionError;
+
+        const session = sessionData && sessionData.session;
+        if (!session || !session.access_token) {
+            throw new Error("The authenticated session is not available.");
+        }
+
+        const endpoint =
+            "https://dwzcyupoenjafgtdijla.supabase.co/rest/v1/events" +
+            "?select=event_id,title,description,event_date,start_time,end_time,location,type,status,created_by" +
+            "&order=event_date.asc,start_time.asc";
+
+        const response = await fetch(endpoint, {
+            method: "GET",
+            headers: {
+                "apikey": "sb_publishable_s4VaYFDHxE3I9jgK2reWHw_zQ8VPVwd",
+                "Authorization": "Bearer " + session.access_token,
+                "Accept": "application/json"
+            },
+            cache: "no-store"
+        });
+
+        if (!response.ok) {
+            let message = "Unable to load events.";
+            try {
+                const body = await response.json();
+                message = body && (body.message || body.error || body.hint) || message;
+            } catch (_) {}
+            throw new Error(message + " (HTTP " + response.status + ")");
+        }
+
+        const data = await response.json();
         return Array.isArray(data) ? data.map(mapSupabaseEvent).filter(Boolean) : [];
     }
 
@@ -4317,8 +4354,11 @@ body.dashboard-data-loading .dashboard-content {
             renderCalendar();
         } catch (error) {
             console.error("Calendar data loading error:", error);
-            calendarEventsData = [];
-            calendarActivities = {};
+            /* Preserve already-loaded events instead of clearing the calendar. */
+            if (!Array.isArray(calendarEventsData)) calendarEventsData = [];
+            if (!calendarActivities || typeof calendarActivities !== "object") {
+                calendarActivities = {};
+            }
             renderCalendar();
         }
     }
