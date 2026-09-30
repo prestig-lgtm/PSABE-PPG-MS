@@ -1952,6 +1952,7 @@ body.dashboard-data-loading .dashboard-content {
         ===================================================== */
 
         let calendarActivities = {};
+    let calendarEventsData = [];
 
 
 
@@ -3063,13 +3064,114 @@ body.dashboard-data-loading .dashboard-content {
                     const selectedDateKey =
                         normalizeCalendarDate(selectedDate);
 
-                    const activities =
-                        calendarActivities[selectedDateKey] || [];
+                    /*
+                       Build the selected-date list directly from the
+                       loaded event cache first. This keeps the detail
+                       panel independent from the calendar marker render.
+                    */
+                    let activities =
+                        (calendarActivities[selectedDateKey] || []).slice();
 
+                    if (
+                        Array.isArray(calendarEventsData) &&
+                        calendarEventsData.length
+                    ) {
+                        const eventActivities =
+                            calendarEventsData
+                                .filter(function (event) {
+                                    const status =
+                                        normalize(
+                                            getRecordValue(
+                                                event,
+                                                "Status"
+                                            )
+                                        ).toLowerCase();
 
+                                    if (
+                                        status &&
+                                        status !== "active"
+                                    ) {
+                                        return false;
+                                    }
 
-                    selectedActivities.innerHTML =
-                        "";
+                                    return (
+                                        normalizeCalendarDate(
+                                            getRecordValue(
+                                                event,
+                                                "Date"
+                                            )
+                                        ) === selectedDateKey
+                                    );
+                                })
+                                .map(function (event) {
+                                    const start =
+                                        normalize(
+                                            getRecordValue(
+                                                event,
+                                                "Start Time"
+                                            )
+                                        );
+
+                                    const end =
+                                        normalize(
+                                            getRecordValue(
+                                                event,
+                                                "End Time"
+                                            )
+                                        );
+
+                                    return {
+                                        eventId:
+                                            getRecordValue(
+                                                event,
+                                                "Event ID"
+                                            ),
+                                        type: "event",
+                                        title:
+                                            getRecordValue(
+                                                event,
+                                                "Title"
+                                            ) ||
+                                            "Untitled event",
+                                        description:
+                                            getRecordValue(
+                                                event,
+                                                "Description"
+                                            ) ||
+                                            getRecordValue(
+                                                event,
+                                                "Location"
+                                            ) ||
+                                            "No description provided.",
+                                        location:
+                                            getRecordValue(
+                                                event,
+                                                "Location"
+                                            ) || "",
+                                        time:
+                                            start && end
+                                                ? start +
+                                                  " – " +
+                                                  end
+                                                : (
+                                                    start ||
+                                                    "Scheduled activity"
+                                                )
+                                    };
+                                });
+
+                        const nonEventActivities =
+                            activities.filter(function (item) {
+                                return item.type !== "event";
+                            });
+
+                        activities =
+                            eventActivities.concat(
+                                nonEventActivities
+                            );
+                    }
+
+                    selectedActivities.innerHTML = "";
 
 
 
@@ -3167,17 +3269,32 @@ body.dashboard-data-loading .dashboard-content {
 
                                     <span class="activity-status-dot"></span>
 
-                                    ${typeLabel}
+                                    ${escapeHtml(typeLabel)}
 
                                 </div>
 
                                 <h3>
-                                    ${activity.title}
+                                    ${escapeHtml(activity.title || "Untitled activity")}
                                 </h3>
 
                                 <p>
-                                    ${activity.description}
+                                    ${escapeHtml(activity.description || "No description provided.")}
                                 </p>
+
+                                ${
+                                    activity.type === "event" &&
+                                    activity.location
+                                        ? `
+                                            <div class="selected-activity-time">
+                                                <svg viewBox="0 0 24 24">
+                                                    <path d="M12 21s7-5.4 7-12a7 7 0 1 0-14 0c0 6.6 7 12 7 12z"></path>
+                                                    <circle cx="12" cy="9" r="2.2"></circle>
+                                                </svg>
+                                                ${escapeHtml(activity.location)}
+                                            </div>
+                                          `
+                                        : ""
+                                }
 
                                 <div class="selected-activity-time">
 
@@ -3195,7 +3312,7 @@ body.dashboard-data-loading .dashboard-content {
 
                                     </svg>
 
-                                    ${activity.time}
+                                    ${escapeHtml(activity.time || "")}
 
                                 </div>
 
@@ -4315,27 +4432,104 @@ body.dashboard-data-loading .dashboard-content {
 
     async function loadCalendarData() {
         try {
-            const [events, tasksResult] = await Promise.all([loadSupabaseEvents(), fetchJson("getTasks")]);
+            const [events, tasksResult] = await Promise.all([
+                loadSupabaseEvents(),
+                fetchJson("getTasks")
+            ]);
+
             calendarActivities = {};
-            const tasks = Array.isArray(tasksResult.data) ? tasksResult.data : [];
-            events.forEach(function(event) {
-                const status = normalize(getRecordValue(event, "Status")).toLowerCase();
+            calendarEventsData = Array.isArray(events) ? events.slice() : [];
+
+            const tasks = Array.isArray(tasksResult.data)
+                ? tasksResult.data
+                : [];
+
+            calendarEventsData.forEach(function (event) {
+                const status =
+                    normalize(getRecordValue(event, "Status")).toLowerCase();
+
                 if (status && status !== "active") return;
-                const start = normalize(getRecordValue(event, "Start Time"));
-                const end = normalize(getRecordValue(event, "End Time"));
-                addCalendarActivity(getRecordValue(event, "Date"), {eventId:getRecordValue(event,"Event ID"), type:"event", title:getRecordValue(event,"Title"), description:getRecordValue(event,"Description") || getRecordValue(event,"Location"), time:start && end ? start + " – " + end : (start || "Scheduled activity")});
+
+                const eventDate =
+                    normalizeCalendarDate(getRecordValue(event, "Date"));
+
+                if (!eventDate) return;
+
+                const start =
+                    normalize(getRecordValue(event, "Start Time"));
+
+                const end =
+                    normalize(getRecordValue(event, "End Time"));
+
+                addCalendarActivity(eventDate, {
+                    eventId: getRecordValue(event, "Event ID"),
+                    type: "event",
+                    title:
+                        getRecordValue(event, "Title") ||
+                        "Untitled event",
+                    description:
+                        getRecordValue(event, "Description") ||
+                        getRecordValue(event, "Location") ||
+                        "No description provided.",
+                    location:
+                        getRecordValue(event, "Location") || "",
+                    time:
+                        start && end
+                            ? start + " – " + end
+                            : (start || "Scheduled activity")
+                });
             });
-            tasks.forEach(function(task) {
-                const assignedTo = normalizeUsername(getRecordValue(task,"Assigned To"));
-                if (!IS_STEERING && assignedTo !== normalizeUsername(CURRENT_USERNAME)) return;
-                const status = normalize(getRecordValue(task,"Status")).toLowerCase();
-                if (status === "complete" || status === "completed") return;
-                const dueDate = getRecordValue(task,"Due Date");
+
+            tasks.forEach(function (task) {
+                const assignedTo =
+                    normalizeUsername(
+                        getRecordValue(task, "Assigned To")
+                    );
+
+                if (
+                    !IS_STEERING &&
+                    assignedTo !== normalizeUsername(CURRENT_USERNAME)
+                ) {
+                    return;
+                }
+
+                const status =
+                    normalize(getRecordValue(task, "Status")).toLowerCase();
+
+                if (
+                    status === "complete" ||
+                    status === "completed"
+                ) {
+                    return;
+                }
+
+                const dueDate =
+                    normalizeCalendarDate(
+                        getRecordValue(task, "Due Date")
+                    );
+
                 if (!dueDate) return;
-                addCalendarActivity(dueDate, {type:"task", title:getRecordValue(task,"Task Title") || "Task", description:getRecordValue(task,"Description") || "Assigned task", time:"Due date"});
+
+                addCalendarActivity(dueDate, {
+                    type: "task",
+                    title:
+                        getRecordValue(task, "Task Title") ||
+                        "Task",
+                    description:
+                        getRecordValue(task, "Description") ||
+                        "Assigned task",
+                    time: "Due date"
+                });
             });
+
             renderCalendar();
-        } catch (error) { console.error("Calendar data loading error:", error); }
+
+        } catch (error) {
+            console.error(
+                "Calendar data loading error:",
+                error
+            );
+        }
     }
 
     async function updateAssignedTaskStatus(taskId, statusValue, selectElement) {
