@@ -4688,58 +4688,40 @@ body.dashboard-data-loading .dashboard-content {
 
 
     async function loadOfficerProfile() {
-
         try {
-            /* The authenticated Supabase profile was already verified by
-               the dashboard auth bootstrap. Read that profile directly. */
             const officer = window.psabeAuthProfile;
 
-            if (!officer) {
-                throw new Error("Authenticated officer profile is unavailable.");
+            if (officer) {
+                currentOfficer = {
+                    Username: officer.username || CURRENT_USERNAME,
+                    Name: officer.name || "Officer",
+                    Position: officer.position || "Officer",
+                    Status: officer.status || "Active",
+                    "Access Level": officer.access_level || "Officer"
+                };
+                updateOfficerProfile();
+                return currentOfficer;
             }
 
-            CURRENT_USERNAME = normalize(officer.username);
-            CURRENT_ACCESS_LEVEL =
-                normalize(officer.access_level) || "Officer";
-
-            IS_STEERING =
-                CURRENT_ACCESS_LEVEL.toLowerCase() === "steering";
-
-            IS_COMMITTEE_HEAD =
-                CURRENT_ACCESS_LEVEL.toLowerCase() === "committee head";
-
-            IS_OFFICER =
-                CURRENT_ACCESS_LEVEL.toLowerCase() === "officer";
-
-            currentOfficer = {
-                Username: officer.username || "",
-                Name: officer.name || "Officer",
-                Position: officer.position || "Officer",
-                Status: officer.status || "Active",
-                AccessLevel: officer.access_level || "Officer",
-                auth_user_id: officer.auth_user_id || ""
-            };
-
-            /* Preserve the Supabase profile in the local officer array using
-               the field names already expected by the dashboard UI. */
-            officersData = [{
-                Username: currentOfficer.Username,
-                Name: currentOfficer.Name,
-                Position: currentOfficer.Position,
-                Status: currentOfficer.Status,
-                "Access Level": currentOfficer.AccessLevel,
-                auth_user_id: currentOfficer.auth_user_id
-            }];
-
-            updateOfficerProfile();
-            updateDashboardGreeting();
-
-            return currentOfficer;
-
+            if (window.psabeAuthReady) {
+                const authenticated = await window.psabeAuthReady;
+                if (authenticated && window.psabeAuthProfile) {
+                    const profile = window.psabeAuthProfile;
+                    currentOfficer = {
+                        Username: profile.username || CURRENT_USERNAME,
+                        Name: profile.name || "Officer",
+                        Position: profile.position || "Officer",
+                        Status: profile.status || "Active",
+                        "Access Level": profile.access_level || "Officer"
+                    };
+                }
+            }
         } catch (error) {
-            console.error("Unable to load officer profile:", error);
-            throw error;
+            console.error("Unable to load authenticated officer profile:", error);
         }
+
+        updateOfficerProfile();
+        return currentOfficer;
     }
 
     /* =====================================================
@@ -5638,27 +5620,25 @@ body.dashboard-data-loading .dashboard-content {
            Load real data from Google Sheets after the page is ready.
         */
 
+        // Reveal immediately after the Supabase-authenticated profile is ready.
+        // The remaining Google Sheets data loads in the background so network
+        // latency does not hold the dashboard's first display.
+        updateOfficerProfile();
+        updateDashboardGreeting();
+        document.body.classList.remove("dashboard-data-loading");
+
         Promise.all([
-            loadOfficerProfile(),
             loadAvailability(),
             loadTasks(),
             loadCalendarData(),
             loadDashboardData(),
             loadAnnouncements()
         ]).then(function () {
-
-            updateOfficerProfile();
             renderOfficerDirectory();
-            updateDashboardGreeting();
             renderAvailabilityTable();
             renderDashboardAvailability();
-
-        }).finally(function () {
-
-            // Only reveal dashboard content after the initial live-data pass
-            // has finished, preventing old hard-coded values from flashing.
-            document.body.classList.remove("dashboard-data-loading");
-
+        }).catch(function (error) {
+            console.error("Background dashboard data loading error:", error);
         });
 
         // Keep dashboard information current without requiring a page reload.
