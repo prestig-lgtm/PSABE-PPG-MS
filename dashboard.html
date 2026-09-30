@@ -5760,17 +5760,28 @@ body.dashboard-data-loading .dashboard-content {
         updateDashboardGreeting();
         document.body.classList.remove("dashboard-data-loading");
 
-        Promise.all([
-            loadOfficerDirectory(),
-            loadAvailability(),
-            loadTasks(),
-            loadCalendarData(),
-            loadDashboardData(),
-            loadAnnouncements()
-        ]).then(function () {
+        /*
+           IMPORTANT: wait for the Supabase session/profile check before
+           starting any authenticated data requests. This prevents the
+           calendar from making its first request as the anonymous role
+           while the Supabase session is still being restored.
+        */
+        Promise.resolve(window.psabeAuthReady).then(function (authenticated) {
+            if (!authenticated) return;
+
+            return Promise.all([
+                loadOfficerDirectory(),
+                loadAvailability(),
+                loadTasks(),
+                loadCalendarData(),
+                loadDashboardData(),
+                loadAnnouncements()
+            ]);
+        }).then(function () {
             renderOfficerDirectory();
             renderAvailabilityTable();
             renderDashboardAvailability();
+            renderCalendar();
         }).catch(function (error) {
             console.error("Background dashboard data loading error:", error);
         });
