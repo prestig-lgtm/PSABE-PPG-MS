@@ -3251,7 +3251,7 @@ body.dashboard-data-loading .dashboard-content {
 
                 logoutButton.addEventListener(
                     "click",
-                    function () {
+                    async function () {
 
                         const confirmLogout =
                             confirm(
@@ -3263,6 +3263,7 @@ body.dashboard-data-loading .dashboard-content {
                             confirmLogout
                         ) {
 
+                            await clearLocalCache();
                             window.location.href =
                                 "index.html";
 
@@ -3557,6 +3558,235 @@ body.dashboard-data-loading .dashboard-content {
         };
     }
 
+    /* =====================================================
+       INDEXEDDB LOCAL CACHE
+       Supabase remains the central/shared database.
+       IndexedDB only stores a short-lived local copy so the
+       dashboard can render immediately on repeat visits.
+    ===================================================== */
+
+    const LOCAL_CACHE_DB = "PSABE_PPG_Management_Cache";
+    const LOCAL_CACHE_STORE = "data";
+    const LOCAL_CACHE_VERSION = 1;
+
+    const CACHE_TTL = {
+        getOfficers: 60000,
+        getAvailability: 15000,
+        getTasks: 10000,
+        getEvents: 10000,
+        getMeetings: 15000,
+        getAnnouncements: 10000
+    };
+
+    let localCacheDbPromise = null;
+
+    function openLocalCache() {
+        if (localCacheDbPromise) return localCacheDbPromise;
+
+        localCacheDbPromise = new Promise(function (resolve, reject) {
+            if (!window.indexedDB) {
+                resolve(null);
+                return;
+            }
+
+            const request = window.indexedDB.open(
+                LOCAL_CACHE_DB,
+                LOCAL_CACHE_VERSION
+            );
+
+            request.onupgradeneeded = function (event) {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(LOCAL_CACHE_STORE)) {
+                    db.createObjectStore(LOCAL_CACHE_STORE, {
+                        keyPath: "action"
+                    });
+                }
+            };
+
+            request.onsuccess = function () {
+                resolve(request.result);
+            };
+
+            request.onerror = function () {
+                console.warn("IndexedDB cache unavailable:", request.error);
+                resolve(null);
+            };
+        });
+
+        return localCacheDbPromise;
+    }
+
+    async function readLocalCache(action) {
+        const db = await openLocalCache();
+        if (!db) return null;
+
+        return new Promise(function (resolve) {
+            try {
+                const transaction = db.transaction(
+                    LOCAL_CACHE_STORE,
+                    "readonly"
+                );
+                const store = transaction.objectStore(LOCAL_CACHE_STORE);
+                const request = store.get(action);
+
+                request.onsuccess = function () {
+                    resolve(request.result || null);
+                };
+
+                request.onerror = function () {
+                    resolve(null);
+                };
+            } catch (error) {
+                resolve(null);
+            }
+        });
+    }
+
+    async function writeLocalCache(action, response) {
+        const db = await openLocalCache();
+        if (!db || !response || !response.success) return;
+
+        try {
+            const transaction = db.transaction(
+                LOCAL_CACHE_STORE,
+                "readwrite"
+            );
+            transaction.objectStore(LOCAL_CACHE_STORE).put({
+                action: action,
+                savedAt: Date.now(),
+                response: response
+            });
+        } catch (error) {
+            console.warn("Unable to write IndexedDB cache:", error);
+        }
+    }
+
+    async function clearLocalCache(action) {
+        const db = await openLocalCache();
+        if (!db) return;
+
+        try {
+            const transaction = db.transaction(
+                LOCAL_CACHE_STORE,
+                "readwrite"
+            );
+            const store = transaction.objectStore(LOCAL_CACHE_STORE);
+
+            if (action) {
+                store.delete(action);
+            } else {
+                store.clear();
+            }
+        } catch (error) {
+            console.warn("Unable to clear IndexedDB cache:", error);
+        }
+    }
+
+    function isLocalCacheFresh(entry, action) {
+        if (!entry || !entry.response || !entry.response.success) {
+            return false;
+        }
+
+        const ttl = CACHE_TTL[action] || 15000;
+        return Date.now() - Number(entry.savedAt || 0) < ttl;
+    }
+
+    async function refreshSupabaseData(action) {
+        /*
+           This helper performs the actual network request. It is separated
+           from fetchJson so cached data can be returned immediately while a
+           fresh Supabase copy is updated in the background.
+        */
+        const response = await fetchSupabaseData(action);
+        if (response.success) {
+            await writeLocalCache(action, response);
+        }
+        return response;
+    }
+
+    async function fetchSupabaseData(requestKey) {
+        let result;
+
+        if (requestKey === "getOfficers") {
+            result = await supabaseClient
+                .from("officers")
+                .select("username,name,position,status,access_level,auth_user_id")
+                .order("name", { ascending: true });
+            return {
+                success: !result.error,
+                data: (result.data || []).map(mapOfficer),
+                message: result.error ? result.error.message : ""
+            };
+        }
+
+        if (requestKey === "getAvailability") {
+            result = await supabaseClient
+                .from("availability")
+                .select("id,username,officer_name,position,day,time_slot,status")
+                .order("username", { ascending: true })
+                .order("day", { ascending: true })
+                .order("time_slot", { ascending: true });
+            return {
+                success: !result.error,
+                data: (result.data || []).map(mapAvailability),
+                message: result.error ? result.error.message : ""
+            };
+        }
+
+        if (requestKey === "getTasks") {
+            result = await supabaseClient
+                .from("tasks")
+                .select("task_id,task_title,description,assigned_to,assigned_by,due_date,priority,status,created_at,updated_at")
+                .order("due_date", { ascending: true, nullsFirst: false });
+            return {
+                success: !result.error,
+                data: (result.data || []).map(mapTask),
+                message: result.error ? result.error.message : ""
+            };
+        }
+
+        if (requestKey === "getEvents") {
+            result = await supabaseClient
+                .from("events")
+                .select("event_id,title,description,event_date,start_time,end_time,location,type,status,created_by,created_at,updated_at")
+                .order("event_date", { ascending: true, nullsFirst: false })
+                .order("start_time", { ascending: true, nullsFirst: false });
+            return {
+                success: !result.error,
+                data: (result.data || []).map(mapEvent),
+                message: result.error ? result.error.message : ""
+            };
+        }
+
+        if (requestKey === "getMeetings") {
+            result = await supabaseClient
+                .from("meetings")
+                .select("meeting_id,title,meeting_date,start_time,end_time,location,description,created_by,status,created_at,updated_at")
+                .order("meeting_date", { ascending: true, nullsFirst: false })
+                .order("start_time", { ascending: true, nullsFirst: false });
+            return {
+                success: !result.error,
+                data: (result.data || []).map(mapMeeting),
+                message: result.error ? result.error.message : ""
+            };
+        }
+
+        if (requestKey === "getAnnouncements") {
+            result = await supabaseClient
+                .from("announcements")
+                .select("announcement_id,title,message,type,announcement_date,announcement_time,location,posted_by,created_at,updated_at")
+                .order("announcement_date", { ascending: false, nullsFirst: false })
+                .order("announcement_time", { ascending: false, nullsFirst: false });
+            return {
+                success: !result.error,
+                data: (result.data || []).map(mapAnnouncement),
+                message: result.error ? result.error.message : ""
+            };
+        }
+
+        throw new Error("Unsupported data request: " + requestKey);
+    }
+
     async function fetchJson(action) {
         const requestKey = String(action || "").trim();
 
@@ -3569,86 +3799,25 @@ body.dashboard-data-loading .dashboard-content {
                 throw new Error("Supabase is not configured.");
             }
 
-            let result;
+            const cached = await readLocalCache(requestKey);
 
-            if (requestKey === "getOfficers") {
-                result = await supabaseClient
-                    .from("officers")
-                    .select("username,name,position,status,access_level,auth_user_id")
-                    .order("name", { ascending: true });
-                return {
-                    success: !result.error,
-                    data: (result.data || []).map(mapOfficer),
-                    message: result.error ? result.error.message : ""
-                };
+            /*
+               Fresh cache = instant return.
+               A background refresh keeps the shared Supabase data current
+               without making the user wait for the network.
+            */
+            if (isLocalCacheFresh(cached, requestKey)) {
+                refreshSupabaseData(requestKey).catch(function (error) {
+                    console.warn("Background Supabase refresh failed:", error);
+                });
+                return cached.response;
             }
 
-            if (requestKey === "getAvailability") {
-                result = await supabaseClient
-                    .from("availability")
-                    .select("id,username,officer_name,position,day,time_slot,status")
-                    .order("username", { ascending: true })
-                    .order("day", { ascending: true })
-                    .order("time_slot", { ascending: true });
-                return {
-                    success: !result.error,
-                    data: (result.data || []).map(mapAvailability),
-                    message: result.error ? result.error.message : ""
-                };
-            }
-
-            if (requestKey === "getTasks") {
-                result = await supabaseClient
-                    .from("tasks")
-                    .select("task_id,task_title,description,assigned_to,assigned_by,due_date,priority,status,created_at,updated_at")
-                    .order("due_date", { ascending: true, nullsFirst: false });
-                return {
-                    success: !result.error,
-                    data: (result.data || []).map(mapTask),
-                    message: result.error ? result.error.message : ""
-                };
-            }
-
-            if (requestKey === "getEvents") {
-                result = await supabaseClient
-                    .from("events")
-                    .select("event_id,title,description,event_date,start_time,end_time,location,type,status,created_by,created_at,updated_at")
-                    .order("event_date", { ascending: true, nullsFirst: false })
-                    .order("start_time", { ascending: true, nullsFirst: false });
-                return {
-                    success: !result.error,
-                    data: (result.data || []).map(mapEvent),
-                    message: result.error ? result.error.message : ""
-                };
-            }
-
-            if (requestKey === "getMeetings") {
-                result = await supabaseClient
-                    .from("meetings")
-                    .select("meeting_id,title,meeting_date,start_time,end_time,location,description,created_by,status,created_at,updated_at")
-                    .order("meeting_date", { ascending: true, nullsFirst: false })
-                    .order("start_time", { ascending: true, nullsFirst: false });
-                return {
-                    success: !result.error,
-                    data: (result.data || []).map(mapMeeting),
-                    message: result.error ? result.error.message : ""
-                };
-            }
-
-            if (requestKey === "getAnnouncements") {
-                result = await supabaseClient
-                    .from("announcements")
-                    .select("announcement_id,title,message,type,announcement_date,announcement_time,location,posted_by,created_at,updated_at")
-                    .order("announcement_date", { ascending: false, nullsFirst: false })
-                    .order("announcement_time", { ascending: false, nullsFirst: false });
-                return {
-                    success: !result.error,
-                    data: (result.data || []).map(mapAnnouncement),
-                    message: result.error ? result.error.message : ""
-                };
-            }
-
-            throw new Error("Unsupported data request: " + requestKey);
+            /*
+               No usable cache = fetch from Supabase normally, then store the
+               result for the next visit.
+            */
+            return await refreshSupabaseData(requestKey);
         })();
 
         apiInFlightRequests.set(requestKey, requestPromise);
@@ -3683,6 +3852,7 @@ body.dashboard-data-loading .dashboard-content {
             };
             const result = await supabaseClient.from("tasks").insert(payload).select().single();
             if (result.error) throw new Error(result.error.message);
+            await clearLocalCache("getTasks");
             return { success: true, data: mapTask(result.data), message: "Task assigned successfully." };
         }
 
@@ -3694,6 +3864,7 @@ body.dashboard-data-loading .dashboard-content {
                 .select()
                 .single();
             if (result.error) throw new Error(result.error.message);
+            await clearLocalCache("getTasks");
             return { success: true, data: mapTask(result.data), message: "Task status updated successfully." };
         }
 
@@ -3703,6 +3874,7 @@ body.dashboard-data-loading .dashboard-content {
                 .delete()
                 .eq("task_id", data.taskId);
             if (result.error) throw new Error(result.error.message);
+            await clearLocalCache("getTasks");
             return { success: true, message: "Task deleted successfully." };
         }
 
@@ -3722,6 +3894,7 @@ body.dashboard-data-loading .dashboard-content {
             };
             const result = await supabaseClient.from("events").insert(payload).select().single();
             if (result.error) throw new Error(result.error.message);
+            await clearLocalCache("getEvents");
             return { success: true, data: mapEvent(result.data), message: "Activity scheduled successfully." };
         }
 
@@ -3751,6 +3924,7 @@ body.dashboard-data-loading .dashboard-content {
                 if (insertResult.error) throw new Error(insertResult.error.message);
             }
 
+            await clearLocalCache("getAvailability");
             return { success: true, message: "Availability saved successfully." };
         }
 
@@ -3774,6 +3948,7 @@ body.dashboard-data-loading .dashboard-content {
                 result = await supabaseClient.from("announcements").update(payload).eq("announcement_id", announcementId).select().single();
             }
             if (result.error) throw new Error(result.error.message);
+            await clearLocalCache("getAnnouncements");
             return { success: true, data: mapAnnouncement(result.data), message: "Announcement saved successfully." };
         }
 
@@ -3783,6 +3958,7 @@ body.dashboard-data-loading .dashboard-content {
                 .delete()
                 .eq("announcement_id", data.announcementId);
             if (result.error) throw new Error(result.error.message);
+            await clearLocalCache("getAnnouncements");
             return { success: true, message: "Announcement deleted successfully." };
         }
 
