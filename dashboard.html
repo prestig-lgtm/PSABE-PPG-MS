@@ -72,6 +72,26 @@ body.dashboard-data-loading .dashboard-content {
 .task-status-chevron{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#caa654;display:grid;place-items:center;}
 .task-status-chevron svg{width:15px;height:15px;stroke:currentColor;stroke-width:2.5;}
 @media(max-width:720px){.task-status-control{width:100%;}.task-status-select-wrap,.task-status-select-officer{min-width:0;width:100%;}}
+
+.calendar-event-delete-button {
+    margin-top: 14px;
+    border: 1px solid rgba(202, 166, 84, 0.45);
+    background: transparent;
+    color: #caa654;
+    border-radius: 8px;
+    padding: 8px 11px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .04em;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+}
+.calendar-event-delete-button:hover {
+    background: rgba(202, 166, 84, 0.10);
+}
+.calendar-event-delete-button svg { width: 14px; height: 14px; }
 </style>
 </head>
 
@@ -3178,6 +3198,12 @@ body.dashboard-data-loading .dashboard-content {
 
                                 </div>
 
+                                ${IS_STEERING && activity.type === "event" && activity.eventId ? `
+                                    <button type="button" class="calendar-event-delete-button" data-event-id="${escapeHtml(activity.eventId)}">
+                                        <i data-lucide="trash-2"></i> DELETE EVENT
+                                    </button>
+                                ` : ""}
+
                             `;
 
 
@@ -3185,8 +3211,19 @@ body.dashboard-data-loading .dashboard-content {
                                 card
                             );
 
+                            if (IS_STEERING && activity.type === "event" && activity.eventId) {
+                                const deleteButton = card.querySelector(".calendar-event-delete-button");
+                                if (deleteButton) {
+                                    deleteButton.addEventListener("click", function () {
+                                        deleteCalendarEvent(activity.eventId);
+                                    });
+                                }
+                            }
+
                         }
                     );
+
+                    if (window.lucide) lucide.createIcons();
 
                 }
 
@@ -4277,7 +4314,7 @@ body.dashboard-data-loading .dashboard-content {
                 if (status && status !== "active") return;
                 const start = normalize(getRecordValue(event, "Start Time"));
                 const end = normalize(getRecordValue(event, "End Time"));
-                addCalendarActivity(getRecordValue(event, "Date"), {type:"event", title:getRecordValue(event,"Title"), description:getRecordValue(event,"Description") || getRecordValue(event,"Location"), time:start && end ? start + " – " + end : (start || "Scheduled activity")});
+                addCalendarActivity(getRecordValue(event, "Date"), {eventId:getRecordValue(event,"Event ID"), type:"event", title:getRecordValue(event,"Title"), description:getRecordValue(event,"Description") || getRecordValue(event,"Location"), time:start && end ? start + " – " + end : (start || "Scheduled activity")});
             });
             tasks.forEach(function(task) {
                 const assignedTo = normalizeUsername(getRecordValue(task,"Assigned To"));
@@ -4440,6 +4477,28 @@ body.dashboard-data-loading .dashboard-content {
             await loadDashboardData();
             setTimeout(closeScheduleEventModal,500);
         }catch(error){console.error("Activity scheduling error:",error);if(status)status.textContent=error.message||"The activity could not be scheduled.";}finally{if(saveButton)saveButton.disabled=false;}
+    }
+
+    async function deleteCalendarEvent(eventId) {
+        if (!IS_STEERING || !eventId || !window.psabeSupabase) return;
+
+        const confirmed = window.confirm("Delete this event? This action cannot be undone.");
+        if (!confirmed) return;
+
+        try {
+            const { error } = await window.psabeSupabase
+                .from("events")
+                .delete()
+                .eq("event_id", eventId);
+
+            if (error) throw error;
+
+            await loadCalendarData();
+            await loadDashboardData();
+        } catch (error) {
+            console.error("Event deletion error:", error);
+            alert(error.message || "The event could not be deleted.");
+        }
     }
 
     /* =====================================================
