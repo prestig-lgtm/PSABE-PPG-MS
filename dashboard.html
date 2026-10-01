@@ -2497,7 +2497,7 @@ body.dashboard-data-loading .dashboard-content {
                     "click",
                     function (event) {
                         const button = event.target.closest(".selected-activity-delete-button");
-                        if (!button || !IS_STEERING) return;
+                        if (!button || (sessionStorage.getItem("psabeAccessLevel") || "Officer").trim().toLowerCase() !== "steering") return;
 
                         const eventId = button.getAttribute("data-event-id") || "";
                         const card = button.closest(".selected-activity");
@@ -3165,7 +3165,7 @@ body.dashboard-data-loading .dashboard-content {
 
                                 </div>
 
-                                ${IS_STEERING && activity.type === "event" ? `
+                                ${(sessionStorage.getItem("psabeAccessLevel") || "Officer").trim().toLowerCase() === "steering" && activity.type === "event" ? `
                                     <div class="selected-activity-actions">
                                         <button
                                             type="button"
