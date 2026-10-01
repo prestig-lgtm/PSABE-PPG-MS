@@ -3465,9 +3465,19 @@ body.dashboard-data-loading .dashboard-content {
                             confirmLogout
                         ) {
 
-                            await clearLocalCache();
-                            window.location.href =
-                                "index.html";
+                            try {
+                                if (window.psabeSupabase) {
+                                    await window.psabeSupabase.auth.signOut({
+                                        scope: "local"
+                                    });
+                                }
+                            } catch (error) {
+                                console.error("Supabase sign-out error:", error);
+                            } finally {
+                                sessionStorage.clear();
+                                await clearLocalCache();
+                                window.location.replace("index.html");
+                            }
 
                         }
 
