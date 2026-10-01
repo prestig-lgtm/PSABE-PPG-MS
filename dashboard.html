@@ -1879,16 +1879,6 @@ body.dashboard-data-loading .dashboard-content {
 
 
         /* =====================================================
-           ROLE / ACCESS LEVEL
-           Needed by the calendar script before the Supabase/data
-           initialization script runs.
-        ===================================================== */
-
-        const IS_STEERING =
-            (sessionStorage.getItem("psabeAccessLevel") || "Officer").trim().toLowerCase() === "steering";
-
-
-        /* =====================================================
            SAMPLE CALENDAR DATA
         ===================================================== */
 
@@ -3145,7 +3135,7 @@ body.dashboard-data-loading .dashboard-content {
 
                             `;
 
-                            if (IS_STEERING && activity.type === "event" && normalize(activity.eventId)) {
+                            if (sessionStorage.getItem("psabeAccessLevel") === "Steering" && activity.type === "event" && String(activity.eventId == null ? "" : activity.eventId).trim()) {
                                 const deleteButton = document.createElement("button");
                                 deleteButton.type = "button";
                                 deleteButton.className = "calendar-event-delete-button";
@@ -3957,65 +3947,15 @@ body.dashboard-data-loading .dashboard-content {
                 };
             });
 
-            let insertedRows = [];
-
             if (rows.length) {
                 const insertResult = await supabaseClient
                     .from("availability")
-                    .insert(rows)
-                    .select("id,username,officer_name,position,day,time_slot,status");
-
-                if (insertResult.error) {
-                    throw new Error(insertResult.error.message);
-                }
-
-                insertedRows = Array.isArray(insertResult.data)
-                    ? insertResult.data
-                    : [];
-
-                if (insertedRows.length !== rows.length) {
-                    throw new Error(
-                        "Supabase did not confirm all availability rows were saved."
-                    );
-                }
-            }
-
-            // Verify the rows that are actually stored in Supabase.
-            const verifyResult = await supabaseClient
-                .from("availability")
-                .select("id,username,officer_name,position,day,time_slot,status")
-                .eq("username", username);
-
-            if (verifyResult.error) {
-                throw new Error(verifyResult.error.message);
-            }
-
-            const savedRows = Array.isArray(verifyResult.data)
-                ? verifyResult.data
-                : [];
-
-            if (savedRows.length !== rows.length) {
-                throw new Error(
-                    "Availability was not fully saved to Supabase. Expected " +
-                    rows.length +
-                    " row(s), but Supabase returned " +
-                    savedRows.length +
-                    " row(s) for this officer."
-                );
+                    .insert(rows);
+                if (insertResult.error) throw new Error(insertResult.error.message);
             }
 
             await clearLocalCache("getAvailability");
-            await writeLocalCache("getAvailability", {
-                success: true,
-                data: savedRows.map(mapAvailability),
-                message: ""
-            });
-
-            return {
-                success: true,
-                data: savedRows.map(mapAvailability),
-                message: "Availability saved successfully."
-            };
+            return { success: true, message: "Availability saved successfully." };
         }
 
         if (action === "createAnnouncement" || action === "updateAnnouncement") {
