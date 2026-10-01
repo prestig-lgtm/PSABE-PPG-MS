@@ -104,6 +104,25 @@ body.dashboard-data-loading .dashboard-content {
     margin-top: 2px;
 }
 
+.dashboard-my-availability-times {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3px 18px;
+    margin-top: 2px;
+}
+
+.dashboard-my-availability-time-item {
+    display: block;
+    white-space: nowrap;
+    line-height: 1.45;
+}
+
+@media (max-width: 560px) {
+    .dashboard-my-availability-times {
+        grid-template-columns: 1fr;
+    }
+}
+
 .dashboard-available-officer {
     position: relative;
     display: block;
@@ -5472,9 +5491,17 @@ body.dashboard-data-loading .dashboard-content {
         const availabilityValue = document.getElementById("dashboardAvailabilityValue");
         const availabilityLabel = document.getElementById("dashboardAvailabilityLabel");
 
-        const myRanges = [...new Set(myRecords.map(function(record) {
-            return dashboardAvailabilityRangeText(getRecordValue(record, "Time"));
-        }))];
+        const myRanges = [...new Map(myRecords.map(function(record) {
+            const parsed = dashboardParseAvailabilityRange(getRecordValue(record, "Time"));
+            const label = dashboardAvailabilityRangeText(getRecordValue(record, "Time"));
+            return [label, parsed ? parsed.start : Number.MAX_SAFE_INTEGER];
+        })).entries()]
+            .sort(function(a, b) {
+                return a[1] - b[1];
+            })
+            .map(function(entry) {
+                return entry[0];
+            });
 
         const availableOfficers = otherOfficerRecords.map(function(record) {
             const username = normalizeUsername(getRecordValue(record, "Username"));
@@ -5500,9 +5527,15 @@ body.dashboard-data-loading .dashboard-content {
                 : "You are not available";
         }
         if (myTime) {
-            myTime.textContent = myRanges.length
-                ? myRanges.join(" · ")
-                : "No availability saved for today";
+            if (myRanges.length) {
+                myTime.classList.add("dashboard-my-availability-times");
+                myTime.innerHTML = myRanges.map(function(range) {
+                    return '<span class="dashboard-my-availability-time-item">' + escapeHtml(range) + '</span>';
+                }).join("");
+            } else {
+                myTime.classList.remove("dashboard-my-availability-times");
+                myTime.textContent = "No availability saved for today";
+            }
         }
         if (myDot) myDot.classList.toggle("availability-dot-inactive", !myActiveNow.length);
 
