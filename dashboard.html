@@ -69,44 +69,29 @@ body.dashboard-data-loading .dashboard-content {
 .task-status-select-officer:focus{border-color:#caa654;box-shadow:0 0 0 3px rgba(202,166,84,.12);}
 .task-status-select-officer:disabled{opacity:.65;cursor:wait;}
 .task-status-select-officer option{background:#0d342c;color:#fff;font-weight:800;}
-.task-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0;}
-.task-delete-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:34px;padding:0 10px;border:1px solid rgba(164,68,68,.48);border-radius:7px;background:rgba(164,68,68,.12);color:#e59b9b;font-family:inherit;font-size:9px;font-weight:900;letter-spacing:.06em;cursor:pointer;white-space:nowrap;visibility:visible;opacity:1;}
-.task-delete-button:hover{background:rgba(164,68,68,.2);border-color:rgba(229,155,155,.7);color:#ffd0d0;}
-.task-delete-button svg{width:14px;height:14px;stroke-width:2.2;}
-.task-delete-button span{display:inline;}
 .task-status-chevron{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#caa654;display:grid;place-items:center;}
 .task-status-chevron svg{width:15px;height:15px;stroke:currentColor;stroke-width:2.5;}
 @media(max-width:720px){.task-status-control{width:100%;}.task-status-select-wrap,.task-status-select-officer{min-width:0;width:100%;}}
-</style>
-<style>
-.selected-activity-actions {
-    display:flex;
-    justify-content:flex-end;
-    margin-top:14px;
+
+.calendar-event-delete-button {
+    margin-top: 14px;
+    border: 1px solid rgba(202, 166, 84, 0.45);
+    background: transparent;
+    color: #caa654;
+    border-radius: 8px;
+    padding: 8px 11px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .04em;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
 }
-.selected-activity-delete-button {
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:7px;
-    min-height:38px;
-    padding:8px 14px;
-    border:1px solid rgba(255, 90, 90, 0.45);
-    border-radius:8px;
-    background:rgba(255, 90, 90, 0.10);
-    color:#ff8f8f;
-    font-size:12px;
-    font-weight:700;
-    letter-spacing:.05em;
-    cursor:pointer;
+.calendar-event-delete-button:hover {
+    background: rgba(202, 166, 84, 0.10);
 }
-.selected-activity-delete-button:hover {
-    background:rgba(255, 90, 90, 0.18);
-}
-.selected-activity-delete-button svg {
-    width:15px;
-    height:15px;
-}
+.calendar-event-delete-button svg { width: 14px; height: 14px; }
 </style>
 </head>
 
@@ -1892,17 +1877,6 @@ body.dashboard-data-loading .dashboard-content {
 
     <script>
 
-      function escapeHtml(value) {
-          return String(value == null ? "" : value)
-              .replace(/&/g, "&amp;")
-              .replace(/</g, "&lt;")
-              .replace(/>/g, "&gt;")
-              .replace(/\"/g, "&quot;")
-              .replace(/\x27/g, "&#039;");
-      }
-
-
-
 
         /* =====================================================
            SAMPLE CALENDAR DATA
@@ -2211,7 +2185,11 @@ body.dashboard-data-loading .dashboard-content {
                             "calendar"
                         );
 
-                        renderCalendar();
+                        if (typeof window.loadCalendarData === "function") {
+                            window.loadCalendarData();
+                        } else {
+                            renderCalendar();
+                        }
 
                     }
 
@@ -2502,27 +2480,6 @@ body.dashboard-data-loading .dashboard-content {
                     document.getElementById(
                         "selectedActivities"
                     );
-
-
-                selectedActivities.addEventListener(
-                    "click",
-                    function (event) {
-                        const button = event.target.closest(".selected-activity-delete-button");
-                        if (!button || (sessionStorage.getItem("psabeAccessLevel") || "Officer").trim().toLowerCase() !== "steering") return;
-
-                        const eventId = button.getAttribute("data-event-id") || "";
-                        const card = button.closest(".selected-activity");
-                        const titleElement = card ? card.querySelector("h3") : null;
-                        const title = titleElement ? titleElement.textContent.trim() : "Scheduled event";
-
-                        if (!eventId) {
-                            alert("This scheduled event does not have a valid Event ID and cannot be deleted safely.");
-                            return;
-                        }
-
-                        deleteScheduledEvent(eventId, title);
-                    }
-                );
 
 
 
@@ -3156,7 +3113,7 @@ body.dashboard-data-loading .dashboard-content {
                                     ${activity.description}
                                 </p>
 
-                                                <div class="selected-activity-time">
+                                <div class="selected-activity-time">
 
                                     <svg viewBox="0 0 24 24">
 
@@ -3176,22 +3133,18 @@ body.dashboard-data-loading .dashboard-content {
 
                                 </div>
 
-                                ${(sessionStorage.getItem("psabeAccessLevel") || "Officer").trim().toLowerCase() === "steering" && activity.type === "event" ? `
-                                    <div class="selected-activity-actions">
-                                        <button
-                                            type="button"
-                                            class="selected-activity-delete-button"
-                                            data-event-id="${escapeHtml(activity.eventId || "")}"
-                                            aria-label="Delete scheduled event"
-                                        >
-                                            <i data-lucide="trash-2"></i>
-                                            <span>DELETE</span>
-                                        </button>
-                                    </div>
-                                ` : ""}
-
                             `;
 
+                            if (sessionStorage.getItem("psabeAccessLevel") === "Steering" && activity.type === "event" && String(activity.eventId == null ? "" : activity.eventId).trim()) {
+                                const deleteButton = document.createElement("button");
+                                deleteButton.type = "button";
+                                deleteButton.className = "calendar-event-delete-button";
+                                deleteButton.innerHTML = '<i data-lucide="trash-2"></i><span>DELETE EVENT</span>';
+                                deleteButton.addEventListener("click", function () {
+                                    window.deleteCalendarEvent(activity.eventId);
+                                });
+                                card.appendChild(deleteButton);
+                            }
 
                             selectedActivities.appendChild(
                                 card
@@ -3328,7 +3281,7 @@ body.dashboard-data-loading .dashboard-content {
 
                 logoutButton.addEventListener(
                     "click",
-                    function () {
+                    async function () {
 
                         const confirmLogout =
                             confirm(
@@ -3340,6 +3293,7 @@ body.dashboard-data-loading .dashboard-content {
                             confirmLogout
                         ) {
 
+                            await clearLocalCache();
                             window.location.href =
                                 "index.html";
 
@@ -3359,7 +3313,7 @@ body.dashboard-data-loading .dashboard-content {
 <script>
 /* =========================================================
    AVAILABLE OFFICERS
-   Google Sheets integrated version
+   Supabase integrated version
    UI/HTML structure intentionally preserved.
 ========================================================= */
 (function () {
@@ -3375,469 +3329,677 @@ body.dashboard-data-loading .dashboard-content {
 
 
     /* =====================================================
-       GOOGLE APPS SCRIPT SETTINGS
+       SUPABASE SETTINGS
+       The publishable/anon key is intended for browser use.
+       Never place the service_role key in this file.
     ===================================================== */
 
-    /* Google Apps Script data access removed. Dashboard data now uses Supabase. */
+    const SUPABASE_URL = "https://dwzcyupoenjafgtdijla.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_s4VaYFDHxE3I9jgK2reWHw_zQ8VPVwd";
+
+    const supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY,
+        {
+            auth: {
+                persistSession: false,
+                autoRefreshToken: false,
+                detectSessionInUrl: false
+            }
+        }
+    );
+
+    /* =====================================================
+       ROLE / ACCESS LEVEL
+       Steering       = management access
+       Committee Head = regular access for now
+       Officer        = regular access
+    ===================================================== */
+
+    const CURRENT_ACCESS_LEVEL =
+        (sessionStorage.getItem("psabeAccessLevel") || "Officer").trim();
+
+    const IS_STEERING =
+        CURRENT_ACCESS_LEVEL.toLowerCase() === "steering";
+
+    const IS_COMMITTEE_HEAD =
+        CURRENT_ACCESS_LEVEL.toLowerCase() === "committee head";
+
+    const IS_OFFICER =
+        CURRENT_ACCESS_LEVEL.toLowerCase() === "officer";
+
+    const CURRENT_USERNAME =
+        sessionStorage.getItem("psabeUsername") || "Mac";
 
 
     /* =====================================================
-       SUPABASE OFFICER / AVAILABILITY / ANNOUNCEMENT HELPERS
+       AVAILABILITY SETTINGS
     ===================================================== */
-    function ensureSupabaseDashboard() {
-        if (!supabaseClient) {
-            throw new Error("Supabase could not be initialized. Please check the Supabase client library.");
-        }
-        return supabaseClient;
+
+    const timeSlots = [
+        "7:00 AM - 7:30 AM",
+        "7:30 AM - 8:00 AM",
+        "8:00 AM - 8:30 AM",
+        "8:30 AM - 9:00 AM",
+        "9:00 AM - 9:30 AM",
+        "9:30 AM - 10:00 AM",
+        "10:00 AM - 10:30 AM",
+        "10:30 AM - 11:00 AM",
+        "11:00 AM - 11:30 AM",
+        "11:30 AM - 12:00 NN",
+        "12:00 NN - 12:30 PM",
+        "12:30 PM - 1:00 PM",
+        "1:00 PM - 1:30 PM",
+        "1:30 PM - 2:00 PM",
+        "2:00 PM - 2:30 PM",
+        "2:30 PM - 3:00 PM",
+        "3:00 PM - 3:30 PM",
+        "3:30 PM - 4:00 PM",
+        "4:00 PM - 4:30 PM",
+        "4:30 PM - 5:00 PM",
+        "5:00 PM - 5:30 PM",
+        "5:30 PM - 6:00 PM",
+        "6:00 PM - 6:30 PM",
+        "6:30 PM - 7:00 PM",
+        "7:00 PM - 7:30 PM"
+    ];
+
+    const days = [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri"
+    ];
+
+
+    /* =====================================================
+       DATA
+    ===================================================== */
+
+    let officerAvailability = {};
+    let availabilityRecords = [];
+    let officersData = [];
+    let currentOfficer = {
+        Username: CURRENT_USERNAME,
+        Name:
+            sessionStorage.getItem("psabeName") ||
+            "MC RJ Escote",
+        Position:
+            sessionStorage.getItem("psabePosition") ||
+            "Vice President",
+        Status:
+            sessionStorage.getItem("psabeStatus") ||
+            "Active"
+    };
+
+    let myAvailability = {};
+
+
+    /* =====================================================
+       HELPERS
+    ===================================================== */
+
+    function normalize(value) {
+        return String(value == null ? "" : value).trim();
     }
 
-    function mapSupabaseOfficer(row) {
+    function normalizeUsername(value) {
+        return normalize(value).toLowerCase();
+    }
+
+    function isCurrentOfficer(value) {
+        const candidate = normalizeUsername(value);
+        if (!candidate) return false;
+
+        const username = normalizeUsername(CURRENT_USERNAME);
+        const name = normalizeUsername(currentOfficer && currentOfficer.Name);
+
+        return candidate === username || (name && candidate === name);
+    }
+
+    function normalizeDay(value) {
+        return normalize(value).toLowerCase();
+    }
+
+    function normalizeTime(value) {
+        return normalize(value)
+            .replace(/[–—−-]/g, "–")
+            .replace(/\s+/g, "")
+            .toUpperCase();
+    }
+
+    function getRecordValue(record, key) {
+        if (!record || typeof record !== "object") return "";
+
+        if (Object.prototype.hasOwnProperty.call(record, key)) {
+            return record[key];
+        }
+
+        const target = String(key).trim().toLowerCase();
+        const foundKey = Object.keys(record).find(function (item) {
+            return String(item).trim().toLowerCase() === target;
+        });
+
+        return foundKey ? record[foundKey] : "";
+    }
+
+    function isApiConfigured() {
+        return Boolean(
+            SUPABASE_URL &&
+            SUPABASE_PUBLISHABLE_KEY &&
+            supabaseClient
+        );
+    }
+
+    /* =====================================================
+       SUPABASE DATA COMPATIBILITY LAYER
+       The existing UI still uses the old Google-Sheets-style
+       field names. Supabase rows are mapped here so the UI
+       does not need to be redesigned.
+    ===================================================== */
+
+    const apiInFlightRequests = new Map();
+
+    function mapOfficer(row) {
         return {
-            Username: row.username || "",
-            Name: row.name || "",
-            Position: row.position || "",
-            Status: row.status || "Active",
-            "Access Level": row.access_level || "Officer"
+            Username: row.username,
+            Name: row.name,
+            Position: row.position,
+            Status: row.status,
+            "Access Level": row.access_level,
+            auth_user_id: row.auth_user_id
         };
     }
 
-    let supabaseOfficersCache = null;
-    let supabaseOfficersRequest = null;
-    async function getSupabaseOfficers(forceRefresh) {
-        const client = ensureSupabaseDashboard();
-        const force = forceRefresh === true;
-        if (!force && Array.isArray(supabaseOfficersCache)) return supabaseOfficersCache.slice();
-        if (!force && supabaseOfficersRequest) return supabaseOfficersRequest;
-        supabaseOfficersRequest = client
-            .from("officers")
-            .select("username,name,position,status,access_level")
-            .order("name", { ascending: true })
-            .then(function(result) {
-                if (result.error) throw new Error(result.error.message || "Officers could not be loaded from Supabase.");
-                const mapped = Array.isArray(result.data) ? result.data.map(mapSupabaseOfficer) : [];
-                supabaseOfficersCache = mapped;
-                return mapped.slice();
-            })
-            .finally(function() { supabaseOfficersRequest = null; });
-        return supabaseOfficersRequest;
-    }
-    function invalidateSupabaseOfficersCache() { supabaseOfficersCache = null; }
-
-    function mapSupabaseAvailability(row) {
+    function mapAvailability(row) {
         return {
             id: row.id,
-            Username: row.username || "",
-            "Officer Name": row.officer_name || "",
-            Position: row.position || "",
-            Day: row.day || "",
-            Time: row.time_slot || "",
-            Status: row.status || "Available"
+            Username: row.username,
+            "Officer Name": row.officer_name,
+            Position: row.position,
+            Day: row.day,
+            Time: row.time_slot,
+            Status: row.status
         };
     }
 
-    let supabaseAvailabilityCache = null;
-    let supabaseAvailabilityRequest = null;
-    async function getSupabaseAvailability(forceRefresh) {
-        const client = ensureSupabaseDashboard();
-        const force = forceRefresh === true;
-        if (!force && Array.isArray(supabaseAvailabilityCache)) return supabaseAvailabilityCache.slice();
-        if (!force && supabaseAvailabilityRequest) return supabaseAvailabilityRequest;
-        supabaseAvailabilityRequest = client
-            .from("availability")
-            .select("id,username,officer_name,position,day,time_slot,status")
-            .order("id", { ascending: true })
-            .then(function(result) {
-                if (result.error) throw new Error(result.error.message || "Availability could not be loaded from Supabase.");
-                const mapped = Array.isArray(result.data) ? result.data.map(mapSupabaseAvailability) : [];
-                supabaseAvailabilityCache = mapped;
-                return mapped.slice();
-            })
-            .finally(function() { supabaseAvailabilityRequest = null; });
-        return supabaseAvailabilityRequest;
-    }
-    function invalidateSupabaseAvailabilityCache() { supabaseAvailabilityCache = null; }
-
-    function mapSupabaseAnnouncement(row) {
+    function mapTask(row) {
         return {
-            "Announcement ID": row.announcement_id || "",
-            Title: row.title || "",
-            Message: row.message || "",
-            Type: row.type || "Announcement",
-            Date: row.announcement_date || "",
-            Time: row.announcement_time || "",
-            Location: row.location || "",
-            "Posted By": row.posted_by || "",
+            "Task ID": row.task_id,
+            "Task Title": row.task_title,
+            Description: row.description,
+            "Assigned To": row.assigned_to,
+            "Assigned By": row.assigned_by,
+            "Due Date": row.due_date,
+            Priority: row.priority,
+            Status: row.status,
+            "Created At": row.created_at,
+            "Updated At": row.updated_at
+        };
+    }
+
+    function mapEvent(row) {
+        return {
+            "Event ID": row.event_id,
+            Title: row.title,
+            Description: row.description,
+            Date: row.event_date,
+            "Start Time": row.start_time,
+            "End Time": row.end_time,
+            Location: row.location,
+            Type: row.type,
+            Status: row.status,
+            "Created By": row.created_by,
+            "Created At": row.created_at,
+            "Updated At": row.updated_at
+        };
+    }
+
+    function mapMeeting(row) {
+        return {
+            "Meeting ID": row.meeting_id,
+            Title: row.title,
+            Date: row.meeting_date,
+            "Start Time": row.start_time,
+            "End Time": row.end_time,
+            Location: row.location,
+            Description: row.description,
+            "Created By": row.created_by,
+            Status: row.status,
+            "Created At": row.created_at,
+            "Updated At": row.updated_at
+        };
+    }
+
+    function mapAnnouncement(row) {
+        return {
+            "Announcement ID": row.announcement_id,
+            Title: row.title,
+            Message: row.message,
+            Type: row.type,
+            Date: row.announcement_date,
+            Time: row.announcement_time,
+            Location: row.location,
+            "Posted By": row.posted_by,
             Status: "Active",
-            "Created At": row.created_at || "",
-            "Updated At": row.updated_at || ""
+            "Created At": row.created_at,
+            "Updated At": row.updated_at
         };
-    }
-
-    let supabaseAnnouncementsCache = null;
-    let supabaseAnnouncementsRequest = null;
-    async function getSupabaseAnnouncements(forceRefresh) {
-        const client = ensureSupabaseDashboard();
-        const force = forceRefresh === true;
-        if (!force && Array.isArray(supabaseAnnouncementsCache)) return supabaseAnnouncementsCache.slice();
-        if (!force && supabaseAnnouncementsRequest) return supabaseAnnouncementsRequest;
-        supabaseAnnouncementsRequest = client
-            .from("announcements")
-            .select("*")
-            .order("announcement_date", { ascending: false, nullsFirst: false })
-            .order("announcement_time", { ascending: false, nullsFirst: false })
-            .order("created_at", { ascending: false })
-            .then(function(result) {
-                if (result.error) throw new Error(result.error.message || "Announcements could not be loaded from Supabase.");
-                const mapped = Array.isArray(result.data) ? result.data.map(mapSupabaseAnnouncement) : [];
-                supabaseAnnouncementsCache = mapped;
-                return mapped.slice();
-            })
-            .finally(function() { supabaseAnnouncementsRequest = null; });
-        return supabaseAnnouncementsRequest;
-    }
-    function invalidateSupabaseAnnouncementsCache() { supabaseAnnouncementsCache = null; }
-    function generateAnnouncementId() {
-        const now = new Date();
-        const pad = function(value) { return String(value).padStart(2, "0"); };
-        const stamp = now.getFullYear() + pad(now.getMonth()+1) + pad(now.getDate()) + "-" + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
-        return "ANN-" + stamp + "-" + Math.random().toString(36).slice(2,8).toUpperCase();
-    }
-    async function createSupabaseAnnouncement(data) {
-        const client = ensureSupabaseDashboard();
-        const row = {
-            announcement_id: generateAnnouncementId(),
-            title: data.title,
-            message: data.message,
-            type: data.type || "Announcement",
-            announcement_date: data.date || null,
-            announcement_time: data.time || null,
-            location: data.location || null,
-            posted_by: CURRENT_USERNAME
-        };
-        const { data: inserted, error } = await client.from("announcements").insert(row).select("*").single();
-        if (error) throw new Error(error.message || "The announcement could not be created.");
-        invalidateSupabaseAnnouncementsCache();
-        return mapSupabaseAnnouncement(inserted);
-    }
-    async function updateSupabaseAnnouncement(id, data) {
-        const client = ensureSupabaseDashboard();
-        const row = {
-            title: data.title,
-            message: data.message,
-            type: data.type || "Announcement",
-            announcement_date: data.date || null,
-            announcement_time: data.time || null,
-            location: data.location || null,
-            updated_at: new Date().toISOString()
-        };
-        const { data: updated, error } = await client.from("announcements").update(row).eq("announcement_id", id).select("*").single();
-        if (error) throw new Error(error.message || "The announcement could not be updated.");
-        invalidateSupabaseAnnouncementsCache();
-        return mapSupabaseAnnouncement(updated);
-    }
-    async function deleteSupabaseAnnouncement(id) {
-        const client = ensureSupabaseDashboard();
-        const { data, error } = await client.from("announcements").delete().eq("announcement_id", id).select("announcement_id").maybeSingle();
-        if (error) throw new Error(error.message || "The announcement could not be deleted.");
-        if (!data) throw new Error("The announcement could not be deleted or was not found.");
-        invalidateSupabaseAnnouncementsCache();
-        return true;
     }
 
     /* =====================================================
-       SUPABASE TASK HELPERS
+       INDEXEDDB LOCAL CACHE
+       Supabase remains the central/shared database.
+       IndexedDB only stores a short-lived local copy so the
+       dashboard can render immediately on repeat visits.
     ===================================================== */
 
-    function ensureSupabaseTasks() {
-        if (!supabaseClient) {
-            throw new Error("Supabase could not be initialized. Please check the Supabase client library.");
+    const LOCAL_CACHE_DB = "PSABE_PPG_Management_Cache";
+    const LOCAL_CACHE_STORE = "data";
+    const LOCAL_CACHE_VERSION = 1;
+
+    const CACHE_TTL = {
+        getOfficers: 60000,
+        getAvailability: 15000,
+        getTasks: 10000,
+        getEvents: 10000,
+        getMeetings: 15000,
+        getAnnouncements: 10000
+    };
+
+    let localCacheDbPromise = null;
+
+    function openLocalCache() {
+        if (localCacheDbPromise) return localCacheDbPromise;
+
+        localCacheDbPromise = new Promise(function (resolve, reject) {
+            if (!window.indexedDB) {
+                resolve(null);
+                return;
+            }
+
+            const request = window.indexedDB.open(
+                LOCAL_CACHE_DB,
+                LOCAL_CACHE_VERSION
+            );
+
+            request.onupgradeneeded = function (event) {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains(LOCAL_CACHE_STORE)) {
+                    db.createObjectStore(LOCAL_CACHE_STORE, {
+                        keyPath: "action"
+                    });
+                }
+            };
+
+            request.onsuccess = function () {
+                resolve(request.result);
+            };
+
+            request.onerror = function () {
+                console.warn("IndexedDB cache unavailable:", request.error);
+                resolve(null);
+            };
+        });
+
+        return localCacheDbPromise;
+    }
+
+    async function readLocalCache(action) {
+        const db = await openLocalCache();
+        if (!db) return null;
+
+        return new Promise(function (resolve) {
+            try {
+                const transaction = db.transaction(
+                    LOCAL_CACHE_STORE,
+                    "readonly"
+                );
+                const store = transaction.objectStore(LOCAL_CACHE_STORE);
+                const request = store.get(action);
+
+                request.onsuccess = function () {
+                    resolve(request.result || null);
+                };
+
+                request.onerror = function () {
+                    resolve(null);
+                };
+            } catch (error) {
+                resolve(null);
+            }
+        });
+    }
+
+    async function writeLocalCache(action, response) {
+        const db = await openLocalCache();
+        if (!db || !response || !response.success) return;
+
+        try {
+            const transaction = db.transaction(
+                LOCAL_CACHE_STORE,
+                "readwrite"
+            );
+            transaction.objectStore(LOCAL_CACHE_STORE).put({
+                action: action,
+                savedAt: Date.now(),
+                response: response
+            });
+        } catch (error) {
+            console.warn("Unable to write IndexedDB cache:", error);
         }
-        return supabaseClient;
     }
 
-    function mapSupabaseTask(row) {
-        return {
-            "Task ID": row.task_id || "",
-            "Task Title": row.task_title || "",
-            "Description": row.description || "",
-            "Assigned To": row.assigned_to || "",
-            "Assigned By": row.assigned_by || "",
-            "Due Date": row.due_date || "",
-            "Priority": row.priority || "Normal",
-            "Status": row.status || "Pending",
-            "Created At": row.created_at || "",
-            "Updated At": row.updated_at || ""
-        };
+    async function clearLocalCache(action) {
+        const db = await openLocalCache();
+        if (!db) return;
+
+        try {
+            const transaction = db.transaction(
+                LOCAL_CACHE_STORE,
+                "readwrite"
+            );
+            const store = transaction.objectStore(LOCAL_CACHE_STORE);
+
+            if (action) {
+                store.delete(action);
+            } else {
+                store.clear();
+            }
+        } catch (error) {
+            console.warn("Unable to clear IndexedDB cache:", error);
+        }
     }
 
-    let supabaseTasksCache = null;
-    let supabaseTasksRequest = null;
+    function isLocalCacheFresh(entry, action) {
+        if (!entry || !entry.response || !entry.response.success) {
+            return false;
+        }
 
-    async function getSupabaseTasks(forceRefresh) {
-        const client = ensureSupabaseTasks();
-        const force = forceRefresh === true;
+        const ttl = CACHE_TTL[action] || 15000;
+        return Date.now() - Number(entry.savedAt || 0) < ttl;
+    }
 
+    async function refreshSupabaseData(action) {
         /*
-           Several parts of the dashboard request tasks during startup.
-           Share the same in-flight request and reuse the result so the
-           initial page does not wait for three separate task queries.
+           This helper performs the actual network request. It is separated
+           from fetchJson so cached data can be returned immediately while a
+           fresh Supabase copy is updated in the background.
         */
-        if (!force && Array.isArray(supabaseTasksCache)) {
-            return supabaseTasksCache.slice();
+        const response = await fetchSupabaseData(action);
+        if (response.success) {
+            await writeLocalCache(action, response);
+        }
+        return response;
+    }
+
+    async function fetchSupabaseData(requestKey) {
+        let result;
+
+        if (requestKey === "getOfficers") {
+            result = await supabaseClient
+                .from("officers")
+                .select("username,name,position,status,access_level,auth_user_id")
+                .order("name", { ascending: true });
+            return {
+                success: !result.error,
+                data: (result.data || []).map(mapOfficer),
+                message: result.error ? result.error.message : ""
+            };
         }
 
-        if (!force && supabaseTasksRequest) {
-            return supabaseTasksRequest;
+        if (requestKey === "getAvailability") {
+            result = await supabaseClient
+                .from("availability")
+                .select("id,username,officer_name,position,day,time_slot,status")
+                .order("username", { ascending: true })
+                .order("day", { ascending: true })
+                .order("time_slot", { ascending: true });
+            return {
+                success: !result.error,
+                data: (result.data || []).map(mapAvailability),
+                message: result.error ? result.error.message : ""
+            };
         }
 
-        supabaseTasksRequest = client
-            .from("tasks")
-            .select("*")
-            .order("due_date", { ascending: true, nullsFirst: false })
-            .order("created_at", { ascending: false })
-            .then(function(result) {
-                if (result.error) {
-                    throw new Error(result.error.message || "Tasks could not be loaded from Supabase.");
-                }
+        if (requestKey === "getTasks") {
+            result = await supabaseClient
+                .from("tasks")
+                .select("task_id,task_title,description,assigned_to,assigned_by,due_date,priority,status,created_at,updated_at")
+                .order("due_date", { ascending: true, nullsFirst: false });
+            return {
+                success: !result.error,
+                data: (result.data || []).map(mapTask),
+                message: result.error ? result.error.message : ""
+            };
+        }
 
-                const mapped = Array.isArray(result.data)
-                    ? result.data.map(mapSupabaseTask)
-                    : [];
+        if (requestKey === "getEvents") {
+            result = await supabaseClient
+                .from("events")
+                .select("event_id,title,description,event_date,start_time,end_time,location,type,status,created_by,created_at,updated_at")
+                .order("event_date", { ascending: true, nullsFirst: false })
+                .order("start_time", { ascending: true, nullsFirst: false });
+            return {
+                success: !result.error,
+                data: (result.data || []).map(mapEvent),
+                message: result.error ? result.error.message : ""
+            };
+        }
 
-                supabaseTasksCache = mapped;
-                return mapped.slice();
-            })
-            .finally(function() {
-                supabaseTasksRequest = null;
+        if (requestKey === "getMeetings") {
+            result = await supabaseClient
+                .from("meetings")
+                .select("meeting_id,title,meeting_date,start_time,end_time,location,description,created_by,status,created_at,updated_at")
+                .order("meeting_date", { ascending: true, nullsFirst: false })
+                .order("start_time", { ascending: true, nullsFirst: false });
+            return {
+                success: !result.error,
+                data: (result.data || []).map(mapMeeting),
+                message: result.error ? result.error.message : ""
+            };
+        }
+
+        if (requestKey === "getAnnouncements") {
+            result = await supabaseClient
+                .from("announcements")
+                .select("announcement_id,title,message,type,announcement_date,announcement_time,location,posted_by,created_at,updated_at")
+                .order("announcement_date", { ascending: false, nullsFirst: false })
+                .order("announcement_time", { ascending: false, nullsFirst: false });
+            return {
+                success: !result.error,
+                data: (result.data || []).map(mapAnnouncement),
+                message: result.error ? result.error.message : ""
+            };
+        }
+
+        throw new Error("Unsupported data request: " + requestKey);
+    }
+
+    async function fetchJson(action) {
+        const requestKey = String(action || "").trim();
+
+        if (apiInFlightRequests.has(requestKey)) {
+            return apiInFlightRequests.get(requestKey);
+        }
+
+        const requestPromise = (async function () {
+            if (!isApiConfigured()) {
+                throw new Error("Supabase is not configured.");
+            }
+
+            const cached = await readLocalCache(requestKey);
+
+            /*
+               Fresh cache = instant return.
+               A background refresh keeps the shared Supabase data current
+               without making the user wait for the network.
+            */
+            if (isLocalCacheFresh(cached, requestKey)) {
+                refreshSupabaseData(requestKey).catch(function (error) {
+                    console.warn("Background Supabase refresh failed:", error);
+                });
+                return cached.response;
+            }
+
+            /*
+               No usable cache = fetch from Supabase normally, then store the
+               result for the next visit.
+            */
+            return await refreshSupabaseData(requestKey);
+        })();
+
+        apiInFlightRequests.set(requestKey, requestPromise);
+
+        try {
+            const response = await requestPromise;
+            if (!response.success) {
+                throw new Error(response.message || "Supabase request failed.");
+            }
+            return response;
+        } finally {
+            apiInFlightRequests.delete(requestKey);
+        }
+    }
+
+    async function supabaseAction(action, data) {
+        if (!isApiConfigured()) {
+            throw new Error("Supabase is not configured.");
+        }
+
+        if (action === "createTask") {
+            const taskId = "TSK-" + Date.now().toString(36).toUpperCase() + "-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+            const payload = {
+                task_id: taskId,
+                task_title: data.title,
+                description: data.description || null,
+                assigned_to: data.assignedTo || null,
+                assigned_by: data.assignedBy || CURRENT_USERNAME,
+                due_date: data.dueDate || null,
+                priority: data.priority || "Normal",
+                status: "Pending"
+            };
+            const result = await supabaseClient.from("tasks").insert(payload).select().single();
+            if (result.error) throw new Error(result.error.message);
+            await clearLocalCache("getTasks");
+            return { success: true, data: mapTask(result.data), message: "Task assigned successfully." };
+        }
+
+        if (action === "updateTaskStatus") {
+            const result = await supabaseClient
+                .from("tasks")
+                .update({ status: data.status, updated_at: new Date().toISOString() })
+                .eq("task_id", data.taskId)
+                .select()
+                .single();
+            if (result.error) throw new Error(result.error.message);
+            await clearLocalCache("getTasks");
+            return { success: true, data: mapTask(result.data), message: "Task status updated successfully." };
+        }
+
+        if (action === "deleteTask") {
+            const result = await supabaseClient
+                .from("tasks")
+                .delete()
+                .eq("task_id", data.taskId);
+            if (result.error) throw new Error(result.error.message);
+            await clearLocalCache("getTasks");
+            return { success: true, message: "Task deleted successfully." };
+        }
+
+        if (action === "saveEvent") {
+            const eventId = "EVT-" + new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
+            const payload = {
+                event_id: eventId,
+                title: data.title,
+                description: data.description || null,
+                event_date: data.date || null,
+                start_time: data.startTime || null,
+                end_time: data.endTime || null,
+                location: data.location || null,
+                type: data.type || "Event",
+                status: "Active",
+                created_by: data.createdBy || CURRENT_USERNAME
+            };
+            const result = await supabaseClient.from("events").insert(payload).select().single();
+            if (result.error) throw new Error(result.error.message);
+            await clearLocalCache("getEvents");
+            return { success: true, data: mapEvent(result.data), message: "Activity scheduled successfully." };
+        }
+
+        if (action === "saveAvailability") {
+            const username = data.username || CURRENT_USERNAME;
+            const deleteResult = await supabaseClient
+                .from("availability")
+                .delete()
+                .eq("username", username);
+            if (deleteResult.error) throw new Error(deleteResult.error.message);
+
+            const rows = (data.records || []).map(function (record) {
+                return {
+                    username: username,
+                    officer_name: data.officerName || currentOfficer.Name || "",
+                    position: data.position || currentOfficer.Position || "",
+                    day: record.day,
+                    time_slot: record.time,
+                    status: "Available"
+                };
             });
 
-        return supabaseTasksRequest;
-    }
+            if (rows.length) {
+                const insertResult = await supabaseClient
+                    .from("availability")
+                    .insert(rows);
+                if (insertResult.error) throw new Error(insertResult.error.message);
+            }
 
-    function invalidateSupabaseTasksCache() {
-        supabaseTasksCache = null;
-    }
-
-    function generateTaskId() {
-        const now = new Date();
-        const pad = function(value) { return String(value).padStart(2, "0"); };
-        const stamp = now.getFullYear() + pad(now.getMonth() + 1) + pad(now.getDate()) + "-" +
-            pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
-        const randomPart = Math.random().toString(36).slice(2, 8).toUpperCase();
-        return "TASK-" + stamp + "-" + randomPart;
-    }
-
-    async function createSupabaseTask(taskData) {
-        const client = ensureSupabaseTasks();
-        const row = {
-            task_id: generateTaskId(),
-            task_title: taskData.title,
-            description: taskData.description || null,
-            assigned_to: taskData.assignedTo,
-            assigned_by: CURRENT_USERNAME,
-            due_date: taskData.dueDate || null,
-            priority: taskData.priority || "Normal",
-            status: "Pending"
-        };
-
-        const { data, error } = await client
-            .from("tasks")
-            .insert(row)
-            .select("*")
-            .single();
-
-        if (error) {
-            throw new Error(error.message || "The task could not be created.");
+            await clearLocalCache("getAvailability");
+            return { success: true, message: "Availability saved successfully." };
         }
 
-        invalidateSupabaseTasksCache();
-        return mapSupabaseTask(data);
-    }
-
-    async function updateSupabaseTaskStatus(taskId, statusValue) {
-        const client = ensureSupabaseTasks();
-        const allowedStatuses = ["In Progress", "For Checking", "Completed"];
-        if (!allowedStatuses.includes(statusValue)) {
-            throw new Error("Invalid task status.");
-        }
-
-        const { data, error } = await client
-            .from("tasks")
-            .update({
-                status: statusValue,
+        if (action === "createAnnouncement" || action === "updateAnnouncement") {
+            const announcementId = data.announcementId || ("ANN-" + new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14));
+            const payload = {
+                announcement_id: announcementId,
+                title: data.title,
+                message: data.message,
+                type: data.type || "Announcement",
+                announcement_date: data.date || null,
+                announcement_time: data.time || null,
+                location: data.location || null,
+                posted_by: data.username || CURRENT_USERNAME,
                 updated_at: new Date().toISOString()
-            })
-            .eq("task_id", taskId)
-            .eq("assigned_to", CURRENT_USERNAME)
-            .select("*")
-            .maybeSingle();
-
-        if (error) {
-            throw new Error(error.message || "Task status could not be updated.");
+            };
+            let result;
+            if (action === "createAnnouncement") {
+                result = await supabaseClient.from("announcements").insert(payload).select().single();
+            } else {
+                result = await supabaseClient.from("announcements").update(payload).eq("announcement_id", announcementId).select().single();
+            }
+            if (result.error) throw new Error(result.error.message);
+            await clearLocalCache("getAnnouncements");
+            return { success: true, data: mapAnnouncement(result.data), message: "Announcement saved successfully." };
         }
-        if (!data) {
-            throw new Error("The task could not be updated. You may not be the assigned officer for this task.");
+
+        if (action === "deleteAnnouncement") {
+            const result = await supabaseClient
+                .from("announcements")
+                .delete()
+                .eq("announcement_id", data.announcementId);
+            if (result.error) throw new Error(result.error.message);
+            await clearLocalCache("getAnnouncements");
+            return { success: true, message: "Announcement deleted successfully." };
         }
 
-        invalidateSupabaseTasksCache();
-        return mapSupabaseTask(data);
+        throw new Error("Unsupported database action: " + action);
     }
 
-    async function deleteSupabaseTask(taskId) {
-        const client = ensureSupabaseTasks();
-        const { data, error } = await client
-            .from("tasks")
-            .delete()
-            .eq("task_id", taskId)
-            .select("task_id")
-            .maybeSingle();
-
-        if (error) {
-            throw new Error(error.message || "Task could not be deleted.");
-        }
-        if (!data) {
-            throw new Error("The task could not be deleted. Only the officer who assigned it can delete it.");
-        }
-
-        invalidateSupabaseTasksCache();
-        return true;
-    }
-
-    /* =====================================================
-       SUPABASE EVENT HELPERS
-       Events are stored in public.events.
-    ===================================================== */
-
-    function ensureSupabaseEvents() {
-        if (!supabaseClient) {
-            throw new Error("Supabase could not be initialized. Please check the Supabase client library.");
-        }
-        return supabaseClient;
-    }
-
-    function mapSupabaseEvent(row) {
-        return {
-            "Event ID": row.event_id || "",
-            "Title": row.title || "",
-            "Description": row.description || "",
-            "Date": row.event_date || "",
-            "Start Time": row.start_time || "",
-            "End Time": row.end_time || "",
-            "Location": row.location || "",
-            "Type": row.type || "Event",
-            "Status": row.status || "Active",
-            "Created By": row.created_by || "",
-            "Created At": row.created_at || "",
-            "Updated At": row.updated_at || ""
-        };
-    }
-
-    let supabaseEventsCache = null;
-    let supabaseEventsRequest = null;
-
-    async function getSupabaseEvents(forceRefresh) {
-        const client = ensureSupabaseEvents();
-        const force = forceRefresh === true;
-
-        if (!force && Array.isArray(supabaseEventsCache)) {
-            return supabaseEventsCache.slice();
-        }
-
-        if (!force && supabaseEventsRequest) {
-            return supabaseEventsRequest;
-        }
-
-        supabaseEventsRequest = client
-            .from("events")
-            .select("*")
-            .order("event_date", { ascending: true, nullsFirst: false })
-            .order("start_time", { ascending: true, nullsFirst: false })
-            .then(function(result) {
-                if (result.error) {
-                    throw new Error(result.error.message || "Events could not be loaded from Supabase.");
-                }
-
-                const mapped = Array.isArray(result.data)
-                    ? result.data.map(mapSupabaseEvent)
-                    : [];
-
-                supabaseEventsCache = mapped;
-                return mapped.slice();
-            })
-            .finally(function() {
-                supabaseEventsRequest = null;
-            });
-
-        return supabaseEventsRequest;
-    }
-
-    function invalidateSupabaseEventsCache() {
-        supabaseEventsCache = null;
-    }
-
-    function generateEventId() {
-        const now = new Date();
-        const pad = function(value) { return String(value).padStart(2, "0"); };
-        const stamp = now.getFullYear() + pad(now.getMonth() + 1) + pad(now.getDate()) + "-" +
-            pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
-        const randomPart = Math.random().toString(36).slice(2, 8).toUpperCase();
-        return "EVENT-" + stamp + "-" + randomPart;
-    }
-
-    async function createSupabaseEvent(eventData) {
-        const client = ensureSupabaseEvents();
-        const row = {
-            event_id: generateEventId(),
-            title: eventData.title,
-            description: eventData.description || null,
-            event_date: eventData.date || null,
-            start_time: eventData.startTime || null,
-            end_time: eventData.endTime || null,
-            location: eventData.location || null,
-            type: eventData.type || "Event",
-            status: "Active",
-            created_by: CURRENT_USERNAME
-        };
-
-        const { data, error } = await client
-            .from("events")
-            .insert(row)
-            .select("*")
-            .single();
-
-        if (error) {
-            throw new Error(error.message || "The event could not be created.");
-        }
-
-        invalidateSupabaseEventsCache();
-        return mapSupabaseEvent(data);
-    }
-
-    async function deleteSupabaseEvent(eventId) {
-        const client = ensureSupabaseEvents();
-
-        const { data, error } = await client
-            .from("events")
-            .delete()
-            .eq("event_id", eventId)
-            .select("event_id")
-            .maybeSingle();
-
-        if (error) {
-            throw new Error(error.message || "The scheduled event could not be deleted.");
-        }
-
-        if (!data) {
-            throw new Error("The scheduled event could not be deleted or was not found.");
-        }
-
-        invalidateSupabaseEventsCache();
-        return true;
-    }
 
     /* =====================================================
        LIVE DASHBOARD
-       Dashboard values are read from Supabase tasks/events.
+       Dashboard values are read from Supabase so the
+       home page does not stay on the original sample data.
     ===================================================== */
 
     function dashboardDateKey(value) {
@@ -4102,9 +4264,7 @@ body.dashboard-data-loading .dashboard-content {
         });
 
         upcomingItems.sort(function(a, b) {
-            const dateCompare = a.date.localeCompare(b.date);
-            if (dateCompare !== 0) return dateCompare;
-            return dashboardTimeMinutes(a.time) - dashboardTimeMinutes(b.time);
+            return a.date.localeCompare(b.date);
         });
 
         if (nextCard) {
@@ -4143,19 +4303,14 @@ body.dashboard-data-loading .dashboard-content {
 
         try {
             const results = await Promise.all([
-                getSupabaseTasks(true),
-                getSupabaseEvents(true),
-                getSupabaseAvailability(true)
+                fetchJson("getTasks"),
+                fetchJson("getEvents")
             ]);
 
-            const tasks = Array.isArray(results[0]) ? results[0] : [];
-            const events = Array.isArray(results[1]) ? results[1] : [];
-            availabilityRecords = Array.isArray(results[2]) ? results[2] : [];
+            const tasks = Array.isArray(results[0].data) ? results[0].data : [];
+            const events = Array.isArray(results[1].data) ? results[1].data : [];
 
-            rebuildAvailabilityTableData();
-            renderAvailabilityTable();
             renderLiveDashboard(tasks, events);
-            renderDashboardAvailability();
         } catch (error) {
             console.error("Dashboard data loading error:", error);
         }
@@ -4163,7 +4318,7 @@ body.dashboard-data-loading .dashboard-content {
 
     /* =====================================================
        ANNOUNCEMENTS
-       Live Supabase announcement management
+       Live Google Sheets announcement management
     ===================================================== */
     let announcementsData = [];
 
@@ -4218,9 +4373,9 @@ body.dashboard-data-loading .dashboard-content {
         }).join("");
         if(window.lucide)lucide.createIcons();
     }
-    async function loadAnnouncements(forceRefresh){
+    async function loadAnnouncements(){
         const list=document.getElementById("announcementsList");
-        try{announcementsData=await getSupabaseAnnouncements(forceRefresh===true);renderAnnouncements();updateDashboardAnnouncement();}
+        try{const result=await fetchJson("getAnnouncements");announcementsData=Array.isArray(result.data)?result.data:[];renderAnnouncements();updateDashboardAnnouncement();}
         catch(error){console.error("Announcements loading error:",error);if(list)list.innerHTML='<div class="announcements-empty"><div class="announcements-empty-icon"><i data-lucide="triangle-alert"></i></div><strong>Unable to load announcements</strong><span>'+escapeHtml(error.message||"Please try again.")+'</span></div>';if(window.lucide)lucide.createIcons();}
     }
     window.loadAnnouncements=loadAnnouncements;
@@ -4242,11 +4397,11 @@ body.dashboard-data-loading .dashboard-content {
     async function submitAnnouncement(event){
         event.preventDefault();if(!IS_STEERING)return;const submit=document.getElementById("announcementSubmitButton"),status=document.getElementById("announcementFormStatus"),id=normalize(document.getElementById("announcementIdInput").value),data={username:CURRENT_USERNAME,announcementId:id,title:normalize(document.getElementById("announcementTitleInput").value),message:normalize(document.getElementById("announcementMessageInput").value),type:normalize(document.getElementById("announcementTypeInput").value)||"Announcement",date:normalize(document.getElementById("announcementDateInput").value),time:normalize(document.getElementById("announcementTimeInput").value),location:normalize(document.getElementById("announcementLocationInput").value)};
         if(!data.title||!data.message){status.textContent="Title and message are required.";return;} submit.disabled=true;status.textContent=id?"Saving changes...":"Posting announcement...";
-        try{if(id){await updateSupabaseAnnouncement(id,data);}else{await createSupabaseAnnouncement(data);}status.textContent="Announcement saved successfully.";await loadAnnouncements(true);setTimeout(closeAnnouncementModal,350);}catch(error){console.error("Announcement save error:",error);status.textContent=error.message||"The announcement could not be saved.";}finally{submit.disabled=false;}
+        try{const result=await supabaseAction(id?"updateAnnouncement":"createAnnouncement",data);status.textContent=result.message||"Announcement saved successfully.";await loadAnnouncements();setTimeout(closeAnnouncementModal,350);}catch(error){console.error("Announcement save error:",error);status.textContent=error.message||"The announcement could not be saved.";}finally{submit.disabled=false;}
     }
     async function deleteAnnouncement(announcementId){
         if(!IS_STEERING||!announcementId)return;if(!confirm("Delete this announcement? This cannot be undone."))return;
-        try{await deleteSupabaseAnnouncement(announcementId);await loadAnnouncements(true);}catch(error){console.error("Announcement delete error:",error);alert(error.message||"The announcement could not be deleted.");}
+        try{await supabaseAction("deleteAnnouncement",{username:CURRENT_USERNAME,announcementId:announcementId});await loadAnnouncements();}catch(error){console.error("Announcement delete error:",error);alert(error.message||"The announcement could not be deleted.");}
     }
 
     /* =====================================================
@@ -4309,21 +4464,18 @@ body.dashboard-data-loading .dashboard-content {
         const scope = document.getElementById("tasksScopeLabel");
         if (scope) scope.textContent = IS_STEERING ? "ALL TASKS" : "MY TASKS";
     }
-    async function loadTasks(forceRefresh) {
+    async function loadTasks() {
         const list = document.getElementById("tasksList");
         const count = document.getElementById("tasksCountLabel");
         if (!list) return;
-        const hasCachedTasks = Array.isArray(supabaseTasksCache);
-        if (!hasCachedTasks) {
-            list.innerHTML = '<div class="tasks-empty"><strong>Loading tasks...</strong><span>Retrieving task records.</span></div>';
-        }
+        list.innerHTML = '<div class="tasks-empty"><strong>Loading tasks...</strong><span>Retrieving task records.</span></div>';
         try {
-            tasksData = await getSupabaseTasks(forceRefresh === true);
+            const result = await fetchJson("getTasks");
+            tasksData = Array.isArray(result.data) ? result.data : [];
             const visibleTasks = IS_STEERING ? tasksData : tasksData.filter(function(task) {
                 return normalizeUsername(getRecordValue(task, "Assigned To")) === normalizeUsername(CURRENT_USERNAME);
             });
             renderTasks(visibleTasks);
-            if (window.lucide) lucide.createIcons();
         } catch (error) {
             console.error("Task loading error:", error);
             list.innerHTML = '<div class="tasks-empty"><strong>Unable to load tasks</strong><span>' + escapeHtml(error.message || "Please try again.") + '</span></div>';
@@ -4389,22 +4541,7 @@ body.dashboard-data-loading .dashboard-content {
             }
 
             /* Only the officer who originally assigned the task can delete it. */
-            const currentOfficerUsername = currentOfficer && (
-                currentOfficer.Username ||
-                currentOfficer.username ||
-                currentOfficer["Username"] ||
-                ""
-            );
-            const currentOfficerName = currentOfficer && (
-                currentOfficer.Name ||
-                currentOfficer.name ||
-                currentOfficer["Name"] ||
-                ""
-            );
-            const canDelete =
-                normalizeUsername(assignedBy) === normalizeUsername(CURRENT_USERNAME) ||
-                normalizeUsername(assignedBy) === normalizeUsername(currentOfficerUsername) ||
-                normalizeUsername(assignedBy) === normalizeUsername(currentOfficerName);
+            const canDelete = isCurrentOfficer(assignedBy);
 
             const deleteControl = canDelete
                 ? '<button type="button" class="task-delete-button" data-task-id="' + escapeHtml(taskId) + '" aria-label="Delete task" title="Delete task"><i data-lucide="trash-2"></i><span>DELETE</span></button>'
@@ -4434,7 +4571,8 @@ body.dashboard-data-loading .dashboard-content {
         if (!select) return;
         select.innerHTML = '<option value="">Loading officers...</option>';
         try {
-            officersData = await getSupabaseOfficers();
+            const result = await fetchJson("getOfficers");
+            officersData = Array.isArray(result.data) ? result.data : [];
             const activeOfficers = officersData.filter(function(officer) {
                 const status = normalize(getRecordValue(officer, "Status"));
                 return !status || status.toLowerCase() === "active";
@@ -4487,26 +4625,30 @@ body.dashboard-data-loading .dashboard-content {
         const saveButton = document.getElementById("saveAssignedTaskButton");
         const assignedSelect = document.getElementById("taskAssignedToInput");
         const selected = assignedSelect && assignedSelect.options[assignedSelect.selectedIndex];
-        const taskData = {
+        const payload = { action: "createTask", data: {
             title: normalize(document.getElementById("taskTitleInput")?.value),
             description: normalize(document.getElementById("taskDescriptionInput")?.value),
             assignedTo: normalize(assignedSelect?.value),
             assignedToName: normalize(selected?.dataset?.name),
+            assignedBy: CURRENT_USERNAME,
             dueDate: normalize(document.getElementById("taskDueDateInput")?.value),
-            priority: normalize(document.getElementById("taskPriorityInput")?.value) || "Normal"
-        };
-        if (!taskData.title || !taskData.assignedTo || !taskData.dueDate) {
+            priority: normalize(document.getElementById("taskPriorityInput")?.value) || "Normal",
+            status: "Pending"
+        }};
+        if (!payload.data.title || !payload.data.assignedTo || !payload.data.dueDate) {
             if (status) status.textContent = "Task title, assigned officer, and due date are required.";
+            return;
+        }
+        if (!isApiConfigured()) {
+            if (status) status.textContent = "Supabase is not configured.";
             return;
         }
         if (saveButton) saveButton.disabled = true;
         if (status) status.textContent = "Assigning task...";
         try {
-            await createSupabaseTask(taskData);
+            const result = await supabaseAction(payload.action, payload.data);
             if (status) status.textContent = "Task assigned successfully.";
-            await loadTasks(true);
-            await loadDashboardData();
-            await loadCalendarData();
+            await loadTasks();
             setTimeout(closeAssignTaskModal, 500);
         } catch (error) {
             console.error("Task assignment error:", error);
@@ -4526,40 +4668,18 @@ body.dashboard-data-loading .dashboard-content {
         calendarActivities[date].push(activity);
     }
 
-    async function deleteScheduledEvent(eventId, eventTitle) {
-        if (!IS_STEERING || !eventId) return;
-
-        const title = eventTitle || "this scheduled event";
-        if (!window.confirm('Delete "' + title + '"? This action cannot be undone.')) return;
-
-        try {
-            await deleteSupabaseEvent(eventId);
-            await loadCalendarData();
-            await loadDashboardData();
-        } catch (error) {
-            console.error("Scheduled event deletion error:", error);
-            alert(error.message || "The scheduled event could not be deleted.");
-        }
-    }
-
-    window.deleteScheduledEvent = deleteScheduledEvent;
-
     async function loadCalendarData() {
         try {
-            const [events, tasks] = await Promise.all([getSupabaseEvents(), getSupabaseTasks()]);
+            const [eventsResult, tasksResult] = await Promise.all([fetchJson("getEvents"), fetchJson("getTasks")]);
             calendarActivities = {};
+            const events = Array.isArray(eventsResult.data) ? eventsResult.data : [];
+            const tasks = Array.isArray(tasksResult.data) ? tasksResult.data : [];
             events.forEach(function(event) {
                 const status = normalize(getRecordValue(event, "Status")).toLowerCase();
                 if (status && status !== "active") return;
                 const start = normalize(getRecordValue(event, "Start Time"));
                 const end = normalize(getRecordValue(event, "End Time"));
-                addCalendarActivity(getRecordValue(event, "Date"), {
-                    type:"event",
-                    eventId:getRecordValue(event,"Event ID"),
-                    title:getRecordValue(event,"Title"),
-                    description:getRecordValue(event,"Description") || getRecordValue(event,"Location"),
-                    time:start && end ? start + " – " + end : (start || "Scheduled activity")
-                });
+                addCalendarActivity(getRecordValue(event, "Date"), {type:"event", eventId:getRecordValue(event,"Event ID"), title:getRecordValue(event,"Title"), description:getRecordValue(event,"Description") || getRecordValue(event,"Location"), time:start && end ? start + " – " + end : (start || "Scheduled activity")});
             });
             tasks.forEach(function(task) {
                 const assignedTo = normalizeUsername(getRecordValue(task,"Assigned To"));
@@ -4587,8 +4707,8 @@ body.dashboard-data-loading .dashboard-content {
         }
 
         try {
-            await updateSupabaseTaskStatus(taskId, statusValue);
-            await loadTasks(true);
+            const result = await supabaseAction("updateTaskStatus", {taskId:taskId,username:CURRENT_USERNAME,officerName:normalize(currentOfficer.Name),status:statusValue});
+            await loadTasks();
             await loadCalendarData();
             await loadDashboardData();
         } catch (error) {
@@ -4628,9 +4748,9 @@ body.dashboard-data-loading .dashboard-content {
         if (!window.confirm('Delete "' + title + '"? This action cannot be undone.')) return;
 
         try {
-            await deleteSupabaseTask(taskId);
+            const result = await supabaseAction("deleteTask", {taskId:taskId,username:CURRENT_USERNAME,officerName:normalize(currentOfficer.Name)});
 
-            await loadTasks(true);
+            await loadTasks();
             await loadCalendarData();
             await loadDashboardData();
         } catch (error) {
@@ -4652,42 +4772,42 @@ body.dashboard-data-loading .dashboard-content {
     }
     function closeScheduleEventModal(){const modal=document.getElementById("scheduleEventModal");if(modal)modal.classList.remove("show");}
     async function submitScheduledEvent(event){
-        event.preventDefault();
-        if(!IS_STEERING)return;
+        event.preventDefault(); if(!IS_STEERING)return;
+        const status=document.getElementById("eventFormStatus"), saveButton=document.getElementById("saveScheduleEventButton");
+        const payload={action:"saveEvent",data:{title:normalize(document.getElementById("eventTitleInput")?.value),description:normalize(document.getElementById("eventDescriptionInput")?.value),date:normalize(document.getElementById("eventDateInput")?.value),startTime:normalize(document.getElementById("eventStartTimeInput")?.value),endTime:normalize(document.getElementById("eventEndTimeInput")?.value),location:normalize(document.getElementById("eventLocationInput")?.value),type:normalize(document.getElementById("eventTypeInput")?.value)||"Event",createdBy:CURRENT_USERNAME}};
+        if(!payload.data.title||!payload.data.date){if(status)status.textContent="Activity title and date are required.";return;}
+        if(saveButton)saveButton.disabled=true;if(status)status.textContent="Scheduling activity...";
+        try{await supabaseAction("saveEvent",payload.data);if(status)status.textContent="Activity scheduled successfully.";await loadCalendarData();setTimeout(closeScheduleEventModal,500);}catch(error){console.error("Activity scheduling error:",error);if(status)status.textContent=error.message||"The activity could not be scheduled.";}finally{if(saveButton)saveButton.disabled=false;}
+    }
 
-        const status=document.getElementById("eventFormStatus");
-        const saveButton=document.getElementById("saveScheduleEventButton");
-        const eventData={
-            title:normalize(document.getElementById("eventTitleInput")?.value),
-            description:normalize(document.getElementById("eventDescriptionInput")?.value),
-            date:normalize(document.getElementById("eventDateInput")?.value),
-            startTime:normalize(document.getElementById("eventStartTimeInput")?.value),
-            endTime:normalize(document.getElementById("eventEndTimeInput")?.value),
-            location:normalize(document.getElementById("eventLocationInput")?.value),
-            type:normalize(document.getElementById("eventTypeInput")?.value)||"Event"
-        };
+    // Expose the Supabase event deletion handler to the calendar renderer in the first script.
+    window.deleteCalendarEvent = async function(eventId) {
+        return deleteCalendarEvent(eventId);
+    };
 
-        if(!eventData.title||!eventData.date){
-            if(status)status.textContent="Activity title and date are required.";
-            return;
-        }
+    async function deleteCalendarEvent(eventId) {
+        if (!IS_STEERING || !eventId || !supabaseClient) return;
 
-        if(saveButton)saveButton.disabled=true;
-        if(status)status.textContent="Scheduling activity...";
+        const confirmed = window.confirm("Delete this event? This action cannot be undone.");
+        if (!confirmed) return;
 
-        try{
-            await createSupabaseEvent(eventData);
-            if(status)status.textContent="Activity scheduled successfully.";
+        try {
+            const { error } = await supabaseClient
+                .from("events")
+                .delete()
+                .eq("event_id", eventId);
+
+            if (error) throw error;
+
             await loadCalendarData();
             await loadDashboardData();
-            setTimeout(closeScheduleEventModal,500);
-        }catch(error){
-            console.error("Activity scheduling error:",error);
-            if(status)status.textContent=error.message||"The activity could not be scheduled.";
-        }finally{
-            if(saveButton)saveButton.disabled=false;
+        } catch (error) {
+            console.error("Event deletion error:", error);
+            alert(error.message || "The event could not be deleted.");
         }
     }
+
+    window.loadCalendarData = loadCalendarData;
 
     /* =====================================================
        LOAD OFFICER PROFILE
@@ -4971,16 +5091,17 @@ body.dashboard-data-loading .dashboard-content {
     async function loadOfficerDirectory() {
         const grid = document.getElementById("officerDirectoryGrid");
         if (grid) {
-            grid.innerHTML = '<div class="officers-directory-empty"><strong>Loading officers...</strong><span>Refreshing the officer directory from Supabase.</span></div>';
+            grid.innerHTML = '<div class="officers-directory-empty"><strong>Loading officers...</strong><span>Refreshing the officer directory from Google Sheets.</span></div>';
         }
 
         try {
-            officersData = await getSupabaseOfficers();
+            const result = await fetchJson("getOfficers");
+            officersData = Array.isArray(result.data) ? result.data : [];
             renderOfficerDirectory();
         } catch (error) {
             console.error("Unable to load officer directory:", error);
             if (grid) {
-                grid.innerHTML = '<div class="officers-directory-empty"><strong>Unable to load officers.</strong><span>Check the Supabase connection and try Refresh again.</span></div>';
+                grid.innerHTML = '<div class="officers-directory-empty"><strong>Unable to load officers.</strong><span>Check the Google Sheets connection and try Refresh again.</span></div>';
             }
         }
     }
@@ -5012,7 +5133,13 @@ body.dashboard-data-loading .dashboard-content {
 
         try {
 
-            officersData = await getSupabaseOfficers();
+            const result =
+                await fetchJson("getOfficers");
+
+            officersData =
+                Array.isArray(result.data)
+                    ? result.data
+                    : [];
 
             const foundOfficer =
                 officersData.find(function (officer) {
@@ -5232,19 +5359,21 @@ body.dashboard-data-loading .dashboard-content {
         if (availabilityLabel) availabilityLabel.textContent = "Today";
     }
 
-    async function loadAvailability(forceRefresh) {
+    async function loadAvailability() {
 
         try {
 
-            const records = await getSupabaseAvailability(forceRefresh === true);
+            const result =
+                await fetchJson("getAvailability");
 
-            availabilityRecords = Array.isArray(records) ? records : [];
+            availabilityRecords =
+                Array.isArray(result.data)
+                    ? result.data
+                    : [];
 
             rebuildAvailabilityTableData();
             renderAvailabilityTable();
             renderDashboardAvailability();
-
-            return availabilityRecords;
 
         } catch (error) {
 
@@ -5253,20 +5382,12 @@ body.dashboard-data-loading .dashboard-content {
                 error
             );
 
-            // Keep the last successfully loaded data visible instead of
-            // replacing the availability interface with an empty state
-            // when a background Supabase request temporarily fails.
+            availabilityRecords = [];
             rebuildAvailabilityTableData();
             renderAvailabilityTable();
             renderDashboardAvailability();
-
-            return Array.isArray(availabilityRecords)
-                ? availabilityRecords
-                : [];
         }
     }
-
-    window.loadAvailability = loadAvailability;
 
 
     /* =====================================================
@@ -5549,65 +5670,136 @@ body.dashboard-data-loading .dashboard-content {
     ===================================================== */
 
     async function saveMyAvailability() {
-        const saveButton = document.getElementById("saveAvailabilityButton");
-        const status = document.getElementById("saveStatus");
-        const client = ensureSupabaseDashboard();
-        const username = normalize(CURRENT_USERNAME);
-        if (!username) {
-            if (status) status.textContent = "Unable to identify the current officer.";
+
+        const saveButton =
+            document.getElementById(
+                "saveAvailabilityButton"
+            );
+
+        const status =
+            document.getElementById(
+                "saveStatus"
+            );
+
+        if (!isApiConfigured()) {
+
+            if (status) {
+                status.textContent =
+                    "Supabase is not configured.";
+            }
+
+            console.error(
+                "Supabase is not configured."
+            );
+
             return;
         }
 
+
         const records = [];
+
         timeSlots.forEach(function (time) {
+
             days.forEach(function (day) {
-                if (myAvailability[time] && myAvailability[time][day]) {
-                    records.push({ day: day, time: time });
+
+                if (myAvailability[time][day]) {
+
+                    records.push({
+                        day: day,
+                        time: time
+                    });
                 }
             });
         });
 
-        if (saveButton) saveButton.disabled = true;
-        if (status) status.textContent = "Saving availability...";
+
+        if (saveButton) {
+            saveButton.disabled = true;
+        }
+
+        if (status) {
+            status.textContent =
+                "Saving availability...";
+        }
+
 
         try {
-            const { error: deleteError } = await client
-                .from("availability")
-                .delete()
-                .eq("username", username);
-            if (deleteError) throw new Error(deleteError.message || "Existing availability could not be cleared.");
 
-            if (records.length) {
-                const rows = records.map(function(record) {
-                    return {
-                        username: username,
-                        officer_name: normalize(currentOfficer.Name) || "MC RJ Escote",
-                        position: normalize(currentOfficer.Position) || "Vice President",
-                        day: record.day,
-                        time_slot: record.time,
-                        status: "Available"
-                    };
+            const payload = {
+
+                action: "saveAvailability",
+
+                data: {
+                    username: CURRENT_USERNAME,
+                    officerName:
+                        normalize(currentOfficer.Name) ||
+                        "MC RJ Escote",
+                    position:
+                        normalize(currentOfficer.Position) ||
+                        "Vice President",
+                    records: records
+                }
+            };
+
+
+            const result = await supabaseAction("saveAvailability", payload.data);
+
+
+            /*
+               Update the local availability records immediately.
+               The next page refresh will read the same records from
+               Google Sheets again.
+            */
+
+            availabilityRecords = availabilityRecords.filter(function (record) {
+                return normalizeUsername(getRecordValue(record, "Username")) !==
+                    normalizeUsername(CURRENT_USERNAME);
+            });
+
+            records.forEach(function (record) {
+                availabilityRecords.push({
+                    Username: CURRENT_USERNAME,
+                    "Officer Name":
+                        normalize(currentOfficer.Name) || "MC RJ Escote",
+                    Position:
+                        normalize(currentOfficer.Position) || "Vice President",
+                    Day: record.day,
+                    Time: record.time,
+                    Status: "Available"
                 });
-                const { error: insertError } = await client.from("availability").insert(rows);
-                if (insertError) throw new Error(insertError.message || "Availability could not be saved.");
-            }
+            });
 
-            invalidateSupabaseAvailabilityCache();
-            availabilityRecords = await getSupabaseAvailability(true);
             rebuildAvailabilityTableData();
             renderAvailabilityTable();
             renderDashboardAvailability();
             initializeMyAvailability();
 
-            if (status) status.textContent = "Availability saved successfully.";
+            if (status) {
+                status.textContent = "Availability saved successfully.";
+            }
+
             closeAvailabilityModal();
+
         } catch (error) {
-            console.error("Unable to save availability:", error);
-            if (status) status.textContent = error.message || "Unable to save availability.";
+
+            console.error(
+                "Unable to save availability:",
+                error
+            );
+
+            if (status) {
+                status.textContent =
+                    "Unable to save. Please check your connection and Web App URL.";
+            }
+
         } finally {
-            if (saveButton) saveButton.disabled = false;
+
+            if (saveButton) {
+                saveButton.disabled = false;
+            }
         }
     }
+
 
     window.renderAvailabilityTable =
         renderAvailabilityTable;
@@ -5835,38 +6027,48 @@ body.dashboard-data-loading .dashboard-content {
 
 
         /*
-           Load real data from Supabase after the page is ready.
+           Load real data from Google Sheets after the page is ready.
         */
 
         /*
-           Load only the data required for the first usable screen before
-           revealing the dashboard. The remaining sections continue in the
-           background so mobile users are not forced to wait for every page.
+           Load only the data needed to make the dashboard usable first.
+           Calendar data is intentionally deferred until the Calendar page is
+           opened because the dashboard already gets the same Events/Tasks
+           data through loadDashboardData().
+        */
+        /*
+           FAST FIRST PAINT:
+           The visible dashboard only needs Tasks + Events.
+           Availability, officer profile, and announcements continue in the
+           background so a large Google Sheet does not block the first view.
         */
         Promise.all([
-            loadOfficerProfile(),
             loadTasks(),
             loadDashboardData()
         ]).then(function () {
 
-            updateOfficerProfile();
             updateDashboardGreeting();
             document.body.classList.remove("dashboard-data-loading");
 
-            /* Background data. These do not block the first render. */
-            loadCalendarData().catch(function (error) {
-                console.error("Calendar background loading error:", error);
-            });
-
-            loadAnnouncements().catch(function (error) {
-                console.error("Announcement background loading error:", error);
+            /* Non-blocking dashboard extras. */
+            Promise.all([
+                loadOfficerProfile(),
+                loadAvailability(),
+                loadAnnouncements()
+            ]).then(function () {
+                updateOfficerProfile();
+                renderOfficerDirectory();
+                updateDashboardGreeting();
+                renderAvailabilityTable();
+                renderDashboardAvailability();
+            }).catch(function (error) {
+                console.error("Background dashboard data loading error:", error);
             });
 
         }).catch(function (error) {
-
-            console.error("Initial dashboard loading error:", error);
+            console.error("Critical dashboard data loading error:", error);
+            /* Never leave the user staring at the loading state. */
             document.body.classList.remove("dashboard-data-loading");
-
         });
 
         // Keep dashboard information current without requiring a page reload.
@@ -5874,10 +6076,7 @@ body.dashboard-data-loading .dashboard-content {
             updateDashboardGreeting();
             loadDashboardData();
             loadAnnouncements();
-            // Availability is refreshed independently so the
-            // Available Officers view stays current without blocking
-            // the rest of the dashboard.
-            loadAvailability(true);
+            loadAvailability();
             loadOfficerProfile();
         }, 60000);
 
