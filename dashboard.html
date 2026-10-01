@@ -1952,30 +1952,11 @@ body.dashboard-data-loading .dashboard-content {
         ===================================================== */
 
         var calendarActivities = {};
-        var calendarEventsData = [];
+    var calendarEventsData = [];
 
-        /* Shared calendar helpers. These must be available to the calendar
-           script because the Supabase data helpers are in a separate script. */
-        function normalize(value) {
-            return String(value == null ? "" : value).trim();
-        }
-
-        function getRecordValue(record, key) {
-            if (!record || typeof record !== "object") return "";
-            if (Object.prototype.hasOwnProperty.call(record, key)) return record[key];
-            const target = String(key).trim().toLowerCase();
-            const foundKey = Object.keys(record).find(function (item) {
-                return String(item).trim().toLowerCase() === target;
-            });
-            return foundKey ? record[foundKey] : "";
-        }
-
-        function normalizeCalendarDate(value) {
-            const text = normalize(value);
-            if (!text) return "";
-            const match = text.match(/^(\d{4}-\d{2}-\d{2})/);
-            return match ? match[1] : text;
-        }
+    /* Calendar script runs before the login/role IIFE. Expose the current
+       access level here so selected-day rendering can safely use it. */
+    var IS_STEERING = String(sessionStorage.getItem("psabeAccessLevel") || "Officer").trim().toLowerCase() === "steering";
 
 
 
@@ -4557,17 +4538,7 @@ body.dashboard-data-loading .dashboard-content {
     async function deleteCalendarEvent(eventId) {
         if (!IS_STEERING || !eventId || !window.psabeSupabase) return;
 
-        const eventRecord = (Array.isArray(calendarEventsData) ? calendarEventsData : []).find(function (item) {
-            return normalize(String(getRecordValue(item, "Event ID"))) === normalize(String(eventId));
-        });
-
-        const title = eventRecord
-            ? (normalize(getRecordValue(eventRecord, "Title")) || "this event")
-            : "this event";
-
-        const confirmed = window.confirm(
-            'Delete "' + title + '"? This action cannot be undone.'
-        );
+        const confirmed = window.confirm("Delete this event? This action cannot be undone.");
         if (!confirmed) return;
 
         try {
