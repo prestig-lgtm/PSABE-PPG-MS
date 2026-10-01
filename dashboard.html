@@ -6719,7 +6719,11 @@ body.dashboard-data-loading .dashboard-content {
             setStatus("Verifying your current password...", "info");
 
             try {
-                const client = ensureSupabaseDashboard();
+                const client = window.psabeSupabase;
+
+                if (!client) {
+                    throw new Error("Supabase client is not available.");
+                }
 
                 /* Re-authenticate in this dashboard page because this client
                    intentionally does not persist the Supabase session. */
