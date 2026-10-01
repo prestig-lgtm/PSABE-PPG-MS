@@ -56,7 +56,7 @@
 
 /* Prevent hard-coded dashboard content from flashing before live data loads. */
 body.dashboard-data-loading .dashboard-content {
-    visibility: visible;
+    visibility: hidden;
 }
 
 
@@ -77,6 +77,36 @@ body.dashboard-data-loading .dashboard-content {
 .task-status-chevron{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#caa654;display:grid;place-items:center;}
 .task-status-chevron svg{width:15px;height:15px;stroke:currentColor;stroke-width:2.5;}
 @media(max-width:720px){.task-status-control{width:100%;}.task-status-select-wrap,.task-status-select-officer{min-width:0;width:100%;}}
+</style>
+<style>
+.selected-activity-actions {
+    display:flex;
+    justify-content:flex-end;
+    margin-top:14px;
+}
+.selected-activity-delete-button {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    min-height:38px;
+    padding:8px 14px;
+    border:1px solid rgba(255, 90, 90, 0.45);
+    border-radius:8px;
+    background:rgba(255, 90, 90, 0.10);
+    color:#ff8f8f;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.05em;
+    cursor:pointer;
+}
+.selected-activity-delete-button:hover {
+    background:rgba(255, 90, 90, 0.18);
+}
+.selected-activity-delete-button svg {
+    width:15px;
+    height:15px;
+}
 </style>
 </head>
 
@@ -2463,6 +2493,27 @@ body.dashboard-data-loading .dashboard-content {
                     );
 
 
+                selectedActivities.addEventListener(
+                    "click",
+                    function (event) {
+                        const button = event.target.closest(".selected-activity-delete-button");
+                        if (!button || !IS_STEERING) return;
+
+                        const eventId = button.getAttribute("data-event-id") || "";
+                        const card = button.closest(".selected-activity");
+                        const titleElement = card ? card.querySelector("h3") : null;
+                        const title = titleElement ? titleElement.textContent.trim() : "Scheduled event";
+
+                        if (!eventId) {
+                            alert("This scheduled event does not have a valid Event ID and cannot be deleted safely.");
+                            return;
+                        }
+
+                        deleteScheduledEvent(eventId, title);
+                    }
+                );
+
+
 
                 const calendarNow = new Date();
 
@@ -3094,7 +3145,7 @@ body.dashboard-data-loading .dashboard-content {
                                     ${activity.description}
                                 </p>
 
-                                <div class="selected-activity-time">
+                                                <div class="selected-activity-time">
 
                                     <svg viewBox="0 0 24 24">
 
@@ -3113,6 +3164,20 @@ body.dashboard-data-loading .dashboard-content {
                                     ${activity.time}
 
                                 </div>
+
+                                ${IS_STEERING && activity.type === "event" ? `
+                                    <div class="selected-activity-actions">
+                                        <button
+                                            type="button"
+                                            class="selected-activity-delete-button"
+                                            data-event-id="${escapeHtml(activity.eventId || "")}"
+                                            aria-label="Delete scheduled event"
+                                        >
+                                            <i data-lucide="trash-2"></i>
+                                            <span>DELETE</span>
+                                        </button>
+                                    </div>
+                                ` : ""}
 
                             `;
 
@@ -3562,7 +3627,7 @@ body.dashboard-data-loading .dashboard-content {
 
         supabaseTasksRequest = client
             .from("tasks")
-            .select("task_id,task_title,description,assigned_to,assigned_by,due_date,priority,status,created_at,updated_at")
+            .select("*")
             .order("due_date", { ascending: true, nullsFirst: false })
             .order("created_at", { ascending: false })
             .then(function(result) {
@@ -3674,9 +3739,140 @@ body.dashboard-data-loading .dashboard-content {
     }
 
     /* =====================================================
+       SUPABASE EVENT HELPERS
+       Events are stored in public.events.
+    ===================================================== */
+
+    function ensureSupabaseEvents() {
+        if (!supabaseClient) {
+            throw new Error("Supabase could not be initialized. Please check the Supabase client library.");
+        }
+        return supabaseClient;
+    }
+
+    function mapSupabaseEvent(row) {
+        return {
+            "Event ID": row.event_id || "",
+            "Title": row.title || "",
+            "Description": row.description || "",
+            "Date": row.event_date || "",
+            "Start Time": row.start_time || "",
+            "End Time": row.end_time || "",
+            "Location": row.location || "",
+            "Type": row.type || "Event",
+            "Status": row.status || "Active",
+            "Created By": row.created_by || "",
+            "Created At": row.created_at || "",
+            "Updated At": row.updated_at || ""
+        };
+    }
+
+    let supabaseEventsCache = null;
+    let supabaseEventsRequest = null;
+
+    async function getSupabaseEvents(forceRefresh) {
+        const client = ensureSupabaseEvents();
+        const force = forceRefresh === true;
+
+        if (!force && Array.isArray(supabaseEventsCache)) {
+            return supabaseEventsCache.slice();
+        }
+
+        if (!force && supabaseEventsRequest) {
+            return supabaseEventsRequest;
+        }
+
+        supabaseEventsRequest = client
+            .from("events")
+            .select("*")
+            .order("event_date", { ascending: true, nullsFirst: false })
+            .order("start_time", { ascending: true, nullsFirst: false })
+            .then(function(result) {
+                if (result.error) {
+                    throw new Error(result.error.message || "Events could not be loaded from Supabase.");
+                }
+
+                const mapped = Array.isArray(result.data)
+                    ? result.data.map(mapSupabaseEvent)
+                    : [];
+
+                supabaseEventsCache = mapped;
+                return mapped.slice();
+            })
+            .finally(function() {
+                supabaseEventsRequest = null;
+            });
+
+        return supabaseEventsRequest;
+    }
+
+    function invalidateSupabaseEventsCache() {
+        supabaseEventsCache = null;
+    }
+
+    function generateEventId() {
+        const now = new Date();
+        const pad = function(value) { return String(value).padStart(2, "0"); };
+        const stamp = now.getFullYear() + pad(now.getMonth() + 1) + pad(now.getDate()) + "-" +
+            pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
+        const randomPart = Math.random().toString(36).slice(2, 8).toUpperCase();
+        return "EVENT-" + stamp + "-" + randomPart;
+    }
+
+    async function createSupabaseEvent(eventData) {
+        const client = ensureSupabaseEvents();
+        const row = {
+            event_id: generateEventId(),
+            title: eventData.title,
+            description: eventData.description || null,
+            event_date: eventData.date || null,
+            start_time: eventData.startTime || null,
+            end_time: eventData.endTime || null,
+            location: eventData.location || null,
+            type: eventData.type || "Event",
+            status: "Active",
+            created_by: CURRENT_USERNAME
+        };
+
+        const { data, error } = await client
+            .from("events")
+            .insert(row)
+            .select("*")
+            .single();
+
+        if (error) {
+            throw new Error(error.message || "The event could not be created.");
+        }
+
+        invalidateSupabaseEventsCache();
+        return mapSupabaseEvent(data);
+    }
+
+    async function deleteSupabaseEvent(eventId) {
+        const client = ensureSupabaseEvents();
+
+        const { data, error } = await client
+            .from("events")
+            .delete()
+            .eq("event_id", eventId)
+            .select("event_id")
+            .maybeSingle();
+
+        if (error) {
+            throw new Error(error.message || "The scheduled event could not be deleted.");
+        }
+
+        if (!data) {
+            throw new Error("The scheduled event could not be deleted or was not found.");
+        }
+
+        invalidateSupabaseEventsCache();
+        return true;
+    }
+
+    /* =====================================================
        LIVE DASHBOARD
-       Dashboard values are read from Google Sheets so the
-       home page does not stay on the original sample data.
+       Dashboard values are read from Supabase tasks/events.
     ===================================================== */
 
     function dashboardDateKey(value) {
@@ -3981,11 +4177,11 @@ body.dashboard-data-loading .dashboard-content {
         try {
             const results = await Promise.all([
                 getSupabaseTasks(),
-                fetchJson("getEvents")
+                getSupabaseEvents()
             ]);
 
             const tasks = Array.isArray(results[0]) ? results[0] : [];
-            const events = Array.isArray(results[1].data) ? results[1].data : [];
+            const events = Array.isArray(results[1]) ? results[1] : [];
 
             renderLiveDashboard(tasks, events);
         } catch (error) {
@@ -4233,12 +4429,10 @@ body.dashboard-data-loading .dashboard-content {
                 currentOfficer["Name"] ||
                 ""
             );
-            const sessionOfficerName = normalize(sessionStorage.getItem("psabeName") || "");
             const canDelete =
                 normalizeUsername(assignedBy) === normalizeUsername(CURRENT_USERNAME) ||
                 normalizeUsername(assignedBy) === normalizeUsername(currentOfficerUsername) ||
-                normalizeUsername(assignedBy) === normalizeUsername(currentOfficerName) ||
-                normalizeUsername(assignedBy) === normalizeUsername(sessionOfficerName);
+                normalizeUsername(assignedBy) === normalizeUsername(currentOfficerName);
 
             const deleteControl = canDelete
                 ? '<button type="button" class="task-delete-button" data-task-id="' + escapeHtml(taskId) + '" aria-label="Delete task" title="Delete task"><i data-lucide="trash-2"></i><span>DELETE</span></button>'
@@ -4361,17 +4555,40 @@ body.dashboard-data-loading .dashboard-content {
         calendarActivities[date].push(activity);
     }
 
+    async function deleteScheduledEvent(eventId, eventTitle) {
+        if (!IS_STEERING || !eventId) return;
+
+        const title = eventTitle || "this scheduled event";
+        if (!window.confirm('Delete "' + title + '"? This action cannot be undone.')) return;
+
+        try {
+            await deleteSupabaseEvent(eventId);
+            await loadCalendarData();
+            await loadDashboardData();
+        } catch (error) {
+            console.error("Scheduled event deletion error:", error);
+            alert(error.message || "The scheduled event could not be deleted.");
+        }
+    }
+
+    window.deleteScheduledEvent = deleteScheduledEvent;
+
     async function loadCalendarData() {
         try {
-            const [eventsResult, tasks] = await Promise.all([fetchJson("getEvents"), getSupabaseTasks()]);
+            const [events, tasks] = await Promise.all([getSupabaseEvents(), getSupabaseTasks()]);
             calendarActivities = {};
-            const events = Array.isArray(eventsResult.data) ? eventsResult.data : [];
             events.forEach(function(event) {
                 const status = normalize(getRecordValue(event, "Status")).toLowerCase();
                 if (status && status !== "active") return;
                 const start = normalize(getRecordValue(event, "Start Time"));
                 const end = normalize(getRecordValue(event, "End Time"));
-                addCalendarActivity(getRecordValue(event, "Date"), {type:"event", title:getRecordValue(event,"Title"), description:getRecordValue(event,"Description") || getRecordValue(event,"Location"), time:start && end ? start + " – " + end : (start || "Scheduled activity")});
+                addCalendarActivity(getRecordValue(event, "Date"), {
+                    type:"event",
+                    eventId:getRecordValue(event,"Event ID"),
+                    title:getRecordValue(event,"Title"),
+                    description:getRecordValue(event,"Description") || getRecordValue(event,"Location"),
+                    time:start && end ? start + " – " + end : (start || "Scheduled activity")
+                });
             });
             tasks.forEach(function(task) {
                 const assignedTo = normalizeUsername(getRecordValue(task,"Assigned To"));
@@ -4431,14 +4648,7 @@ body.dashboard-data-loading .dashboard-content {
         }
 
         const assignedBy = getRecordValue(task, "Assigned By");
-        const currentName = normalize(currentOfficer && (currentOfficer.Name || currentOfficer.name || ""));
-        const sessionOfficerName = normalize(sessionStorage.getItem("psabeName") || "");
-        const mayDelete =
-            normalizeUsername(assignedBy) === normalizeUsername(CURRENT_USERNAME) ||
-            normalizeUsername(assignedBy) === normalizeUsername(currentOfficer && (currentOfficer.Username || currentOfficer.username || "")) ||
-            normalizeUsername(assignedBy) === normalizeUsername(currentName) ||
-            normalizeUsername(assignedBy) === normalizeUsername(sessionOfficerName);
-        if (!mayDelete) {
+        if (normalizeUsername(assignedBy) !== normalizeUsername(CURRENT_USERNAME)) {
             alert("Only the officer who assigned this task can delete it.");
             return;
         }
@@ -4471,12 +4681,41 @@ body.dashboard-data-loading .dashboard-content {
     }
     function closeScheduleEventModal(){const modal=document.getElementById("scheduleEventModal");if(modal)modal.classList.remove("show");}
     async function submitScheduledEvent(event){
-        event.preventDefault(); if(!IS_STEERING)return;
-        const status=document.getElementById("eventFormStatus"), saveButton=document.getElementById("saveScheduleEventButton");
-        const payload={action:"saveEvent",data:{title:normalize(document.getElementById("eventTitleInput")?.value),description:normalize(document.getElementById("eventDescriptionInput")?.value),date:normalize(document.getElementById("eventDateInput")?.value),startTime:normalize(document.getElementById("eventStartTimeInput")?.value),endTime:normalize(document.getElementById("eventEndTimeInput")?.value),location:normalize(document.getElementById("eventLocationInput")?.value),type:normalize(document.getElementById("eventTypeInput")?.value)||"Event",createdBy:CURRENT_USERNAME}};
-        if(!payload.data.title||!payload.data.date){if(status)status.textContent="Activity title and date are required.";return;}
-        if(saveButton)saveButton.disabled=true;if(status)status.textContent="Scheduling activity...";
-        try{const response=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});if(!response.ok)throw new Error("Activity request failed.");const result=await response.json();if(!result.success)throw new Error(result.message||"The activity could not be scheduled.");if(status)status.textContent="Activity scheduled successfully.";await loadCalendarData();setTimeout(closeScheduleEventModal,500);}catch(error){console.error("Activity scheduling error:",error);if(status)status.textContent=error.message||"The activity could not be scheduled.";}finally{if(saveButton)saveButton.disabled=false;}
+        event.preventDefault();
+        if(!IS_STEERING)return;
+
+        const status=document.getElementById("eventFormStatus");
+        const saveButton=document.getElementById("saveScheduleEventButton");
+        const eventData={
+            title:normalize(document.getElementById("eventTitleInput")?.value),
+            description:normalize(document.getElementById("eventDescriptionInput")?.value),
+            date:normalize(document.getElementById("eventDateInput")?.value),
+            startTime:normalize(document.getElementById("eventStartTimeInput")?.value),
+            endTime:normalize(document.getElementById("eventEndTimeInput")?.value),
+            location:normalize(document.getElementById("eventLocationInput")?.value),
+            type:normalize(document.getElementById("eventTypeInput")?.value)||"Event"
+        };
+
+        if(!eventData.title||!eventData.date){
+            if(status)status.textContent="Activity title and date are required.";
+            return;
+        }
+
+        if(saveButton)saveButton.disabled=true;
+        if(status)status.textContent="Scheduling activity...";
+
+        try{
+            await createSupabaseEvent(eventData);
+            if(status)status.textContent="Activity scheduled successfully.";
+            await loadCalendarData();
+            await loadDashboardData();
+            setTimeout(closeScheduleEventModal,500);
+        }catch(error){
+            console.error("Activity scheduling error:",error);
+            if(status)status.textContent=error.message||"The activity could not be scheduled.";
+        }finally{
+            if(saveButton)saveButton.disabled=false;
+        }
     }
 
     /* =====================================================
@@ -5736,40 +5975,38 @@ body.dashboard-data-loading .dashboard-content {
            revealing the dashboard. The remaining sections continue in the
            background so mobile users are not forced to wait for every page.
         */
-        /*
-           Reveal the interface immediately. No remote request is allowed to
-           block the first paint on mobile. Each data source fills its own
-           section when it finishes loading.
-        */
-        document.body.classList.remove("dashboard-data-loading");
+        Promise.all([
+            loadOfficerProfile(),
+            loadTasks(),
+            loadDashboardData()
+        ]).then(function () {
 
-        Promise.resolve().then(loadOfficerProfile).catch(function (error) {
-            console.error("Officer profile loading error:", error);
-        });
+            updateOfficerProfile();
+            updateDashboardGreeting();
+            document.body.classList.remove("dashboard-data-loading");
 
-        Promise.resolve().then(loadTasks).catch(function (error) {
-            console.error("Task loading error:", error);
-        });
+            /* Background data. These do not block the first render. */
+            loadAvailability().then(function () {
+                renderOfficerDirectory();
+                renderAvailabilityTable();
+                renderDashboardAvailability();
+            }).catch(function (error) {
+                console.error("Availability background loading error:", error);
+            });
 
-        Promise.resolve().then(loadDashboardData).catch(function (error) {
-            console.error("Dashboard loading error:", error);
-        });
+            loadCalendarData().catch(function (error) {
+                console.error("Calendar background loading error:", error);
+            });
 
-        /* Background sections. None of these block the first render. */
-        Promise.resolve().then(loadAvailability).then(function () {
-            renderOfficerDirectory();
-            renderAvailabilityTable();
-            renderDashboardAvailability();
+            loadAnnouncements().catch(function (error) {
+                console.error("Announcement background loading error:", error);
+            });
+
         }).catch(function (error) {
-            console.error("Availability background loading error:", error);
-        });
 
-        Promise.resolve().then(loadCalendarData).catch(function (error) {
-            console.error("Calendar background loading error:", error);
-        });
+            console.error("Initial dashboard loading error:", error);
+            document.body.classList.remove("dashboard-data-loading");
 
-        Promise.resolve().then(loadAnnouncements).catch(function (error) {
-            console.error("Announcement background loading error:", error);
         });
 
         // Keep dashboard information current without requiring a page reload.
