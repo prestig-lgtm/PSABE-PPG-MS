@@ -69,6 +69,11 @@ body.dashboard-data-loading .dashboard-content {
 .task-status-select-officer:focus{border-color:#caa654;box-shadow:0 0 0 3px rgba(202,166,84,.12);}
 .task-status-select-officer:disabled{opacity:.65;cursor:wait;}
 .task-status-select-officer option{background:#0d342c;color:#fff;font-weight:800;}
+.task-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0;}
+.task-delete-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:34px;padding:0 10px;border:1px solid rgba(164,68,68,.48);border-radius:7px;background:rgba(164,68,68,.12);color:#e59b9b;font-family:inherit;font-size:9px;font-weight:900;letter-spacing:.06em;cursor:pointer;white-space:nowrap;visibility:visible;opacity:1;}
+.task-delete-button:hover{background:rgba(164,68,68,.2);border-color:rgba(229,155,155,.7);color:#ffd0d0;}
+.task-delete-button svg{width:14px;height:14px;stroke-width:2.2;}
+.task-delete-button span{display:inline;}
 .task-status-chevron{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:#caa654;display:grid;place-items:center;}
 .task-status-chevron svg{width:15px;height:15px;stroke:currentColor;stroke-width:2.5;}
 @media(max-width:720px){.task-status-control{width:100%;}.task-status-select-wrap,.task-status-select-officer{min-width:0;width:100%;}}
@@ -3535,19 +3540,52 @@ body.dashboard-data-loading .dashboard-content {
         };
     }
 
-    async function getSupabaseTasks() {
+    let supabaseTasksCache = null;
+    let supabaseTasksRequest = null;
+
+    async function getSupabaseTasks(forceRefresh) {
         const client = ensureSupabaseTasks();
-        const { data, error } = await client
+        const force = forceRefresh === true;
+
+        /*
+           Several parts of the dashboard request tasks during startup.
+           Share the same in-flight request and reuse the result so the
+           initial page does not wait for three separate task queries.
+        */
+        if (!force && Array.isArray(supabaseTasksCache)) {
+            return supabaseTasksCache.slice();
+        }
+
+        if (!force && supabaseTasksRequest) {
+            return supabaseTasksRequest;
+        }
+
+        supabaseTasksRequest = client
             .from("tasks")
             .select("*")
             .order("due_date", { ascending: true, nullsFirst: false })
-            .order("created_at", { ascending: false });
+            .order("created_at", { ascending: false })
+            .then(function(result) {
+                if (result.error) {
+                    throw new Error(result.error.message || "Tasks could not be loaded from Supabase.");
+                }
 
-        if (error) {
-            throw new Error(error.message || "Tasks could not be loaded from Supabase.");
-        }
+                const mapped = Array.isArray(result.data)
+                    ? result.data.map(mapSupabaseTask)
+                    : [];
 
-        return Array.isArray(data) ? data.map(mapSupabaseTask) : [];
+                supabaseTasksCache = mapped;
+                return mapped.slice();
+            })
+            .finally(function() {
+                supabaseTasksRequest = null;
+            });
+
+        return supabaseTasksRequest;
+    }
+
+    function invalidateSupabaseTasksCache() {
+        supabaseTasksCache = null;
     }
 
     function generateTaskId() {
@@ -3582,6 +3620,7 @@ body.dashboard-data-loading .dashboard-content {
             throw new Error(error.message || "The task could not be created.");
         }
 
+        invalidateSupabaseTasksCache();
         return mapSupabaseTask(data);
     }
 
@@ -3610,6 +3649,7 @@ body.dashboard-data-loading .dashboard-content {
             throw new Error("The task could not be updated. You may not be the assigned officer for this task.");
         }
 
+        invalidateSupabaseTasksCache();
         return mapSupabaseTask(data);
     }
 
@@ -3630,6 +3670,7 @@ body.dashboard-data-loading .dashboard-content {
             throw new Error("The task could not be deleted. Only the officer who assigned it can delete it.");
         }
 
+        invalidateSupabaseTasksCache();
         return true;
     }
 
@@ -4101,17 +4142,21 @@ body.dashboard-data-loading .dashboard-content {
         const scope = document.getElementById("tasksScopeLabel");
         if (scope) scope.textContent = IS_STEERING ? "ALL TASKS" : "MY TASKS";
     }
-    async function loadTasks() {
+    async function loadTasks(forceRefresh) {
         const list = document.getElementById("tasksList");
         const count = document.getElementById("tasksCountLabel");
         if (!list) return;
-        list.innerHTML = '<div class="tasks-empty"><strong>Loading tasks...</strong><span>Retrieving task records.</span></div>';
+        const hasCachedTasks = Array.isArray(supabaseTasksCache);
+        if (!hasCachedTasks) {
+            list.innerHTML = '<div class="tasks-empty"><strong>Loading tasks...</strong><span>Retrieving task records.</span></div>';
+        }
         try {
-            tasksData = await getSupabaseTasks();
+            tasksData = await getSupabaseTasks(forceRefresh === true);
             const visibleTasks = IS_STEERING ? tasksData : tasksData.filter(function(task) {
                 return normalizeUsername(getRecordValue(task, "Assigned To")) === normalizeUsername(CURRENT_USERNAME);
             });
             renderTasks(visibleTasks);
+            if (window.lucide) lucide.createIcons();
         } catch (error) {
             console.error("Task loading error:", error);
             list.innerHTML = '<div class="tasks-empty"><strong>Unable to load tasks</strong><span>' + escapeHtml(error.message || "Please try again.") + '</span></div>';
@@ -4177,7 +4222,9 @@ body.dashboard-data-loading .dashboard-content {
             }
 
             /* Only the officer who originally assigned the task can delete it. */
-            const canDelete = isCurrentOfficer(assignedBy);
+            const canDelete =
+                normalizeUsername(assignedBy) === normalizeUsername(CURRENT_USERNAME) ||
+                normalizeUsername(assignedBy) === normalizeUsername(currentOfficer && currentOfficer.Name);
 
             const deleteControl = canDelete
                 ? '<button type="button" class="task-delete-button" data-task-id="' + escapeHtml(taskId) + '" aria-label="Delete task" title="Delete task"><i data-lucide="trash-2"></i><span>DELETE</span></button>'
@@ -4278,7 +4325,9 @@ body.dashboard-data-loading .dashboard-content {
         try {
             await createSupabaseTask(taskData);
             if (status) status.textContent = "Task assigned successfully.";
-            await loadTasks();
+            await loadTasks(true);
+            await loadDashboardData();
+            await loadCalendarData();
             setTimeout(closeAssignTaskModal, 500);
         } catch (error) {
             console.error("Task assignment error:", error);
@@ -4337,7 +4386,7 @@ body.dashboard-data-loading .dashboard-content {
 
         try {
             await updateSupabaseTaskStatus(taskId, statusValue);
-            await loadTasks();
+            await loadTasks(true);
             await loadCalendarData();
             await loadDashboardData();
         } catch (error) {
@@ -4379,7 +4428,7 @@ body.dashboard-data-loading .dashboard-content {
         try {
             await deleteSupabaseTask(taskId);
 
-            await loadTasks();
+            await loadTasks(true);
             await loadCalendarData();
             await loadDashboardData();
         } catch (error) {
