@@ -93,6 +93,57 @@ body.dashboard-data-loading .dashboard-content {
 }
 .calendar-event-delete-button svg { width: 14px; height: 14px; }
 </style>
+
+<style>
+/* Dashboard Today's Availability - uniform officer list */
+.dashboard-available-officer-list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    margin-top: 2px;
+}
+
+.dashboard-available-officer {
+    position: relative;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 0 0 14px;
+    margin: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 400;
+    line-height: 1.35;
+    text-align: left;
+    cursor: pointer;
+    transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+.dashboard-available-officer::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 8px;
+    text-align: center;
+}
+
+.dashboard-available-officer:hover,
+.dashboard-available-officer:focus-visible {
+    color: var(--viz-accent, #ffffff);
+    opacity: 0.9;
+    outline: none;
+}
+
+.dashboard-available-officer:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+</style>
 </head>
 
 
@@ -5406,8 +5457,11 @@ body.dashboard-data-loading .dashboard-content {
     function renderDashboardAvailability() {
         const todayRecords = dashboardAvailabilityRecordsForToday();
         const activeNow = dashboardAvailabilityRecordsActiveNow();
-        const uniqueOfficers = dashboardUniqueAvailabilityOfficers(todayRecords);
         const myRecords = todayRecords.filter(dashboardRecordBelongsToCurrentOfficer);
+        const otherOfficerRecords = todayRecords.filter(function(record) {
+            return !dashboardRecordBelongsToCurrentOfficer(record);
+        });
+        const uniqueOfficers = dashboardUniqueAvailabilityOfficers(otherOfficerRecords);
         const myActiveNow = activeNow.filter(dashboardRecordBelongsToCurrentOfficer);
         const myDot = document.getElementById("dashboardMyAvailabilityDot");
         const myTitle = document.getElementById("dashboardMyAvailabilityTitle");
@@ -5422,7 +5476,7 @@ body.dashboard-data-loading .dashboard-content {
             return dashboardAvailabilityRangeText(getRecordValue(record, "Time"));
         }))];
 
-        const availableOfficers = todayRecords.map(function(record) {
+        const availableOfficers = otherOfficerRecords.map(function(record) {
             const username = normalizeUsername(getRecordValue(record, "Username"));
             const name = normalize(getRecordValue(record, "Officer Name"));
             return {
