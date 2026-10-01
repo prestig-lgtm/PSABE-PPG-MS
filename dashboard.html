@@ -5418,16 +5418,21 @@ body.dashboard-data-loading .dashboard-content {
     }
 
     function dashboardCanonicalDay(value) {
-        const key = normalize(value).toLowerCase().replace(/\./g, "");
+        const key = normalize(value)
+            .toLowerCase()
+            .replace(/\./g, "")
+            .replace(/\s+/g, "");
+
         const map = {
-            sunday: "sun", sun: "sun",
-            monday: "mon", mon: "mon",
-            tuesday: "tue", tue: "tue",
-            wednesday: "wed", wed: "wed",
-            thursday: "thu", thu: "thu",
-            friday: "fri", fri: "fri",
-            saturday: "sat", sat: "sat"
+            sunday: "sun", sun: "sun", su: "sun",
+            monday: "mon", mon: "mon", mo: "mon",
+            tuesday: "tue", tue: "tue", tu: "tue",
+            wednesday: "wed", wed: "wed", we: "wed",
+            thursday: "thu", thu: "thu", th: "thu",
+            friday: "fri", fri: "fri", fr: "fri",
+            saturday: "sat", sat: "sat", sa: "sat"
         };
+
         return map[key] || "";
     }
 
@@ -5476,13 +5481,46 @@ body.dashboard-data-loading .dashboard-content {
         return result;
     }
 
+    function dashboardCurrentOfficerIdentity() {
+        const identities = new Set();
+
+        [
+            CURRENT_USERNAME,
+            currentOfficer && currentOfficer.Username,
+            currentOfficer && currentOfficer.Name,
+            sessionStorage.getItem("psabeUsername"),
+            sessionStorage.getItem("psabeName")
+        ].forEach(function(value) {
+            const normalized = normalizeUsername(value);
+            if (normalized) identities.add(normalized);
+        });
+
+        return identities;
+    }
+
+    function dashboardOfficerDisplayName(record) {
+        const recordName = normalize(getRecordValue(record, "Officer Name"));
+        if (recordName) return recordName;
+
+        const username = normalizeUsername(getRecordValue(record, "Username"));
+        const officer = (Array.isArray(officersData) ? officersData : []).find(function(item) {
+            return normalizeUsername(getRecordValue(item, "Username")) === username;
+        });
+
+        return officer
+            ? normalize(getRecordValue(officer, "Name"))
+            : username;
+    }
+
     function dashboardRecordBelongsToCurrentOfficer(record) {
         const username = normalizeUsername(getRecordValue(record, "Username"));
-        const name = normalize(getRecordValue(record, "Officer Name"));
-        const currentUsername = normalizeUsername(CURRENT_USERNAME);
-        const currentName = normalize(currentOfficer.Name).toLowerCase();
-        return (username && username === currentUsername) ||
-               (name && name.toLowerCase() === currentName);
+        const name = normalizeUsername(getRecordValue(record, "Officer Name"));
+        const identities = dashboardCurrentOfficerIdentity();
+
+        if (username && identities.has(username)) return true;
+        if (name && identities.has(name)) return true;
+
+        return false;
     }
 
     function renderDashboardAvailability() {
@@ -5517,7 +5555,7 @@ body.dashboard-data-loading .dashboard-content {
 
         const availableOfficers = otherOfficerRecords.map(function(record) {
             const username = normalizeUsername(getRecordValue(record, "Username"));
-            const name = normalize(getRecordValue(record, "Officer Name"));
+            const name = dashboardOfficerDisplayName(record);
             return {
                 username: username,
                 name: name || username || "Officer"
@@ -5609,8 +5647,13 @@ body.dashboard-data-loading .dashboard-content {
 
         try {
 
-            /* Always read the shared availability table directly from Supabase. */
-            const result = await refreshSupabaseData("getAvailability");
+            /*
+               Availability is loaded independently from the dashboard's
+               other Supabase requests. Do not use the shared request/cache
+               wrapper here because another dashboard request must never be
+               able to prevent or mask the availability response.
+            */
+            const result = await fetchSupabaseData("getAvailability");
 
             if (!result || !result.success) {
                 throw new Error(
@@ -5620,13 +5663,21 @@ body.dashboard-data-loading .dashboard-content {
                 );
             }
 
-            if (Array.isArray(result.data)) {
-                availabilityRecords = result.data;
-            }
+            availabilityRecords = Array.isArray(result.data)
+                ? result.data
+                : [];
+
+            console.info(
+                "Availability loaded from Supabase:",
+                availabilityRecords.length,
+                "records"
+            );
 
             rebuildAvailabilityTableData();
             renderAvailabilityTable();
             renderDashboardAvailability();
+            initializeMyAvailability();
+            renderEditorTable();
 
         } catch (error) {
 
@@ -5635,8 +5686,8 @@ body.dashboard-data-loading .dashboard-content {
                 error
             );
 
-            /* Keep the last successfully loaded live data instead of
-               replacing it with an empty array when a refresh fails. */
+            /* Keep the last successfully loaded data visible on a transient
+               network failure instead of replacing it with an empty state. */
             rebuildAvailabilityTableData();
             renderAvailabilityTable();
             renderDashboardAvailability();
