@@ -5423,15 +5423,37 @@ body.dashboard-data-loading .dashboard-content {
         if (!today) return [];
 
         /*
-           The dashboard must reflect the availability actually saved in
-           Supabase for today. Do not reduce the result to only the current
-           30-minute slot. That made a valid saved schedule appear as
-           "Unavailable" whenever the current clock was outside that slot.
+           The dashboard availability preview is a TODAY view only.
+           Availability records for the other days of the week must never
+           appear here, even though they remain available to the full
+           Available Officers timetable.
         */
+        const dayMap = {
+            sunday: "sun",
+            monday: "mon",
+            tuesday: "tue",
+            wednesday: "wed",
+            thursday: "thu",
+            friday: "fri",
+            saturday: "sat",
+            sun: "sun",
+            mon: "mon",
+            tue: "tue",
+            wed: "wed",
+            thu: "thu",
+            fri: "fri",
+            sat: "sat"
+        };
+
         return availabilityRecords.filter(function(record) {
             const status = normalize(getRecordValue(record, "Status")).toLowerCase();
             if (status && status !== "available") return false;
-            return normalizeDay(getRecordValue(record, "Day")) === today;
+
+            const storedDay = normalize(getRecordValue(record, "Day"))
+                .toLowerCase()
+                .replace(/\./g, "");
+
+            return dayMap[storedDay] === today;
         });
     }
 
