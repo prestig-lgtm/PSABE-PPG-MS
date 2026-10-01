@@ -56,7 +56,7 @@
 
 /* Prevent hard-coded dashboard content from flashing before live data loads. */
 body.dashboard-data-loading .dashboard-content {
-    visibility: hidden;
+    visibility: visible;
 }
 
 
@@ -3562,7 +3562,7 @@ body.dashboard-data-loading .dashboard-content {
 
         supabaseTasksRequest = client
             .from("tasks")
-            .select("*")
+            .select("task_id,task_title,description,assigned_to,assigned_by,due_date,priority,status,created_at,updated_at")
             .order("due_date", { ascending: true, nullsFirst: false })
             .order("created_at", { ascending: false })
             .then(function(result) {
@@ -4233,10 +4233,12 @@ body.dashboard-data-loading .dashboard-content {
                 currentOfficer["Name"] ||
                 ""
             );
+            const sessionOfficerName = normalize(sessionStorage.getItem("psabeName") || "");
             const canDelete =
                 normalizeUsername(assignedBy) === normalizeUsername(CURRENT_USERNAME) ||
                 normalizeUsername(assignedBy) === normalizeUsername(currentOfficerUsername) ||
-                normalizeUsername(assignedBy) === normalizeUsername(currentOfficerName);
+                normalizeUsername(assignedBy) === normalizeUsername(currentOfficerName) ||
+                normalizeUsername(assignedBy) === normalizeUsername(sessionOfficerName);
 
             const deleteControl = canDelete
                 ? '<button type="button" class="task-delete-button" data-task-id="' + escapeHtml(taskId) + '" aria-label="Delete task" title="Delete task"><i data-lucide="trash-2"></i><span>DELETE</span></button>'
@@ -4429,7 +4431,14 @@ body.dashboard-data-loading .dashboard-content {
         }
 
         const assignedBy = getRecordValue(task, "Assigned By");
-        if (normalizeUsername(assignedBy) !== normalizeUsername(CURRENT_USERNAME)) {
+        const currentName = normalize(currentOfficer && (currentOfficer.Name || currentOfficer.name || ""));
+        const sessionOfficerName = normalize(sessionStorage.getItem("psabeName") || "");
+        const mayDelete =
+            normalizeUsername(assignedBy) === normalizeUsername(CURRENT_USERNAME) ||
+            normalizeUsername(assignedBy) === normalizeUsername(currentOfficer && (currentOfficer.Username || currentOfficer.username || "")) ||
+            normalizeUsername(assignedBy) === normalizeUsername(currentName) ||
+            normalizeUsername(assignedBy) === normalizeUsername(sessionOfficerName);
+        if (!mayDelete) {
             alert("Only the officer who assigned this task can delete it.");
             return;
         }
@@ -5727,38 +5736,40 @@ body.dashboard-data-loading .dashboard-content {
            revealing the dashboard. The remaining sections continue in the
            background so mobile users are not forced to wait for every page.
         */
-        Promise.all([
-            loadOfficerProfile(),
-            loadTasks(),
-            loadDashboardData()
-        ]).then(function () {
+        /*
+           Reveal the interface immediately. No remote request is allowed to
+           block the first paint on mobile. Each data source fills its own
+           section when it finishes loading.
+        */
+        document.body.classList.remove("dashboard-data-loading");
 
-            updateOfficerProfile();
-            updateDashboardGreeting();
-            document.body.classList.remove("dashboard-data-loading");
+        Promise.resolve().then(loadOfficerProfile).catch(function (error) {
+            console.error("Officer profile loading error:", error);
+        });
 
-            /* Background data. These do not block the first render. */
-            loadAvailability().then(function () {
-                renderOfficerDirectory();
-                renderAvailabilityTable();
-                renderDashboardAvailability();
-            }).catch(function (error) {
-                console.error("Availability background loading error:", error);
-            });
+        Promise.resolve().then(loadTasks).catch(function (error) {
+            console.error("Task loading error:", error);
+        });
 
-            loadCalendarData().catch(function (error) {
-                console.error("Calendar background loading error:", error);
-            });
+        Promise.resolve().then(loadDashboardData).catch(function (error) {
+            console.error("Dashboard loading error:", error);
+        });
 
-            loadAnnouncements().catch(function (error) {
-                console.error("Announcement background loading error:", error);
-            });
-
+        /* Background sections. None of these block the first render. */
+        Promise.resolve().then(loadAvailability).then(function () {
+            renderOfficerDirectory();
+            renderAvailabilityTable();
+            renderDashboardAvailability();
         }).catch(function (error) {
+            console.error("Availability background loading error:", error);
+        });
 
-            console.error("Initial dashboard loading error:", error);
-            document.body.classList.remove("dashboard-data-loading");
+        Promise.resolve().then(loadCalendarData).catch(function (error) {
+            console.error("Calendar background loading error:", error);
+        });
 
+        Promise.resolve().then(loadAnnouncements).catch(function (error) {
+            console.error("Announcement background loading error:", error);
         });
 
         // Keep dashboard information current without requiring a page reload.
