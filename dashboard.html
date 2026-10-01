@@ -5371,7 +5371,7 @@ body.dashboard-data-loading .dashboard-content {
     }
 
     function dashboardParseAvailabilityRange(value) {
-        const text = normalize(value).toUpperCase().replace(/[–—−-]/g, "–");
+        const text = normalize(value).toUpperCase().replace(/[–—−-]/g, "–").replace(/\s+/g, "");
         const parts = text.split("–");
         if (parts.length !== 2) return null;
 
