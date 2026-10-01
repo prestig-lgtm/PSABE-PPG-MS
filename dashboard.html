@@ -5418,31 +5418,23 @@ body.dashboard-data-loading .dashboard-content {
     }
 
     function dashboardAvailabilityRecordsForToday() {
-        const now = new Date();
-        const today = dashboardAvailabilityDayKey(now);
-        if (!today) return [];
-
         /*
-           The dashboard availability preview is a TODAY view only.
-           Availability records for the other days of the week must never
-           appear here, even though they remain available to the full
-           Available Officers timetable.
+           IMPORTANT: The dashboard preview is TODAY ONLY.
+           The full availabilityRecords array contains the officer's
+           schedules for every weekday. Never render that array directly
+           in the dashboard preview.
         */
+        const now = new Date();
+        const today = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][now.getDay()];
+
         const dayMap = {
-            sunday: "sun",
-            monday: "mon",
-            tuesday: "tue",
-            wednesday: "wed",
-            thursday: "thu",
-            friday: "fri",
-            saturday: "sat",
-            sun: "sun",
-            mon: "mon",
-            tue: "tue",
-            wed: "wed",
-            thu: "thu",
-            fri: "fri",
-            sat: "sat"
+            sunday: "sun", sun: "sun",
+            monday: "mon", mon: "mon",
+            tuesday: "tue", tue: "tue",
+            wednesday: "wed", wed: "wed",
+            thursday: "thu", thu: "thu",
+            friday: "fri", fri: "fri",
+            saturday: "sat", sat: "sat"
         };
 
         return availabilityRecords.filter(function(record) {
@@ -5453,7 +5445,16 @@ body.dashboard-data-loading .dashboard-content {
                 .toLowerCase()
                 .replace(/\./g, "");
 
-            return dayMap[storedDay] === today;
+            /* This is the critical filter: only rows whose Day equals
+               today's weekday are allowed into the dashboard preview. */
+            if (dayMap[storedDay] !== today) return false;
+
+            return Boolean(dashboardParseAvailabilityRange(getRecordValue(record, "Time")));
+        }).sort(function(a, b) {
+            const aRange = dashboardParseAvailabilityRange(getRecordValue(a, "Time"));
+            const bRange = dashboardParseAvailabilityRange(getRecordValue(b, "Time"));
+            return (aRange ? aRange.start : Number.MAX_SAFE_INTEGER) -
+                   (bRange ? bRange.start : Number.MAX_SAFE_INTEGER);
         });
     }
 
