@@ -5349,7 +5349,25 @@ body.dashboard-data-loading .dashboard-content {
     function dashboardAvailabilityRecordsForToday() {
         const now = new Date();
         const today = dashboardAvailabilityDayKey(now);
-        if (!today || !days.includes(today)) return [];
+        if (!today) return [];
+
+        /*
+           The dashboard must reflect the availability actually saved in
+           Supabase for today. Do not reduce the result to only the current
+           30-minute slot. That made a valid saved schedule appear as
+           "Unavailable" whenever the current clock was outside that slot.
+        */
+        return availabilityRecords.filter(function(record) {
+            const status = normalize(getRecordValue(record, "Status")).toLowerCase();
+            if (status && status !== "available") return false;
+            return normalizeDay(getRecordValue(record, "Day")) === today;
+        });
+    }
+
+    function dashboardAvailabilityRecordsActiveNow() {
+        const now = new Date();
+        const today = dashboardAvailabilityDayKey(now);
+        if (!today) return [];
 
         const nowMinutes = now.getHours() * 60 + now.getMinutes();
         return availabilityRecords.filter(function(record) {
@@ -5385,9 +5403,11 @@ body.dashboard-data-loading .dashboard-content {
     }
 
     function renderDashboardAvailability() {
-        const active = dashboardAvailabilityRecordsForToday();
-        const uniqueOfficers = dashboardUniqueAvailabilityOfficers(active);
-        const myRecords = active.filter(dashboardRecordBelongsToCurrentOfficer);
+        const todayRecords = dashboardAvailabilityRecordsForToday();
+        const activeNow = dashboardAvailabilityRecordsActiveNow();
+        const uniqueOfficers = dashboardUniqueAvailabilityOfficers(todayRecords);
+        const myRecords = todayRecords.filter(dashboardRecordBelongsToCurrentOfficer);
+        const myActiveNow = activeNow.filter(dashboardRecordBelongsToCurrentOfficer);
         const myDot = document.getElementById("dashboardMyAvailabilityDot");
         const myTitle = document.getElementById("dashboardMyAvailabilityTitle");
         const myTime = document.getElementById("dashboardMyAvailabilityTime");
@@ -5397,24 +5417,37 @@ body.dashboard-data-loading .dashboard-content {
         const availabilityValue = document.getElementById("dashboardAvailabilityValue");
         const availabilityLabel = document.getElementById("dashboardAvailabilityLabel");
 
-        const myRanges = myRecords.map(function(record) {
+        const myRanges = [...new Set(myRecords.map(function(record) {
             return dashboardAvailabilityRangeText(getRecordValue(record, "Time"));
-        });
+        }))];
 
-        if (myTitle) myTitle.textContent = myRecords.length ? "You are available" : "You are not available";
-        if (myTime) myTime.textContent = myRanges.length ? myRanges.join(" · ") : "No active availability right now";
-        if (myDot) myDot.classList.toggle("availability-dot-inactive", !myRecords.length);
+        const officerRanges = [...new Set(todayRecords.map(function(record) {
+            return dashboardAvailabilityRangeText(getRecordValue(record, "Time"));
+        }))];
+
+        if (myTitle) {
+            myTitle.textContent = myRecords.length
+                ? (myActiveNow.length ? "You are available now" : "You are available today")
+                : "You are not available";
+        }
+        if (myTime) {
+            myTime.textContent = myRanges.length
+                ? myRanges.join(" · ")
+                : "No availability saved for today";
+        }
+        if (myDot) myDot.classList.toggle("availability-dot-inactive", !myActiveNow.length);
 
         if (officersTitle) {
-            officersTitle.textContent = uniqueOfficers.length === 1 ? "1 officer available" : uniqueOfficers.length + " officers available";
+            officersTitle.textContent = uniqueOfficers.length === 1
+                ? "1 officer available today"
+                : uniqueOfficers.length + " officers available today";
         }
         if (officersTime) {
-            const ranges = [...new Set(active.map(function(record) {
-                return dashboardAvailabilityRangeText(getRecordValue(record, "Time"));
-            }))];
-            officersTime.textContent = ranges.length ? ranges.join(" · ") : "No officers available right now";
+            officersTime.textContent = officerRanges.length
+                ? officerRanges.join(" · ")
+                : "No availability saved for today";
         }
-        if (officersDot) officersDot.classList.toggle("availability-dot-inactive", !uniqueOfficers.length);
+        if (officersDot) officersDot.classList.toggle("availability-dot-inactive", !activeNow.length);
 
         if (availabilityValue) availabilityValue.textContent = myRecords.length ? "Available" : "Unavailable";
         if (availabilityLabel) availabilityLabel.textContent = "Today";
@@ -5424,13 +5457,20 @@ body.dashboard-data-loading .dashboard-content {
 
         try {
 
-            const result =
-                await fetchJson("getAvailability");
+            /* Always read the shared availability table directly from Supabase. */
+            const result = await refreshSupabaseData("getAvailability");
 
-            availabilityRecords =
-                Array.isArray(result.data)
-                    ? result.data
-                    : [];
+            if (!result || !result.success) {
+                throw new Error(
+                    result && result.message
+                        ? result.message
+                        : "Unable to load availability from Supabase."
+                );
+            }
+
+            availabilityRecords = Array.isArray(result.data)
+                ? result.data
+                : [];
 
             rebuildAvailabilityTableData();
             renderAvailabilityTable();
@@ -5439,11 +5479,12 @@ body.dashboard-data-loading .dashboard-content {
         } catch (error) {
 
             console.error(
-                "Unable to load availability:",
+                "Unable to load live availability:",
                 error
             );
 
-            availabilityRecords = [];
+            /* Keep the last successfully loaded live data instead of
+               replacing it with an empty array when a refresh fails. */
             rebuildAvailabilityTableData();
             renderAvailabilityTable();
             renderDashboardAvailability();
