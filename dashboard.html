@@ -1954,6 +1954,29 @@ body.dashboard-data-loading .dashboard-content {
         var calendarActivities = {};
     var calendarEventsData = [];
 
+    /* Shared calendar helpers. Keep these in the first script because the
+       calendar renderer executes before the later dashboard IIFE. */
+    function normalize(value) {
+        return String(value == null ? "" : value).trim();
+    }
+
+    function getRecordValue(record, key) {
+        if (!record || typeof record !== "object") return "";
+        if (Object.prototype.hasOwnProperty.call(record, key)) return record[key];
+        var target = String(key == null ? "" : key).trim().toLowerCase();
+        var foundKey = Object.keys(record).find(function (item) {
+            return String(item).trim().toLowerCase() === target;
+        });
+        return foundKey ? record[foundKey] : "";
+    }
+
+    function normalizeCalendarDate(value) {
+        var text = normalize(value);
+        if (!text) return "";
+        var match = text.match(/^(\d{4}-\d{2}-\d{2})/);
+        return match ? match[1] : text;
+    }
+
     /* Calendar script runs before the login/role IIFE. Expose the current
        access level here so selected-day rendering can safely use it. */
     var IS_STEERING = String(sessionStorage.getItem("psabeAccessLevel") || "Officer").trim().toLowerCase() === "steering";
