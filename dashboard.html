@@ -3659,7 +3659,6 @@ body.dashboard-data-loading .dashboard-content {
             .from("tasks")
             .delete()
             .eq("task_id", taskId)
-            .eq("assigned_by", CURRENT_USERNAME)
             .select("task_id")
             .maybeSingle();
 
@@ -4222,9 +4221,22 @@ body.dashboard-data-loading .dashboard-content {
             }
 
             /* Only the officer who originally assigned the task can delete it. */
+            const currentOfficerUsername = currentOfficer && (
+                currentOfficer.Username ||
+                currentOfficer.username ||
+                currentOfficer["Username"] ||
+                ""
+            );
+            const currentOfficerName = currentOfficer && (
+                currentOfficer.Name ||
+                currentOfficer.name ||
+                currentOfficer["Name"] ||
+                ""
+            );
             const canDelete =
                 normalizeUsername(assignedBy) === normalizeUsername(CURRENT_USERNAME) ||
-                normalizeUsername(assignedBy) === normalizeUsername(currentOfficer && currentOfficer.Name);
+                normalizeUsername(assignedBy) === normalizeUsername(currentOfficerUsername) ||
+                normalizeUsername(assignedBy) === normalizeUsername(currentOfficerName);
 
             const deleteControl = canDelete
                 ? '<button type="button" class="task-delete-button" data-task-id="' + escapeHtml(taskId) + '" aria-label="Delete task" title="Delete task"><i data-lucide="trash-2"></i><span>DELETE</span></button>'
@@ -5710,25 +5722,41 @@ body.dashboard-data-loading .dashboard-content {
            Load real data from Google Sheets after the page is ready.
         */
 
+        /*
+           Load only the data required for the first usable screen before
+           revealing the dashboard. The remaining sections continue in the
+           background so mobile users are not forced to wait for every page.
+        */
         Promise.all([
             loadOfficerProfile(),
-            loadAvailability(),
             loadTasks(),
-            loadCalendarData(),
-            loadDashboardData(),
-            loadAnnouncements()
+            loadDashboardData()
         ]).then(function () {
 
             updateOfficerProfile();
-            renderOfficerDirectory();
             updateDashboardGreeting();
-            renderAvailabilityTable();
-            renderDashboardAvailability();
+            document.body.classList.remove("dashboard-data-loading");
 
-        }).finally(function () {
+            /* Background data. These do not block the first render. */
+            loadAvailability().then(function () {
+                renderOfficerDirectory();
+                renderAvailabilityTable();
+                renderDashboardAvailability();
+            }).catch(function (error) {
+                console.error("Availability background loading error:", error);
+            });
 
-            // Only reveal dashboard content after the initial live-data pass
-            // has finished, preventing old hard-coded values from flashing.
+            loadCalendarData().catch(function (error) {
+                console.error("Calendar background loading error:", error);
+            });
+
+            loadAnnouncements().catch(function (error) {
+                console.error("Announcement background loading error:", error);
+            });
+
+        }).catch(function (error) {
+
+            console.error("Initial dashboard loading error:", error);
             document.body.classList.remove("dashboard-data-loading");
 
         });
