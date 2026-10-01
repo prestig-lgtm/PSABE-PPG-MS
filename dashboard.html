@@ -111,9 +111,10 @@ body.dashboard-data-loading .dashboard-content {
 }
 
 .dashboard-my-availability-times {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 3px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
     margin-top: 2px;
 }
 
@@ -121,12 +122,6 @@ body.dashboard-data-loading .dashboard-content {
     display: block;
     white-space: nowrap;
     line-height: 1.45;
-}
-
-@media (max-width: 560px) {
-    .dashboard-my-availability-times {
-        grid-template-columns: 1fr;
-    }
 }
 
 .dashboard-available-officer {
@@ -167,6 +162,33 @@ body.dashboard-data-loading .dashboard-content {
 .dashboard-available-officer:focus-visible {
     text-decoration: underline;
     text-underline-offset: 3px;
+}
+
+
+.dashboard-available-officer {
+    text-align: left;
+    cursor: pointer;
+    padding: 4px 0 5px 14px;
+}
+
+.dashboard-available-officer-name {
+    display: block;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.dashboard-available-officer-ranges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 10px;
+    margin-top: 2px;
+    color: rgba(255,255,255,.72);
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.dashboard-available-officer-range {
+    white-space: nowrap;
 }
 </style>
 </head>
@@ -5554,6 +5576,50 @@ body.dashboard-data-loading .dashboard-content {
         return dashboardFormatAvailabilityMinutes(parsed.start) + " – " + dashboardFormatAvailabilityMinutes(parsed.end);
     }
 
+    /*
+       Merge consecutive availability slots into continuous ranges.
+       Example:
+       8:00-8:30 + 8:30-9:00 + 9:00-9:30
+       becomes 8:00 AM – 9:30 AM.
+    */
+    function dashboardMergeAvailabilityRanges(records) {
+        const ranges = (Array.isArray(records) ? records : [])
+            .map(function(record) {
+                return dashboardParseAvailabilityRange(getRecordValue(record, "Time"));
+            })
+            .filter(Boolean)
+            .sort(function(a, b) {
+                if (a.start !== b.start) return a.start - b.start;
+                return a.end - b.end;
+            });
+
+        const merged = [];
+
+        ranges.forEach(function(range) {
+            const last = merged[merged.length - 1];
+
+            if (!last) {
+                merged.push({ start: range.start, end: range.end });
+                return;
+            }
+
+            if (range.start <= last.end) {
+                last.end = Math.max(last.end, range.end);
+                return;
+            }
+
+            merged.push({ start: range.start, end: range.end });
+        });
+
+        return merged;
+    }
+
+    function dashboardMergedAvailabilityText(records) {
+        return dashboardMergeAvailabilityRanges(records).map(function(range) {
+            return dashboardFormatAvailabilityMinutes(range.start) + " – " + dashboardFormatAvailabilityMinutes(range.end);
+        });
+    }
+
     function dashboardCanonicalDay(value) {
         const key = normalize(value)
             .toLowerCase()
@@ -5667,7 +5733,7 @@ body.dashboard-data-loading .dashboard-content {
         const otherOfficerRecords = todayRecords.filter(function(record) {
             return !dashboardRecordBelongsToCurrentOfficer(record);
         });
-        const uniqueOfficers = dashboardUniqueAvailabilityOfficers(otherOfficerRecords);
+
         const myActiveNow = activeNow.filter(dashboardRecordBelongsToCurrentOfficer);
         const myDot = document.getElementById("dashboardMyAvailabilityDot");
         const myTitle = document.getElementById("dashboardMyAvailabilityTitle");
@@ -5678,41 +5744,54 @@ body.dashboard-data-loading .dashboard-content {
         const availabilityValue = document.getElementById("dashboardAvailabilityValue");
         const availabilityLabel = document.getElementById("dashboardAvailabilityLabel");
 
-        const myRanges = [...new Map(myRecords.map(function(record) {
-            const parsed = dashboardParseAvailabilityRange(getRecordValue(record, "Time"));
-            const label = dashboardAvailabilityRangeText(getRecordValue(record, "Time"));
-            return [label, parsed ? parsed.start : Number.MAX_SAFE_INTEGER];
-        })).entries()]
-            .sort(function(a, b) {
-                return a[1] - b[1];
-            })
-            .map(function(entry) {
-                return entry[0];
-            });
+        /* Personal availability: merge adjacent 30-minute slots and sort chronologically. */
+        const myRanges = dashboardMergedAvailabilityText(myRecords);
 
-        const availableOfficers = otherOfficerRecords.map(function(record) {
+        /*
+           Available officers: group all of today's slots by officer, then merge
+           consecutive slots. This means the dashboard shows the actual continuous
+           availability of each officer instead of repeating every 30-minute slot.
+        */
+        const officerGroups = new Map();
+
+        otherOfficerRecords.forEach(function(record) {
             const username = normalizeUsername(getRecordValue(record, "Username"));
             const name = dashboardOfficerDisplayName(record);
-            return {
-                username: username,
-                name: name || username || "Officer"
-            };
-        }).filter(function(officer) {
-            return officer.name;
-        }).filter(function(officer, index, list) {
-            const key = officer.username || officer.name.toLowerCase();
-            return list.findIndex(function(item) {
-                return (item.username || item.name.toLowerCase()) === key;
-            }) === index;
-        }).sort(function(a, b) {
-            return a.name.localeCompare(b.name);
+            const key = username || name.toLowerCase();
+            if (!key) return;
+
+            if (!officerGroups.has(key)) {
+                officerGroups.set(key, {
+                    username: username,
+                    name: name || username || "Officer",
+                    records: []
+                });
+            }
+
+            officerGroups.get(key).records.push(record);
         });
+
+        const availableOfficers = Array.from(officerGroups.values())
+            .map(function(officer) {
+                return {
+                    username: officer.username,
+                    name: officer.name,
+                    ranges: dashboardMergedAvailabilityText(officer.records)
+                };
+            })
+            .filter(function(officer) {
+                return officer.name && officer.ranges.length;
+            })
+            .sort(function(a, b) {
+                return a.name.localeCompare(b.name);
+            });
 
         if (myTitle) {
             myTitle.textContent = myRecords.length
                 ? (myActiveNow.length ? "You are available now" : "You are available today")
                 : "You are not available";
         }
+
         if (myTime) {
             if (myRanges.length) {
                 myTime.classList.add("dashboard-my-availability-times");
@@ -5724,22 +5803,34 @@ body.dashboard-data-loading .dashboard-content {
                 myTime.textContent = "No availability saved for today";
             }
         }
+
         if (myDot) myDot.classList.toggle("availability-dot-inactive", !myActiveNow.length);
 
         if (officersTitle) {
-            officersTitle.textContent = uniqueOfficers.length === 1
+            officersTitle.textContent = availableOfficers.length === 1
                 ? "1 officer available today"
-                : uniqueOfficers.length + " officers available today";
+                : availableOfficers.length + " officers available today";
         }
+
         if (officersTime) {
             if (availableOfficers.length) {
                 officersTime.innerHTML = availableOfficers.map(function(officer) {
-                    return '<button type="button" class="dashboard-available-officer" data-availability-username="' + escapeHtml(officer.username) + '" data-availability-name="' + escapeHtml(officer.name) + '">' + escapeHtml(officer.name) + '</button>';
+                    const rangesHtml = officer.ranges.map(function(range) {
+                        return '<span class="dashboard-available-officer-range">' + escapeHtml(range) + '</span>';
+                    }).join("");
+
+                    return '<button type="button" class="dashboard-available-officer" data-availability-username="' +
+                        escapeHtml(officer.username) + '" data-availability-name="' +
+                        escapeHtml(officer.name) + '">' +
+                        '<span class="dashboard-available-officer-name">' + escapeHtml(officer.name) + '</span>' +
+                        '<span class="dashboard-available-officer-ranges">' + rangesHtml + '</span>' +
+                        '</button>';
                 }).join("");
             } else {
                 officersTime.textContent = "No officers available today";
             }
         }
+
         if (officersDot) officersDot.classList.toggle("availability-dot-inactive", !activeNow.length);
 
         if (availabilityValue) availabilityValue.textContent = myRecords.length ? "Available" : "Unavailable";
