@@ -92,6 +92,12 @@ body.dashboard-data-loading .dashboard-content {
     background: rgba(202, 166, 84, 0.10);
 }
 .calendar-event-delete-button svg { width: 14px; height: 14px; }
+
+
+/* =========================================================
+   SETTINGS / CHANGE PASSWORD
+========================================================= */
+.settings-page-header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:28px}.settings-page-header h1{margin:6px 0 8px}.settings-page-header p{margin:0;max-width:720px}.settings-panel{padding:0;overflow:hidden}.settings-section-header{padding:22px;border-bottom:1px solid rgba(255,255,255,.08)}.settings-section-header h2{margin:5px 0 5px;color:#fff;font-size:18px}.settings-section-header p{margin:0;color:rgba(255,255,255,.58);font-size:12px;line-height:1.55}.settings-password-form{max-width:620px;padding:22px;display:grid;gap:16px}.settings-password-field{display:grid;gap:7px}.settings-password-field label{font-size:10px;color:rgba(255,255,255,.62);font-weight:900;letter-spacing:.08em;text-transform:uppercase}.settings-password-input-wrap{position:relative;display:flex;align-items:center}.settings-password-input-wrap input{width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.13);background:#0d342c;color:#fff;border-radius:9px;padding:12px 48px 12px 13px;font:inherit;font-size:13px;outline:none}.settings-password-input-wrap input:focus{border-color:rgba(202,166,84,.7);box-shadow:0 0 0 3px rgba(202,166,84,.08)}.settings-password-toggle{position:absolute;right:6px;width:38px;height:38px;border:0;background:transparent;color:rgba(255,255,255,.58);display:grid;place-items:center;border-radius:7px;cursor:pointer}.settings-password-toggle:hover{color:#caa654;background:rgba(255,255,255,.05)}.settings-password-toggle svg{width:17px;height:17px}.settings-password-requirements{padding:12px 14px;border:1px solid rgba(255,255,255,.08);border-radius:9px;background:rgba(255,255,255,.03);color:rgba(255,255,255,.62);font-size:11px;line-height:1.5}.settings-password-requirements span{display:block;color:#fff;font-weight:800;margin-bottom:5px}.settings-password-requirements ul{margin:0;padding-left:18px}.settings-password-requirements li.valid{color:#a9d9b2}.settings-password-requirements li.invalid{color:#e59b9b}.settings-password-status{min-height:18px;font-size:11px;line-height:1.45}.settings-password-status.success{color:#a9d9b2}.settings-password-status.error{color:#e59b9b}.settings-password-status.info{color:#e3c878}.settings-password-actions{display:flex;justify-content:flex-end;gap:10px;padding-top:4px}.settings-password-actions button:disabled{opacity:.65;cursor:wait}@media(max-width:720px){.settings-page-header{align-items:flex-start;flex-direction:column}.settings-password-form{padding:18px}.settings-password-actions{flex-direction:column-reverse}.settings-password-actions button{width:100%}}
 </style>
 
 <style>
@@ -1728,6 +1734,79 @@ body.dashboard-data-loading .dashboard-content {
             </div>
 
             <!-- =================================================
+                 SETTINGS PAGE
+            ================================================== -->
+            <div id="settingsPage" class="page-section settings-page">
+                <div class="settings-page-header">
+                    <div>
+                        <p class="eyebrow">PSABE-PPG MANAGEMENT SYSTEM</p>
+                        <h1>Settings</h1>
+                        <p>Manage your account settings and password.</p>
+                    </div>
+                </div>
+
+                <section class="dashboard-panel settings-panel">
+                    <div class="settings-section-header">
+                        <div>
+                            <span class="panel-label">ACCOUNT SECURITY</span>
+                            <h2>Change Password</h2>
+                            <p>Update your password without changing your account or officer profile.</p>
+                        </div>
+                    </div>
+
+                    <form id="changePasswordForm" class="settings-password-form" autocomplete="off">
+                        <div class="settings-password-field">
+                            <label for="currentPasswordInput">Current Password</label>
+                            <div class="settings-password-input-wrap">
+                                <input id="currentPasswordInput" type="password" autocomplete="current-password" required>
+                                <button type="button" class="settings-password-toggle" data-password-target="currentPasswordInput" aria-label="Show current password">
+                                    <i data-lucide="eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="settings-password-field">
+                            <label for="newPasswordInput">New Password</label>
+                            <div class="settings-password-input-wrap">
+                                <input id="newPasswordInput" type="password" autocomplete="new-password" minlength="8" required>
+                                <button type="button" class="settings-password-toggle" data-password-target="newPasswordInput" aria-label="Show new password">
+                                    <i data-lucide="eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="settings-password-field">
+                            <label for="confirmPasswordInput">Confirm New Password</label>
+                            <div class="settings-password-input-wrap">
+                                <input id="confirmPasswordInput" type="password" autocomplete="new-password" minlength="8" required>
+                                <button type="button" class="settings-password-toggle" data-password-target="confirmPasswordInput" aria-label="Show confirmed password">
+                                    <i data-lucide="eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="settings-password-requirements">
+                            <span>Password requirements</span>
+                            <ul>
+                                <li id="passwordLengthRequirement">At least 8 characters</li>
+                                <li id="passwordMatchRequirement">New passwords must match</li>
+                            </ul>
+                        </div>
+
+                        <div id="changePasswordStatus" class="settings-password-status" aria-live="polite"></div>
+
+                        <div class="settings-password-actions">
+                            <button type="button" class="task-cancel-button" id="cancelChangePasswordButton">CANCEL</button>
+                            <button type="submit" class="steering-action-button" id="changePasswordButton">
+                                <i data-lucide="lock-keyhole"></i>
+                                CHANGE PASSWORD
+                            </button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+
+            <!-- =================================================
                  PLACEHOLDER PAGE FOR OTHER SECTIONS
             ================================================== -->
             <div id="placeholderPage" class="page-section">
@@ -2135,6 +2214,12 @@ body.dashboard-data-loading .dashboard-content {
                     );
 
 
+                const settingsPage =
+                    document.getElementById(
+                        "settingsPage"
+                    );
+
+
                 const placeholderPage =
                     document.getElementById(
                         "placeholderPage"
@@ -2342,6 +2427,23 @@ body.dashboard-data-loading .dashboard-content {
                         if (typeof window.loadAnnouncements === "function") {
                             window.loadAnnouncements();
                         }
+
+                    }
+
+
+                    else if (
+                        page === "settings"
+                    ) {
+
+                        if (settingsPage) {
+                            settingsPage.classList.add(
+                                "active-page"
+                            );
+                        }
+
+                        setActiveNavigation(
+                            "settings"
+                        );
 
                     }
 
@@ -5541,30 +5643,17 @@ body.dashboard-data-loading .dashboard-content {
         const availabilityValue = document.getElementById("dashboardAvailabilityValue");
         const availabilityLabel = document.getElementById("dashboardAvailabilityLabel");
 
-        // Keep the user's availability in chronological sequence and merge
-        // consecutive/overlapping 30-minute slots into one continuous range.
-        const myRanges = (function() {
-            const ranges = myRecords.map(function(record) {
-                return dashboardParseAvailabilityRange(getRecordValue(record, "Time"));
-            }).filter(Boolean).sort(function(a, b) {
-                return a.start - b.start;
+        const myRanges = [...new Map(myRecords.map(function(record) {
+            const parsed = dashboardParseAvailabilityRange(getRecordValue(record, "Time"));
+            const label = dashboardAvailabilityRangeText(getRecordValue(record, "Time"));
+            return [label, parsed ? parsed.start : Number.MAX_SAFE_INTEGER];
+        })).entries()]
+            .sort(function(a, b) {
+                return a[1] - b[1];
+            })
+            .map(function(entry) {
+                return entry[0];
             });
-
-            const merged = [];
-            ranges.forEach(function(range) {
-                const last = merged[merged.length - 1];
-                if (last && range.start <= last.end) {
-                    last.end = Math.max(last.end, range.end);
-                } else {
-                    merged.push({ start: range.start, end: range.end });
-                }
-            });
-
-            return merged.map(function(range) {
-                return dashboardFormatAvailabilityMinutes(range.start) + " – " +
-                       dashboardFormatAvailabilityMinutes(range.end);
-            });
-        })();
 
         const availableOfficers = otherOfficerRecords.map(function(record) {
             const username = normalizeUsername(getRecordValue(record, "Username"));
@@ -6399,6 +6488,158 @@ body.dashboard-data-loading .dashboard-content {
             renderDashboardAvailability();
         }, 15000);
     }
+
+
+    /* =====================================================
+       CHANGE PASSWORD
+    ===================================================== */
+    (function initializeChangePassword() {
+        const form = document.getElementById("changePasswordForm");
+        if (!form) return;
+
+        const currentInput = document.getElementById("currentPasswordInput");
+        const newInput = document.getElementById("newPasswordInput");
+        const confirmInput = document.getElementById("confirmPasswordInput");
+        const status = document.getElementById("changePasswordStatus");
+        const submitButton = document.getElementById("changePasswordButton");
+        const cancelButton = document.getElementById("cancelChangePasswordButton");
+        const lengthRequirement = document.getElementById("passwordLengthRequirement");
+        const matchRequirement = document.getElementById("passwordMatchRequirement");
+
+        function setStatus(message, type) {
+            status.textContent = message || "";
+            status.className = "settings-password-status" + (type ? " " + type : "");
+        }
+
+        function updateRequirements() {
+            const hasMinimumLength = newInput.value.length >= 8;
+            const passwordsMatch =
+                newInput.value.length > 0 &&
+                newInput.value === confirmInput.value;
+
+            lengthRequirement.classList.toggle("valid", hasMinimumLength);
+            lengthRequirement.classList.toggle("invalid", newInput.value.length > 0 && !hasMinimumLength);
+            matchRequirement.classList.toggle("valid", passwordsMatch);
+            matchRequirement.classList.toggle("invalid", confirmInput.value.length > 0 && !passwordsMatch);
+        }
+
+        function togglePasswordField(button) {
+            const target = document.getElementById(button.dataset.passwordTarget);
+            if (!target) return;
+
+            const visible = target.type === "text";
+            target.type = visible ? "password" : "text";
+            button.setAttribute("aria-label", visible ? "Show password" : "Hide password");
+
+            const icon = button.querySelector("i");
+            if (icon) {
+                icon.setAttribute("data-lucide", visible ? "eye" : "eye-off");
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            }
+        }
+
+        form.querySelectorAll(".settings-password-toggle").forEach(function (button) {
+            button.addEventListener("click", function () {
+                togglePasswordField(button);
+            });
+        });
+
+        newInput.addEventListener("input", updateRequirements);
+        confirmInput.addEventListener("input", updateRequirements);
+
+        cancelButton.addEventListener("click", function () {
+            form.reset();
+            updateRequirements();
+            setStatus("", "");
+        });
+
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const currentPassword = currentInput.value;
+            const newPassword = newInput.value;
+            const confirmPassword = confirmInput.value;
+            const username = (CURRENT_USERNAME || "").trim().toLowerCase();
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                setStatus("Please complete all password fields.", "error");
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                setStatus("Your new password must contain at least 8 characters.", "error");
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                setStatus("The new passwords do not match.", "error");
+                return;
+            }
+
+            if (!username) {
+                setStatus("Unable to identify your account. Please sign in again.", "error");
+                return;
+            }
+
+            const authEmail = username.includes("@")
+                ? username
+                : username + "@psabeppg.local";
+
+            submitButton.disabled = true;
+            cancelButton.disabled = true;
+            submitButton.innerHTML = "<span>UPDATING...</span>";
+            setStatus("Verifying your current password...", "info");
+
+            try {
+                const client = ensureSupabaseDashboard();
+
+                /* Re-authenticate in this dashboard page because this client
+                   intentionally does not persist the Supabase session. */
+                const signInResult = await client.auth.signInWithPassword({
+                    email: authEmail,
+                    password: currentPassword
+                });
+
+                if (signInResult.error || !signInResult.data || !signInResult.data.user) {
+                    console.error("Current password verification error:", signInResult.error);
+                    setStatus("The current password is incorrect.", "error");
+                    return;
+                }
+
+                setStatus("Updating your password...", "info");
+
+                const updateResult = await client.auth.updateUser({
+                    password: newPassword,
+                    current_password: currentPassword
+                });
+
+                if (updateResult.error) {
+                    console.error("Password update error:", updateResult.error);
+                    setStatus(updateResult.error.message || "Unable to update your password.", "error");
+                    return;
+                }
+
+                form.reset();
+                updateRequirements();
+                setStatus("Your password has been changed successfully.", "success");
+
+            } catch (error) {
+                console.error("Change password error:", error);
+                setStatus("Unable to change your password right now. Please try again.", "error");
+            } finally {
+                submitButton.disabled = false;
+                cancelButton.disabled = false;
+                submitButton.innerHTML = '<i data-lucide="lock-keyhole"></i> CHANGE PASSWORD';
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            }
+        });
+
+        updateRequirements();
+    })();
 
 
     /* =====================================================
