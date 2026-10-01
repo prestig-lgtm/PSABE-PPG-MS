@@ -3186,7 +3186,7 @@ body.dashboard-data-loading .dashboard-content {
                             deleteButton.className = "calendar-event-delete-button";
                             deleteButton.innerHTML = '<i data-lucide="trash-2"></i><span>DELETE EVENT</span>';
                             deleteButton.addEventListener("click", function () {
-                                deleteCalendarEvent(activity.eventId);
+                                window.deleteCalendarEvent(activity.eventId);
                             });
                             card.appendChild(deleteButton);
                         }
@@ -4557,6 +4557,11 @@ body.dashboard-data-loading .dashboard-content {
             setTimeout(closeScheduleEventModal,500);
         }catch(error){console.error("Activity scheduling error:",error);if(status)status.textContent=error.message||"The activity could not be scheduled.";}finally{if(saveButton)saveButton.disabled=false;}
     }
+
+    // Expose the Supabase event deletion handler to the calendar renderer in the first script.
+    window.deleteCalendarEvent = async function(eventId) {
+        return deleteCalendarEvent(eventId);
+    };
 
     async function deleteCalendarEvent(eventId) {
         if (!IS_STEERING || !eventId || !window.psabeSupabase) return;
