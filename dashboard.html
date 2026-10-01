@@ -6296,32 +6296,32 @@ body.dashboard-data-loading .dashboard-content {
            Availability, officer profile, and announcements continue in the
            background so a large Google Sheet does not block the first view.
         */
-        Promise.all([
-            loadTasks(),
-            loadDashboardData()
+        /*
+           Load each data source independently. A failure in Tasks, Events,
+           or another dashboard section must never prevent Availability from
+           loading. Availability is a separate Supabase-backed feature.
+        */
+        loadTasks().catch(function (error) {
+            console.error("Task loading error:", error);
+        });
+
+        loadDashboardData().catch(function (error) {
+            console.error("Dashboard data loading error:", error);
+        });
+
+        Promise.allSettled([
+            loadOfficerProfile(),
+            loadAvailability(),
+            loadAnnouncements()
         ]).then(function () {
-
+            updateOfficerProfile();
+            renderOfficerDirectory();
             updateDashboardGreeting();
-            document.body.classList.remove("dashboard-data-loading");
-
-            /* Non-blocking dashboard extras. */
-            Promise.all([
-                loadOfficerProfile(),
-                loadAvailability(),
-                loadAnnouncements()
-            ]).then(function () {
-                updateOfficerProfile();
-                renderOfficerDirectory();
-                updateDashboardGreeting();
-                renderAvailabilityTable();
-                renderDashboardAvailability();
-            }).catch(function (error) {
-                console.error("Background dashboard data loading error:", error);
-            });
-
+            renderAvailabilityTable();
+            renderDashboardAvailability();
         }).catch(function (error) {
-            console.error("Critical dashboard data loading error:", error);
-            /* Never leave the user staring at the loading state. */
+            console.error("Background dashboard data loading error:", error);
+        }).finally(function () {
             document.body.classList.remove("dashboard-data-loading");
         });
 
