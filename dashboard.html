@@ -990,9 +990,9 @@ body.dashboard-data-loading .dashboard-content {
                                         Checking officers...
                                     </strong>
 
-                                    <small id="dashboardOfficersAvailabilityTime">
-                                        Loading today's schedule
-                                    </small>
+                                    <div id="dashboardOfficersAvailabilityTime" class="dashboard-available-officer-list" aria-live="polite">
+                                        Loading officers...
+                                    </div>
 
                                 </div>
 
@@ -1616,7 +1616,7 @@ body.dashboard-data-loading .dashboard-content {
                     </div>
                     <div class="officer-availability-body">
                         <div class="officer-availability-summary">
-                            <span class="officer-directory-status active"><span></span>LIVE FROM GOOGLE SHEETS</span>
+                            <span class="officer-directory-status active"><span></span>LIVE FROM SUPABASE</span>
                         </div>
                         <div class="officer-week-grid" id="officerAvailabilityGrid"></div>
                     </div>
@@ -5187,6 +5187,7 @@ body.dashboard-data-loading .dashboard-content {
         }
         renderOfficerDirectory();
         initializeOfficerAvailabilityModal();
+    initializeDashboardOfficerAvailability();
     }
 
 
@@ -5421,9 +5422,23 @@ body.dashboard-data-loading .dashboard-content {
             return dashboardAvailabilityRangeText(getRecordValue(record, "Time"));
         }))];
 
-        const officerRanges = [...new Set(todayRecords.map(function(record) {
-            return dashboardAvailabilityRangeText(getRecordValue(record, "Time"));
-        }))];
+        const availableOfficers = todayRecords.map(function(record) {
+            const username = normalizeUsername(getRecordValue(record, "Username"));
+            const name = normalize(getRecordValue(record, "Officer Name"));
+            return {
+                username: username,
+                name: name || username || "Officer"
+            };
+        }).filter(function(officer) {
+            return officer.name;
+        }).filter(function(officer, index, list) {
+            const key = officer.username || officer.name.toLowerCase();
+            return list.findIndex(function(item) {
+                return (item.username || item.name.toLowerCase()) === key;
+            }) === index;
+        }).sort(function(a, b) {
+            return a.name.localeCompare(b.name);
+        });
 
         if (myTitle) {
             myTitle.textContent = myRecords.length
@@ -5443,14 +5458,52 @@ body.dashboard-data-loading .dashboard-content {
                 : uniqueOfficers.length + " officers available today";
         }
         if (officersTime) {
-            officersTime.textContent = officerRanges.length
-                ? officerRanges.join(" · ")
-                : "No availability saved for today";
+            if (availableOfficers.length) {
+                officersTime.innerHTML = availableOfficers.map(function(officer) {
+                    return '<button type="button" class="dashboard-available-officer" data-availability-username="' + escapeHtml(officer.username) + '" data-availability-name="' + escapeHtml(officer.name) + '">' + escapeHtml(officer.name) + '</button>';
+                }).join("");
+            } else {
+                officersTime.textContent = "No officers available today";
+            }
         }
         if (officersDot) officersDot.classList.toggle("availability-dot-inactive", !activeNow.length);
 
         if (availabilityValue) availabilityValue.textContent = myRecords.length ? "Available" : "Unavailable";
         if (availabilityLabel) availabilityLabel.textContent = "Today";
+    }
+
+    function initializeDashboardOfficerAvailability() {
+        const container = document.getElementById("dashboardOfficersAvailability");
+        if (!container || container.dataset.availabilityClickBound) return;
+
+        container.addEventListener("click", function(event) {
+            const button = event.target.closest(".dashboard-available-officer");
+            if (!button) return;
+
+            const username = button.dataset.availabilityUsername || "";
+            const name = button.dataset.availabilityName || "";
+            const officer = (Array.isArray(officersData) ? officersData : []).find(function(item) {
+                return normalizeUsername(getRecordValue(item, "Username")) === normalizeUsername(username) ||
+                       normalize(getRecordValue(item, "Name")).toLowerCase() === normalize(name).toLowerCase();
+            });
+
+            if (officer) {
+                openOfficerAvailabilityModal({
+                    Username: getRecordValue(officer, "Username"),
+                    Name: getRecordValue(officer, "Name"),
+                    Position: getRecordValue(officer, "Position")
+                });
+                return;
+            }
+
+            openOfficerAvailabilityModal({
+                Username: username,
+                Name: name,
+                Position: "Position not specified"
+            });
+        });
+
+        container.dataset.availabilityClickBound = "true";
     }
 
     async function loadAvailability() {
