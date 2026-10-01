@@ -4302,14 +4302,75 @@ body.dashboard-data-loading .dashboard-content {
         updateDashboardGreeting();
 
         try {
+            /*
+               Dashboard reads go directly to Supabase on every refresh.
+               This deliberately bypasses the short-lived IndexedDB cache so
+               changes made by another officer are reflected on the dashboard.
+            */
             const results = await Promise.all([
-                fetchJson("getTasks"),
-                fetchJson("getEvents")
+                refreshSupabaseData("getTasks"),
+                refreshSupabaseData("getEvents"),
+                refreshSupabaseData("getMeetings"),
+                refreshSupabaseData("getAvailability"),
+                refreshSupabaseData("getOfficers"),
+                refreshSupabaseData("getAnnouncements")
             ]);
 
-            const tasks = Array.isArray(results[0].data) ? results[0].data : [];
-            const events = Array.isArray(results[1].data) ? results[1].data : [];
+            const tasks = results[0] && Array.isArray(results[0].data)
+                ? results[0].data
+                : [];
 
+            const eventRows = results[1] && Array.isArray(results[1].data)
+                ? results[1].data
+                : [];
+
+            const meetingRows = results[2] && Array.isArray(results[2].data)
+                ? results[2].data
+                : [];
+
+            const events = eventRows.concat(meetingRows.map(function (meeting) {
+                return {
+                    "Event ID": getRecordValue(meeting, "Meeting ID"),
+                    Title: getRecordValue(meeting, "Title"),
+                    Description: getRecordValue(meeting, "Description"),
+                    Date: getRecordValue(meeting, "Date"),
+                    "Start Time": getRecordValue(meeting, "Start Time"),
+                    "End Time": getRecordValue(meeting, "End Time"),
+                    Location: getRecordValue(meeting, "Location"),
+                    Type: "Meeting",
+                    Status: getRecordValue(meeting, "Status"),
+                    "Created By": getRecordValue(meeting, "Created By")
+                };
+            }));
+
+            availabilityRecords = results[3] && Array.isArray(results[3].data)
+                ? results[3].data
+                : [];
+
+            officersData = results[4] && Array.isArray(results[4].data)
+                ? results[4].data
+                : [];
+
+            announcementsData = results[5] && Array.isArray(results[5].data)
+                ? results[5].data
+                : [];
+
+            const currentUsername = normalizeUsername(CURRENT_USERNAME);
+            const freshOfficer = officersData.find(function (officer) {
+                return normalizeUsername(getRecordValue(officer, "Username")) === currentUsername;
+            });
+
+            if (freshOfficer) {
+                currentOfficer = freshOfficer;
+                updateOfficerProfile();
+            }
+
+            rebuildAvailabilityTableData();
+            renderAvailabilityTable();
+            renderDashboardAvailability();
+            renderOfficerDirectory();
+            renderAnnouncements();
+            updateDashboardAnnouncement();
             renderLiveDashboard(tasks, events);
         } catch (error) {
             console.error("Dashboard data loading error:", error);
@@ -6075,10 +6136,7 @@ body.dashboard-data-loading .dashboard-content {
         setInterval(function () {
             updateDashboardGreeting();
             loadDashboardData();
-            loadAnnouncements();
-            loadAvailability();
-            loadOfficerProfile();
-        }, 60000);
+        }, 15000);
 
         setInterval(function () {
             renderDashboardAvailability();
