@@ -4413,9 +4413,9 @@ body.dashboard-data-loading .dashboard-content {
                 };
             }));
 
-            availabilityRecords = results[3] && Array.isArray(results[3].data)
-                ? results[3].data
-                : [];
+            if (results[3] && results[3].success && Array.isArray(results[3].data)) {
+                availabilityRecords = results[3].data;
+            }
 
             officersData = results[4] && Array.isArray(results[4].data)
                 ? results[4].data
@@ -5417,17 +5417,9 @@ body.dashboard-data-loading .dashboard-content {
         return dashboardFormatAvailabilityMinutes(parsed.start) + " – " + dashboardFormatAvailabilityMinutes(parsed.end);
     }
 
-    function dashboardAvailabilityRecordsForToday() {
-        /*
-           IMPORTANT: The dashboard preview is TODAY ONLY.
-           The full availabilityRecords array contains the officer's
-           schedules for every weekday. Never render that array directly
-           in the dashboard preview.
-        */
-        const now = new Date();
-        const today = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][now.getDay()];
-
-        const dayMap = {
+    function dashboardCanonicalDay(value) {
+        const key = normalize(value).toLowerCase().replace(/\./g, "");
+        const map = {
             sunday: "sun", sun: "sun",
             monday: "mon", mon: "mon",
             tuesday: "tue", tue: "tue",
@@ -5436,19 +5428,17 @@ body.dashboard-data-loading .dashboard-content {
             friday: "fri", fri: "fri",
             saturday: "sat", sat: "sat"
         };
+        return map[key] || "";
+    }
+
+    function dashboardAvailabilityRecordsForToday() {
+        const now = new Date();
+        const today = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][now.getDay()];
 
         return availabilityRecords.filter(function(record) {
             const status = normalize(getRecordValue(record, "Status")).toLowerCase();
             if (status && status !== "available") return false;
-
-            const storedDay = normalize(getRecordValue(record, "Day"))
-                .toLowerCase()
-                .replace(/\./g, "");
-
-            /* This is the critical filter: only rows whose Day equals
-               today's weekday are allowed into the dashboard preview. */
-            if (dayMap[storedDay] !== today) return false;
-
+            if (dashboardCanonicalDay(getRecordValue(record, "Day")) !== today) return false;
             return Boolean(dashboardParseAvailabilityRange(getRecordValue(record, "Time")));
         }).sort(function(a, b) {
             const aRange = dashboardParseAvailabilityRange(getRecordValue(a, "Time"));
@@ -5460,14 +5450,13 @@ body.dashboard-data-loading .dashboard-content {
 
     function dashboardAvailabilityRecordsActiveNow() {
         const now = new Date();
-        const today = dashboardAvailabilityDayKey(now);
-        if (!today) return [];
-
+        const today = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][now.getDay()];
         const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
         return availabilityRecords.filter(function(record) {
             const status = normalize(getRecordValue(record, "Status")).toLowerCase();
             if (status && status !== "available") return false;
-            if (normalizeDay(getRecordValue(record, "Day")) !== today) return false;
+            if (dashboardCanonicalDay(getRecordValue(record, "Day")) !== today) return false;
             const parsed = dashboardParseAvailabilityRange(getRecordValue(record, "Time"));
             return parsed && nowMinutes >= parsed.start && nowMinutes < parsed.end;
         });
@@ -5631,9 +5620,9 @@ body.dashboard-data-loading .dashboard-content {
                 );
             }
 
-            availabilityRecords = Array.isArray(result.data)
-                ? result.data
-                : [];
+            if (Array.isArray(result.data)) {
+                availabilityRecords = result.data;
+            }
 
             rebuildAvailabilityTableData();
             renderAvailabilityTable();
