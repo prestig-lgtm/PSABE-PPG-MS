@@ -3474,9 +3474,34 @@ body.dashboard-data-loading .dashboard-content {
                             } catch (error) {
                                 console.error("Supabase sign-out error:", error);
                             } finally {
-                                sessionStorage.clear();
-                                await clearLocalCache();
-                                window.location.replace("index.html");
+                                /*
+                                   Clear the login state immediately.
+                                   Do NOT wait for the dashboard cache to clear
+                                   before leaving the dashboard, because a slow
+                                   IndexedDB/cache operation can make logout
+                                   appear to do nothing until the page is refreshed.
+                                */
+                                try {
+                                    sessionStorage.clear();
+                                } catch (storageError) {
+                                    console.error("Session clear error:", storageError);
+                                }
+
+                                /* Clear the dashboard cache in the background.
+                                   Logout must not depend on this operation finishing. */
+                                try {
+                                    const cachePromise = clearLocalCache();
+                                    if (cachePromise && typeof cachePromise.catch === "function") {
+                                        cachePromise.catch(function (cacheError) {
+                                            console.error("Dashboard cache clear error:", cacheError);
+                                        });
+                                    }
+                                } catch (cacheError) {
+                                    console.error("Dashboard cache clear error:", cacheError);
+                                }
+
+                                /* Force a fresh navigation to the login page. */
+                                window.location.replace("index.html?loggedout=1");
                             }
 
                         }
