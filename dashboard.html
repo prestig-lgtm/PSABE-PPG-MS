@@ -3378,171 +3378,217 @@ body.dashboard-data-loading .dashboard-content {
        GOOGLE APPS SCRIPT SETTINGS
     ===================================================== */
 
-    /* Google Apps Script data access removed. Dashboard data now uses Supabase. */
+    const API_URL = "https://script.google.com/macros/s/AKfycbzTZORNDMsHLxoPeOLNAHurKurC14whoFKxT10RVPyCxP-z9H03slRLTUyhVx7tkyMW/exec";
+
+    /* =====================================================
+       SUPABASE TASK DATABASE
+       Task data is now stored in public.tasks. Other existing
+       Google Apps Script features remain unchanged.
+    ===================================================== */
+    const SUPABASE_URL = "https://dwzcyupoenjafgtdijla.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_s4VaYFDHxE3I9jgK2reWHw_zQ8VPVwd";
+    const supabaseClient = window.supabase
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
+        : null;
 
 
     /* =====================================================
-       SUPABASE OFFICER / AVAILABILITY / ANNOUNCEMENT HELPERS
+       ROLE / ACCESS LEVEL
+       Steering       = management access
+       Committee Head = regular access for now
+       Officer        = regular access
     ===================================================== */
-    function ensureSupabaseDashboard() {
-        if (!supabaseClient) {
-            throw new Error("Supabase could not be initialized. Please check the Supabase client library.");
+
+    const CURRENT_ACCESS_LEVEL =
+        (sessionStorage.getItem("psabeAccessLevel") || "Officer").trim();
+
+    const IS_STEERING =
+        CURRENT_ACCESS_LEVEL.toLowerCase() === "steering";
+
+    const IS_COMMITTEE_HEAD =
+        CURRENT_ACCESS_LEVEL.toLowerCase() === "committee head";
+
+    const IS_OFFICER =
+        CURRENT_ACCESS_LEVEL.toLowerCase() === "officer";
+
+    const CURRENT_USERNAME =
+        sessionStorage.getItem("psabeUsername") || "Mac";
+
+
+    /* =====================================================
+       AVAILABILITY SETTINGS
+    ===================================================== */
+
+    const timeSlots = [
+        "7:00 AM - 7:30 AM",
+        "7:30 AM - 8:00 AM",
+        "8:00 AM - 8:30 AM",
+        "8:30 AM - 9:00 AM",
+        "9:00 AM - 9:30 AM",
+        "9:30 AM - 10:00 AM",
+        "10:00 AM - 10:30 AM",
+        "10:30 AM - 11:00 AM",
+        "11:00 AM - 11:30 AM",
+        "11:30 AM - 12:00 NN",
+        "12:00 NN - 12:30 PM",
+        "12:30 PM - 1:00 PM",
+        "1:00 PM - 1:30 PM",
+        "1:30 PM - 2:00 PM",
+        "2:00 PM - 2:30 PM",
+        "2:30 PM - 3:00 PM",
+        "3:00 PM - 3:30 PM",
+        "3:30 PM - 4:00 PM",
+        "4:00 PM - 4:30 PM",
+        "4:30 PM - 5:00 PM",
+        "5:00 PM - 5:30 PM",
+        "5:30 PM - 6:00 PM",
+        "6:00 PM - 6:30 PM",
+        "6:30 PM - 7:00 PM",
+        "7:00 PM - 7:30 PM"
+    ];
+
+    const days = [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri"
+    ];
+
+
+    /* =====================================================
+       DATA
+    ===================================================== */
+
+    let officerAvailability = {};
+    let availabilityRecords = [];
+    let officersData = [];
+    let currentOfficer = {
+        Username: CURRENT_USERNAME,
+        Name:
+            sessionStorage.getItem("psabeName") ||
+            "MC RJ Escote",
+        Position:
+            sessionStorage.getItem("psabePosition") ||
+            "Vice President",
+        Status:
+            sessionStorage.getItem("psabeStatus") ||
+            "Active"
+    };
+
+    let myAvailability = {};
+
+
+    /* =====================================================
+       HELPERS
+    ===================================================== */
+
+    function normalize(value) {
+        return String(value == null ? "" : value).trim();
+    }
+
+
+    function normalizeUsername(value) {
+        return normalize(value).toLowerCase();
+    }
+
+
+    function isCurrentOfficer(value) {
+        const candidate = normalizeUsername(value);
+        if (!candidate) return false;
+
+        const username = normalizeUsername(CURRENT_USERNAME);
+        const name = normalizeUsername(currentOfficer && currentOfficer.Name);
+
+        return candidate === username || (name && candidate === name);
+    }
+
+
+    function normalizeDay(value) {
+        return normalize(value).toLowerCase();
+    }
+
+
+    function normalizeTime(value) {
+        return normalize(value)
+            .replace(/[–—−-]/g, "–")
+            .replace(/\s+/g, "")
+            .toUpperCase();
+    }
+
+
+    function getRecordValue(record, key) {
+        if (!record || typeof record !== "object") return "";
+
+        if (Object.prototype.hasOwnProperty.call(record, key)) {
+            return record[key];
         }
-        return supabaseClient;
+
+        const target = String(key).trim().toLowerCase();
+        const foundKey = Object.keys(record).find(function (item) {
+            return String(item).trim().toLowerCase() === target;
+        });
+
+        return foundKey ? record[foundKey] : "";
     }
 
-    function mapSupabaseOfficer(row) {
-        return {
-            Username: row.username || "",
-            Name: row.name || "",
-            Position: row.position || "",
-            Status: row.status || "Active",
-            "Access Level": row.access_level || "Officer"
-        };
+
+    function isApiConfigured() {
+        return Boolean(
+            API_URL &&
+            API_URL !== "YOUR_GOOGLE_APPS_SCRIPT_EXEC_URL"
+        );
     }
 
-    let supabaseOfficersCache = null;
-    let supabaseOfficersRequest = null;
-    async function getSupabaseOfficers(forceRefresh) {
-        const client = ensureSupabaseDashboard();
-        const force = forceRefresh === true;
-        if (!force && Array.isArray(supabaseOfficersCache)) return supabaseOfficersCache.slice();
-        if (!force && supabaseOfficersRequest) return supabaseOfficersRequest;
-        supabaseOfficersRequest = client
-            .from("officers")
-            .select("username,name,position,status,access_level")
-            .order("name", { ascending: true })
-            .then(function(result) {
-                if (result.error) throw new Error(result.error.message || "Officers could not be loaded from Supabase.");
-                const mapped = Array.isArray(result.data) ? result.data.map(mapSupabaseOfficer) : [];
-                supabaseOfficersCache = mapped;
-                return mapped.slice();
-            })
-            .finally(function() { supabaseOfficersRequest = null; });
-        return supabaseOfficersRequest;
-    }
-    function invalidateSupabaseOfficersCache() { supabaseOfficersCache = null; }
 
-    function mapSupabaseAvailability(row) {
-        return {
-            id: row.id,
-            Username: row.username || "",
-            "Officer Name": row.officer_name || "",
-            Position: row.position || "",
-            Day: row.day || "",
-            Time: row.time_slot || "",
-            Status: row.status || "Available"
-        };
+    function getApiUrl(action) {
+        const separator =
+            API_URL.indexOf("?") === -1
+                ? "?"
+                : "&";
+
+        return API_URL + separator +
+            "action=" + encodeURIComponent(action);
     }
 
-    let supabaseAvailabilityCache = null;
-    let supabaseAvailabilityRequest = null;
-    async function getSupabaseAvailability(forceRefresh) {
-        const client = ensureSupabaseDashboard();
-        const force = forceRefresh === true;
-        if (!force && Array.isArray(supabaseAvailabilityCache)) return supabaseAvailabilityCache.slice();
-        if (!force && supabaseAvailabilityRequest) return supabaseAvailabilityRequest;
-        supabaseAvailabilityRequest = client
-            .from("availability")
-            .select("id,username,officer_name,position,day,time_slot,status")
-            .order("id", { ascending: true })
-            .then(function(result) {
-                if (result.error) throw new Error(result.error.message || "Availability could not be loaded from Supabase.");
-                const mapped = Array.isArray(result.data) ? result.data.map(mapSupabaseAvailability) : [];
-                supabaseAvailabilityCache = mapped;
-                return mapped.slice();
-            })
-            .finally(function() { supabaseAvailabilityRequest = null; });
-        return supabaseAvailabilityRequest;
-    }
-    function invalidateSupabaseAvailabilityCache() { supabaseAvailabilityCache = null; }
 
-    function mapSupabaseAnnouncement(row) {
-        return {
-            "Announcement ID": row.announcement_id || "",
-            Title: row.title || "",
-            Message: row.message || "",
-            Type: row.type || "Announcement",
-            Date: row.announcement_date || "",
-            Time: row.announcement_time || "",
-            Location: row.location || "",
-            "Posted By": row.posted_by || "",
-            Status: "Active",
-            "Created At": row.created_at || "",
-            "Updated At": row.updated_at || ""
-        };
+    async function fetchJson(action) {
+
+        if (!isApiConfigured()) {
+            throw new Error(
+                "Google Apps Script Web App URL has not been added yet."
+            );
+        }
+
+        const response = await fetch(
+            getApiUrl(action),
+            {
+                method: "GET",
+                cache: "no-store"
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                "API request failed with status " +
+                response.status + "."
+            );
+        }
+
+        const result = await response.json();
+
+        if (!result.success) {
+            throw new Error(
+                result.message ||
+                "The API returned an unsuccessful response."
+            );
+        }
+
+        return result;
     }
 
-    let supabaseAnnouncementsCache = null;
-    let supabaseAnnouncementsRequest = null;
-    async function getSupabaseAnnouncements(forceRefresh) {
-        const client = ensureSupabaseDashboard();
-        const force = forceRefresh === true;
-        if (!force && Array.isArray(supabaseAnnouncementsCache)) return supabaseAnnouncementsCache.slice();
-        if (!force && supabaseAnnouncementsRequest) return supabaseAnnouncementsRequest;
-        supabaseAnnouncementsRequest = client
-            .from("announcements")
-            .select("*")
-            .order("announcement_date", { ascending: false, nullsFirst: false })
-            .order("announcement_time", { ascending: false, nullsFirst: false })
-            .order("created_at", { ascending: false })
-            .then(function(result) {
-                if (result.error) throw new Error(result.error.message || "Announcements could not be loaded from Supabase.");
-                const mapped = Array.isArray(result.data) ? result.data.map(mapSupabaseAnnouncement) : [];
-                supabaseAnnouncementsCache = mapped;
-                return mapped.slice();
-            })
-            .finally(function() { supabaseAnnouncementsRequest = null; });
-        return supabaseAnnouncementsRequest;
-    }
-    function invalidateSupabaseAnnouncementsCache() { supabaseAnnouncementsCache = null; }
-    function generateAnnouncementId() {
-        const now = new Date();
-        const pad = function(value) { return String(value).padStart(2, "0"); };
-        const stamp = now.getFullYear() + pad(now.getMonth()+1) + pad(now.getDate()) + "-" + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
-        return "ANN-" + stamp + "-" + Math.random().toString(36).slice(2,8).toUpperCase();
-    }
-    async function createSupabaseAnnouncement(data) {
-        const client = ensureSupabaseDashboard();
-        const row = {
-            announcement_id: generateAnnouncementId(),
-            title: data.title,
-            message: data.message,
-            type: data.type || "Announcement",
-            announcement_date: data.date || null,
-            announcement_time: data.time || null,
-            location: data.location || null,
-            posted_by: CURRENT_USERNAME
-        };
-        const { data: inserted, error } = await client.from("announcements").insert(row).select("*").single();
-        if (error) throw new Error(error.message || "The announcement could not be created.");
-        invalidateSupabaseAnnouncementsCache();
-        return mapSupabaseAnnouncement(inserted);
-    }
-    async function updateSupabaseAnnouncement(id, data) {
-        const client = ensureSupabaseDashboard();
-        const row = {
-            title: data.title,
-            message: data.message,
-            type: data.type || "Announcement",
-            announcement_date: data.date || null,
-            announcement_time: data.time || null,
-            location: data.location || null,
-            updated_at: new Date().toISOString()
-        };
-        const { data: updated, error } = await client.from("announcements").update(row).eq("announcement_id", id).select("*").single();
-        if (error) throw new Error(error.message || "The announcement could not be updated.");
-        invalidateSupabaseAnnouncementsCache();
-        return mapSupabaseAnnouncement(updated);
-    }
-    async function deleteSupabaseAnnouncement(id) {
-        const client = ensureSupabaseDashboard();
-        const { data, error } = await client.from("announcements").delete().eq("announcement_id", id).select("announcement_id").maybeSingle();
-        if (error) throw new Error(error.message || "The announcement could not be deleted.");
-        if (!data) throw new Error("The announcement could not be deleted or was not found.");
-        invalidateSupabaseAnnouncementsCache();
-        return true;
-    }
+
+
 
     /* =====================================================
        SUPABASE TASK HELPERS
@@ -4156,7 +4202,7 @@ body.dashboard-data-loading .dashboard-content {
 
     /* =====================================================
        ANNOUNCEMENTS
-       Live Supabase announcement management
+       Live Google Sheets announcement management
     ===================================================== */
     let announcementsData = [];
 
@@ -4211,9 +4257,9 @@ body.dashboard-data-loading .dashboard-content {
         }).join("");
         if(window.lucide)lucide.createIcons();
     }
-    async function loadAnnouncements(forceRefresh){
+    async function loadAnnouncements(){
         const list=document.getElementById("announcementsList");
-        try{announcementsData=await getSupabaseAnnouncements(forceRefresh===true);renderAnnouncements();updateDashboardAnnouncement();}
+        try{const result=await fetchJson("getAnnouncements");announcementsData=Array.isArray(result.data)?result.data:[];renderAnnouncements();updateDashboardAnnouncement();}
         catch(error){console.error("Announcements loading error:",error);if(list)list.innerHTML='<div class="announcements-empty"><div class="announcements-empty-icon"><i data-lucide="triangle-alert"></i></div><strong>Unable to load announcements</strong><span>'+escapeHtml(error.message||"Please try again.")+'</span></div>';if(window.lucide)lucide.createIcons();}
     }
     window.loadAnnouncements=loadAnnouncements;
@@ -4235,11 +4281,11 @@ body.dashboard-data-loading .dashboard-content {
     async function submitAnnouncement(event){
         event.preventDefault();if(!IS_STEERING)return;const submit=document.getElementById("announcementSubmitButton"),status=document.getElementById("announcementFormStatus"),id=normalize(document.getElementById("announcementIdInput").value),data={username:CURRENT_USERNAME,announcementId:id,title:normalize(document.getElementById("announcementTitleInput").value),message:normalize(document.getElementById("announcementMessageInput").value),type:normalize(document.getElementById("announcementTypeInput").value)||"Announcement",date:normalize(document.getElementById("announcementDateInput").value),time:normalize(document.getElementById("announcementTimeInput").value),location:normalize(document.getElementById("announcementLocationInput").value)};
         if(!data.title||!data.message){status.textContent="Title and message are required.";return;} submit.disabled=true;status.textContent=id?"Saving changes...":"Posting announcement...";
-        try{if(id){await updateSupabaseAnnouncement(id,data);}else{await createSupabaseAnnouncement(data);}status.textContent="Announcement saved successfully.";await loadAnnouncements(true);setTimeout(closeAnnouncementModal,350);}catch(error){console.error("Announcement save error:",error);status.textContent=error.message||"The announcement could not be saved.";}finally{submit.disabled=false;}
+        try{const response=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:id?"updateAnnouncement":"createAnnouncement",data:data})});if(!response.ok)throw new Error("Announcement request failed.");const result=await response.json();if(!result.success)throw new Error(result.message||"The announcement could not be saved.");status.textContent=result.message||"Announcement saved successfully.";await loadAnnouncements();setTimeout(closeAnnouncementModal,350);}catch(error){console.error("Announcement save error:",error);status.textContent=error.message||"The announcement could not be saved.";}finally{submit.disabled=false;}
     }
     async function deleteAnnouncement(announcementId){
         if(!IS_STEERING||!announcementId)return;if(!confirm("Delete this announcement? This cannot be undone."))return;
-        try{await deleteSupabaseAnnouncement(announcementId);await loadAnnouncements(true);}catch(error){console.error("Announcement delete error:",error);alert(error.message||"The announcement could not be deleted.");}
+        try{const response=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"deleteAnnouncement",data:{username:CURRENT_USERNAME,announcementId:announcementId}})});if(!response.ok)throw new Error("Announcement delete request failed.");const result=await response.json();if(!result.success)throw new Error(result.message||"The announcement could not be deleted.");await loadAnnouncements();}catch(error){console.error("Announcement delete error:",error);alert(error.message||"The announcement could not be deleted.");}
     }
 
     /* =====================================================
@@ -4427,7 +4473,8 @@ body.dashboard-data-loading .dashboard-content {
         if (!select) return;
         select.innerHTML = '<option value="">Loading officers...</option>';
         try {
-            officersData = await getSupabaseOfficers();
+            const result = await fetchJson("getOfficers");
+            officersData = Array.isArray(result.data) ? result.data : [];
             const activeOfficers = officersData.filter(function(officer) {
                 const status = normalize(getRecordValue(officer, "Status"));
                 return !status || status.toLowerCase() === "active";
@@ -4964,16 +5011,17 @@ body.dashboard-data-loading .dashboard-content {
     async function loadOfficerDirectory() {
         const grid = document.getElementById("officerDirectoryGrid");
         if (grid) {
-            grid.innerHTML = '<div class="officers-directory-empty"><strong>Loading officers...</strong><span>Refreshing the officer directory from Supabase.</span></div>';
+            grid.innerHTML = '<div class="officers-directory-empty"><strong>Loading officers...</strong><span>Refreshing the officer directory from Google Sheets.</span></div>';
         }
 
         try {
-            officersData = await getSupabaseOfficers();
+            const result = await fetchJson("getOfficers");
+            officersData = Array.isArray(result.data) ? result.data : [];
             renderOfficerDirectory();
         } catch (error) {
             console.error("Unable to load officer directory:", error);
             if (grid) {
-                grid.innerHTML = '<div class="officers-directory-empty"><strong>Unable to load officers.</strong><span>Check the Supabase connection and try Refresh again.</span></div>';
+                grid.innerHTML = '<div class="officers-directory-empty"><strong>Unable to load officers.</strong><span>Check the Google Sheets connection and try Refresh again.</span></div>';
             }
         }
     }
@@ -5005,7 +5053,13 @@ body.dashboard-data-loading .dashboard-content {
 
         try {
 
-            officersData = await getSupabaseOfficers();
+            const result =
+                await fetchJson("getOfficers");
+
+            officersData =
+                Array.isArray(result.data)
+                    ? result.data
+                    : [];
 
             const foundOfficer =
                 officersData.find(function (officer) {
@@ -5229,7 +5283,13 @@ body.dashboard-data-loading .dashboard-content {
 
         try {
 
-            availabilityRecords = await getSupabaseAvailability();
+            const result =
+                await fetchJson("getAvailability");
+
+            availabilityRecords =
+                Array.isArray(result.data)
+                    ? result.data
+                    : [];
 
             rebuildAvailabilityTableData();
             renderAvailabilityTable();
@@ -5526,69 +5586,171 @@ body.dashboard-data-loading .dashboard-content {
 
 
     /* =====================================================
-       SAVE TO SUPABASE
+       SAVE TO GOOGLE SHEETS
     ===================================================== */
 
     async function saveMyAvailability() {
-        const saveButton = document.getElementById("saveAvailabilityButton");
-        const status = document.getElementById("saveStatus");
-        const client = ensureSupabaseDashboard();
-        const username = normalize(CURRENT_USERNAME);
-        if (!username) {
-            if (status) status.textContent = "Unable to identify the current officer.";
+
+        const saveButton =
+            document.getElementById(
+                "saveAvailabilityButton"
+            );
+
+        const status =
+            document.getElementById(
+                "saveStatus"
+            );
+
+        if (!isApiConfigured()) {
+
+            if (status) {
+                status.textContent =
+                    "Add your Google Apps Script Web App URL first.";
+            }
+
+            console.error(
+                "API_URL is not configured."
+            );
+
             return;
         }
 
+
         const records = [];
+
         timeSlots.forEach(function (time) {
+
             days.forEach(function (day) {
-                if (myAvailability[time] && myAvailability[time][day]) {
-                    records.push({ day: day, time: time });
+
+                if (myAvailability[time][day]) {
+
+                    records.push({
+                        day: day,
+                        time: time
+                    });
                 }
             });
         });
 
-        if (saveButton) saveButton.disabled = true;
-        if (status) status.textContent = "Saving availability...";
+
+        if (saveButton) {
+            saveButton.disabled = true;
+        }
+
+        if (status) {
+            status.textContent =
+                "Saving availability...";
+        }
+
 
         try {
-            const { error: deleteError } = await client
-                .from("availability")
-                .delete()
-                .eq("username", username);
-            if (deleteError) throw new Error(deleteError.message || "Existing availability could not be cleared.");
 
-            if (records.length) {
-                const rows = records.map(function(record) {
-                    return {
-                        username: username,
-                        officer_name: normalize(currentOfficer.Name) || "MC RJ Escote",
-                        position: normalize(currentOfficer.Position) || "Vice President",
-                        day: record.day,
-                        time_slot: record.time,
-                        status: "Available"
-                    };
-                });
-                const { error: insertError } = await client.from("availability").insert(rows);
-                if (insertError) throw new Error(insertError.message || "Availability could not be saved.");
+            const payload = {
+
+                action: "saveAvailability",
+
+                data: {
+                    username: CURRENT_USERNAME,
+                    officerName:
+                        normalize(currentOfficer.Name) ||
+                        "MC RJ Escote",
+                    position:
+                        normalize(currentOfficer.Position) ||
+                        "Vice President",
+                    records: records
+                }
+            };
+
+
+            const response =
+                await fetch(
+                    API_URL,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "text/plain;charset=utf-8"
+                        },
+                        body: JSON.stringify(payload)
+                    }
+                );
+
+
+            if (!response.ok) {
+                throw new Error(
+                    "Save request failed with status " +
+                    response.status + "."
+                );
             }
 
-            invalidateSupabaseAvailabilityCache();
-            availabilityRecords = await getSupabaseAvailability(true);
+
+            const result =
+                await response.json();
+
+
+            if (!result.success) {
+                throw new Error(
+                    result.message ||
+                    "The availability could not be saved."
+                );
+            }
+
+
+            /*
+               Update the local availability records immediately.
+               The next page refresh will read the same records from
+               Google Sheets again.
+            */
+
+            availabilityRecords = availabilityRecords.filter(function (record) {
+                return normalizeUsername(getRecordValue(record, "Username")) !==
+                    normalizeUsername(CURRENT_USERNAME);
+            });
+
+            records.forEach(function (record) {
+                availabilityRecords.push({
+                    Username: CURRENT_USERNAME,
+                    "Officer Name":
+                        normalize(currentOfficer.Name) || "MC RJ Escote",
+                    Position:
+                        normalize(currentOfficer.Position) || "Vice President",
+                    Day: record.day,
+                    Time: record.time,
+                    Status: "Available"
+                });
+            });
+
             rebuildAvailabilityTableData();
             renderAvailabilityTable();
             renderDashboardAvailability();
             initializeMyAvailability();
 
-            if (status) status.textContent = "Availability saved successfully.";
+            if (status) {
+                status.textContent = "Availability saved successfully.";
+            }
+
             closeAvailabilityModal();
+
         } catch (error) {
-            console.error("Unable to save availability:", error);
-            if (status) status.textContent = error.message || "Unable to save availability.";
+
+            console.error(
+                "Unable to save availability:",
+                error
+            );
+
+            if (status) {
+                status.textContent =
+                    "Unable to save. Please check your connection and Web App URL.";
+            }
+
         } finally {
-            if (saveButton) saveButton.disabled = false;
+
+            if (saveButton) {
+                saveButton.disabled = false;
+            }
         }
     }
+
 
     window.renderAvailabilityTable =
         renderAvailabilityTable;
@@ -5816,7 +5978,7 @@ body.dashboard-data-loading .dashboard-content {
 
 
         /*
-           Load real data from Supabase after the page is ready.
+           Load real data from Google Sheets after the page is ready.
         */
 
         /*
