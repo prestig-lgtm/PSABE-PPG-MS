@@ -5541,17 +5541,30 @@ body.dashboard-data-loading .dashboard-content {
         const availabilityValue = document.getElementById("dashboardAvailabilityValue");
         const availabilityLabel = document.getElementById("dashboardAvailabilityLabel");
 
-        const myRanges = [...new Map(myRecords.map(function(record) {
-            const parsed = dashboardParseAvailabilityRange(getRecordValue(record, "Time"));
-            const label = dashboardAvailabilityRangeText(getRecordValue(record, "Time"));
-            return [label, parsed ? parsed.start : Number.MAX_SAFE_INTEGER];
-        })).entries()]
-            .sort(function(a, b) {
-                return a[1] - b[1];
-            })
-            .map(function(entry) {
-                return entry[0];
+        // Keep the user's availability in chronological sequence and merge
+        // consecutive/overlapping 30-minute slots into one continuous range.
+        const myRanges = (function() {
+            const ranges = myRecords.map(function(record) {
+                return dashboardParseAvailabilityRange(getRecordValue(record, "Time"));
+            }).filter(Boolean).sort(function(a, b) {
+                return a.start - b.start;
             });
+
+            const merged = [];
+            ranges.forEach(function(range) {
+                const last = merged[merged.length - 1];
+                if (last && range.start <= last.end) {
+                    last.end = Math.max(last.end, range.end);
+                } else {
+                    merged.push({ start: range.start, end: range.end });
+                }
+            });
+
+            return merged.map(function(range) {
+                return dashboardFormatAvailabilityMinutes(range.start) + " – " +
+                       dashboardFormatAvailabilityMinutes(range.end);
+            });
+        })();
 
         const availableOfficers = otherOfficerRecords.map(function(record) {
             const username = normalizeUsername(getRecordValue(record, "Username"));
