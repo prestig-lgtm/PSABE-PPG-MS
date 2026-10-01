@@ -4786,13 +4786,13 @@ body.dashboard-data-loading .dashboard-content {
     };
 
     async function deleteCalendarEvent(eventId) {
-        if (!IS_STEERING || !eventId || !window.psabeSupabase) return;
+        if (!IS_STEERING || !eventId || !supabaseClient) return;
 
         const confirmed = window.confirm("Delete this event? This action cannot be undone.");
         if (!confirmed) return;
 
         try {
-            const { error } = await window.psabeSupabase
+            const { error } = await supabaseClient
                 .from("events")
                 .delete()
                 .eq("event_id", eventId);
