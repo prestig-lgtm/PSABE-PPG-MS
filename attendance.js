@@ -88,7 +88,21 @@ function printAttendanceYearLevel(){
  const counts={"4PS":0,"IPs":0,"PWD":0,"Solo Parent":0,"LGBTQIA+":0,"Child of a Solo Parent":0};
  rows.forEach(r=>(r.sectoral_groups||[]).forEach(g=>{if(Object.prototype.hasOwnProperty.call(counts,g))counts[g]++;}));
 
- const headerMarkup=`<div class="official-print-header"><img src="osld-header.png" alt="Caraga State University Office of Student Leadership and Development"></div>`;
+ const headerMarkup=`<div class="official-print-header">
+      <div class="official-csu-brand">
+        <div class="official-csu-name">
+          <div class="official-republic">Republic of the Philippines</div>
+          <div class="official-university">CARAGA STATE UNIVERSITY</div>
+          <div class="official-campus">Ampayon, Butuan City 8600, Philippines</div>
+          <div class="official-values"><span>Competence</span><span>Service</span><span>Uprightness</span></div>
+        </div>
+        <div class="official-accreditation">
+          <div class="official-accreditation-box">SOCOTEC</div>
+          <div class="official-accreditation-box official-accreditation-ab">AAB</div>
+        </div>
+      </div>
+      <div class="official-osld-title">OFFICE OF STUDENT LEADERSHIP AND DEVELOPMENT</div>
+    </div>`;
  const footerMarkup=`<div class="official-print-footer"><div>LEGENDS:</div><div><strong>1</strong> - 4PS&nbsp;&nbsp; <strong>2</strong> - IPs&nbsp;&nbsp; <strong>3</strong> - PWDs&nbsp;&nbsp; <strong>4</strong> - Solo Parent&nbsp;&nbsp; <strong>5</strong> - LGBTQIA+&nbsp;&nbsp; <strong>6</strong>. Child of a Solo Parent</div></div>`;
 
  const participantCellMarkup=(r,index)=>{
