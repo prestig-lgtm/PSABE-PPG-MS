@@ -232,7 +232,7 @@ function printAttendanceYearLevel(){
  pages.push(`<section class="official-print-page official-summary-page">
     ${headerMarkup}
     <div class="official-summary-wrap">
-      <div class="official-summary-title">MINORITY CLASSIFICATION</div>
+      <div class="official-summary-title">SUMMARY</div>
       <table class="official-minority-table">
         <thead><tr><th>Minority Classification</th><th>Number of Students</th></tr></thead>
         <tbody>${summary.map(x=>`<tr><td>${esc(x[0])}</td><td>${x[1]}</td></tr>`).join("")}</tbody>
