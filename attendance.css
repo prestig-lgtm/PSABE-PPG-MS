@@ -5,9 +5,134 @@
 .attendance-modal-overlay{position:fixed;inset:0;background:rgba(4,20,17,.78);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;padding:20px;z-index:1300}.attendance-modal-overlay.show{display:flex}.attendance-modal{width:min(650px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#123f35;border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:0 20px 70px rgba(0,0,0,.35)}.attendance-modal-head{display:flex;justify-content:space-between;gap:15px;padding:20px;border-bottom:1px solid rgba(255,255,255,.08)}.attendance-modal-head h2{margin:4px 0;color:#fff;font-size:19px}.attendance-modal-head p{margin:0;color:rgba(255,255,255,.5);font-size:11px}.attendance-modal-close{width:38px;height:38px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#fff;border-radius:8px;cursor:pointer}.attendance-form{padding:20px;display:grid;gap:14px}.attendance-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.attendance-field{display:grid;gap:7px}.attendance-field.full{grid-column:1/-1}.attendance-field label{font-size:10px;font-weight:900;letter-spacing:.08em;color:rgba(255,255,255,.58)}.attendance-field input,.attendance-field select{width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.13);background:#0d342c;color:#fff;border-radius:9px;padding:12px 13px;font:inherit;font-size:13px;outline:none}.attendance-form-actions{display:flex;justify-content:flex-end;gap:9px}.attendance-list{padding:10px 20px 20px;display:grid;gap:8px}.attendance-event-row{display:flex;align-items:center;justify-content:space-between;gap:15px;width:100%;padding:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);border-radius:10px;color:#fff;cursor:pointer}.attendance-event-row strong{font-size:12px}.attendance-event-row small{display:block;color:rgba(255,255,255,.46);font-size:10px;margin-top:4px}.attendance-sector-options{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:20px}.attendance-sector-options label{display:flex;align-items:center;gap:9px;padding:12px;border:1px solid rgba(255,255,255,.09);border-radius:9px;background:rgba(255,255,255,.035);color:#fff;font-size:11px;cursor:pointer}.attendance-sector-na{margin:0 20px 20px;width:calc(100% - 40px);padding:11px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.035);color:#fff;border-radius:9px;font-size:10px;font-weight:900;cursor:pointer}.attendance-sector-na.active{background:#0caa57;border-color:#0caa57}.attendance-modal-actions{display:flex;justify-content:flex-end;gap:9px;padding:0 20px 20px}.attendance-print-document{display:none}
 @media(max-width:1000px){.attendance-grid{grid-template-columns:1fr}.attendance-bottom-grid{grid-template-columns:1fr}}@media(max-width:720px){.attendance-page-header{align-items:flex-start;flex-direction:column}.attendance-stats{grid-template-columns:1fr 1fr}.attendance-event-banner{align-items:flex-start;flex-direction:column}.attendance-scanner-layout{grid-template-columns:1fr}.attendance-form-grid{grid-template-columns:1fr}.attendance-field.full{grid-column:auto}.attendance-recent-head,.attendance-recent-row{grid-template-columns:minmax(0,1.3fr) .9fr .75fr}.attendance-recent-head span:nth-child(2),.attendance-recent-row .attendance-id{display:none}.attendance-sector-options{grid-template-columns:1fr}.attendance-header-actions{width:100%}.attendance-header-actions .attendance-button{flex:1}}
 @media print{
-  .attendance-print-document .official-print-page{width:210mm;min-height:297mm;box-sizing:border-box;page-break-after:always;break-after:page;}
-  .attendance-print-document .official-print-page:last-child{page-break-after:auto;break-after:auto;}
-body.psabe-attendance-printing *{visibility:hidden!important}body.psabe-attendance-printing .attendance-print-document,body.psabe-attendance-printing .attendance-print-document *{visibility:visible!important}.attendance-print-document{display:block!important;position:absolute;left:0;top:0;width:100%;background:#fff;color:#000;padding:0}.attendance-print-document .print-page{page-break-after:always;break-after:page}.attendance-print-document table{width:100%;border-collapse:collapse;font-family:Arial,sans-serif;font-size:10px}.attendance-print-document th,.attendance-print-document td{border:1px solid #000;padding:4px;height:22px}.attendance-print-document th{background:#70ad47;color:#000;font-weight:900;text-align:center}@page{size:A4 portrait;margin:10mm 12mm}}
+  @page{size:A4 portrait;margin:10mm 12mm}
+  html,body{margin:0!important;padding:0!important;background:#fff!important}
+  body.psabe-attendance-printing *{visibility:hidden!important}
+  body.psabe-attendance-printing .attendance-print-document,
+  body.psabe-attendance-printing .attendance-print-document *{visibility:visible!important}
+  .attendance-print-document{
+    display:block!important;
+    position:absolute!important;
+    left:0!important;
+    top:0!important;
+    width:100%!important;
+    margin:0!important;
+    padding:0!important;
+    background:#fff!important;
+    color:#000!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+  }
+  .attendance-print-document .official-print-page{
+    width:100%!important;
+    height:277mm!important;
+    min-height:277mm!important;
+    box-sizing:border-box!important;
+    position:relative!important;
+    overflow:hidden!important;
+    page-break-after:always!important;
+    break-after:page!important;
+    padding:0!important;
+    margin:0!important;
+    background:#fff!important;
+    color:#000!important;
+  }
+  .attendance-print-document .official-print-page:last-child{
+    page-break-after:auto!important;
+    break-after:auto!important;
+  }
+  .official-print-header{
+    width:100%;
+    box-sizing:border-box;
+    padding:0 0 2.5mm;
+    border-bottom:1px solid #000;
+  }
+  .official-csu-brand{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:20mm;
+    position:relative;
+    text-align:center;
+  }
+  .official-csu-name{line-height:1.08}
+  .official-republic{font-size:8.5pt;margin-bottom:1mm}
+  .official-university{font-size:13pt;font-weight:700;letter-spacing:.15pt}
+  .official-campus{font-size:8pt;margin-top:1mm}
+  .official-values{font-size:7pt;margin-top:1mm;display:flex;justify-content:center;gap:8mm}
+  .official-accreditation{position:absolute;right:0;top:1mm;display:flex;gap:1mm;align-items:center}
+  .official-accreditation-box{border:1px solid #000;font-size:5.5pt;font-weight:700;padding:2mm 1.5mm;line-height:1}
+  .official-accreditation-ab{font-size:7pt;padding:2mm 2mm}
+  .official-osld-title{text-align:center;font-size:10pt;font-weight:700;letter-spacing:.2pt;margin-top:1.5mm}
+  .official-page-body{width:100%;box-sizing:border-box}
+  .official-event-block{padding:5mm 0 4mm}
+  .official-event-name{text-align:center;font-size:12pt;font-weight:700;text-transform:uppercase;margin-bottom:7mm}
+  .official-details{font-size:9.5pt;line-height:1.75}
+  .official-details>div{display:flex;align-items:flex-end;gap:1.5mm}
+  .official-details span{flex:1;border-bottom:1px solid #000;min-height:5mm;padding-left:1mm}
+  .official-continuation-page .official-page-body{padding-top:6mm}
+  .official-attendance-table{
+    width:100%!important;
+    table-layout:fixed!important;
+    border-collapse:collapse!important;
+    border-spacing:0!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:7.5pt!important;
+    color:#000!important;
+  }
+  .official-attendance-table th,
+  .official-attendance-table td{
+    border:1px solid #000!important;
+    padding:1.2mm 1mm!important;
+    height:7.5mm!important;
+    min-height:7.5mm!important;
+    box-sizing:border-box!important;
+    vertical-align:middle!important;
+  }
+  .official-attendance-table th{font-weight:700;text-align:center;background:#fff!important}
+  .official-attendance-table td{text-align:center}
+  .official-attendance-table .participant-name{text-align:left;padding-left:2mm!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .official-attendance-table .official-present{font-size:6.8pt;font-weight:700}
+  .official-attendance-table .col-no{width:7mm}
+  .official-attendance-table .col-name{width:55mm}
+  .official-attendance-table .col-org{width:27mm}
+  .official-attendance-table .col-sector{width:8.5mm}
+  .official-attendance-table .col-sex{width:7mm}
+  .official-attendance-table .col-signature{width:24mm}
+  .official-print-footer{position:absolute;left:0;right:0;bottom:1mm;font-size:6.5pt;line-height:1.35;border-top:1px solid #000;padding-top:1.5mm}
+  .official-print-footer>div:first-child{font-weight:700}
+  .official-summary-page .official-summary-wrap{padding-top:12mm}
+  .official-summary-page .official-summary-title{text-align:center;font-size:12pt;font-weight:700;margin-bottom:8mm}
+  .official-minority-table{width:100%;border-collapse:collapse;font-size:9pt}
+  .official-minority-table th,.official-minority-table td{border:1px solid #000;padding:3mm 2mm;height:10mm}
+  .official-minority-table th{font-weight:700;text-align:center}
+  .official-minority-table td:last-child{text-align:center;width:45mm}
+}
+
+/* Scanner instruction: force true geometric centering inside the scanner panel. */
+.attendance-scanner-message{
+  position:absolute!important;
+  top:50%!important;
+  left:50%!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:calc(100% - 40px)!important;
+  max-width:320px!important;
+  height:auto!important;
+  margin:0!important;
+  padding:0!important;
+  transform:translate(-50%,-50%)!important;
+  display:block!important;
+  box-sizing:border-box!important;
+  text-align:center!important;
+  font-size:20px!important;
+  line-height:1.25!important;
+  font-weight:500!important;
+  color:rgba(255,255,255,.88)!important;
+  z-index:6!important;
+  pointer-events:none!important;
+}
+.attendance-scanner-message.error{color:#ff8585!important}
+.attendance-scanner-message.success{color:#69e3ae!important}
 
 /* =========================================================
    PARTICIPANT CLASSIFICATION MODAL
