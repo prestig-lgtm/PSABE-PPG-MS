@@ -126,10 +126,14 @@ function printAttendanceYearLevel(){
  const title=activeEvent.event_name||"Attendance";
  const date=activeEvent.event_date||new Date().toISOString().slice(0,10);
  const rows=[...records].sort((a,b)=>String(a.student_name||"").localeCompare(String(b.student_name||"")));
- const PAGE_ROWS=7;
- const groups=["4PS","IPs","PWD","Solo Parent","LGBTQIA+","Child of a Solo Parent"];
- const counts={"4PS":0,"IPs":0,"PWD":0,"Solo Parent":0,"LGBTQIA+":0,"Child of a Solo Parent":0};
- rows.forEach(r=>(r.sectoral_groups||[]).forEach(g=>{if(Object.prototype.hasOwnProperty.call(counts,g))counts[g]++;}));
+ const FIRST_PAGE_ROWS=18;
+ const CONTINUATION_PAGE_ROWS=24;
+ const groups=["4PS","IPs","PWDs","Solo Parent","LGBTQIA+","Child of a Solo Parent"];
+ const counts={"4PS":0,"IPs":0,"PWDs":0,"Solo Parent":0,"LGBTQIA+":0,"Child of a Solo Parent":0};
+ rows.forEach(r=>(r.sectoral_groups||[]).forEach(g=>{
+   const key=g==="PWD"?"PWDs":g;
+   if(Object.prototype.hasOwnProperty.call(counts,key))counts[key]++;
+ }));
 
  const headerMarkup=`<div class="official-print-header">
       <div class="official-csu-brand">
@@ -157,7 +161,7 @@ function printAttendanceYearLevel(){
       <td></td>
       <td>${hasRecord&&gs.has("4PS")?"✓":""}</td>
       <td>${hasRecord&&gs.has("IPs")?"✓":""}</td>
-      <td>${hasRecord&&gs.has("PWD")?"✓":""}</td>
+      <td>${hasRecord&&(gs.has("PWD")||gs.has("PWDs"))?"✓":""}</td>
       <td>${hasRecord&&gs.has("Solo Parent")?"✓":""}</td>
       <td>${hasRecord&&gs.has("LGBTQIA+")?"✓":""}</td>
       <td>${hasRecord&&gs.has("Child of a Solo Parent")?"✓":""}</td>
@@ -167,9 +171,9 @@ function printAttendanceYearLevel(){
     </tr>`;
  };
 
- const tableMarkup=(chunk,startNumber)=>{
+ const tableMarkup=(chunk,startNumber,rowCount)=>{
    let body="";
-   for(let i=0;i<PAGE_ROWS;i++) body+=participantCellMarkup(chunk[i]||null,startNumber+i);
+   for(let i=0;i<rowCount;i++) body+=participantCellMarkup(chunk[i]||null,startNumber+i);
    return `<table class="official-attendance-table">
       <colgroup>
         <col class="col-no"><col class="col-name"><col class="col-org">
@@ -195,11 +199,14 @@ function printAttendanceYearLevel(){
  };
 
  const pages=[];
- const pageCount=Math.max(1,Math.ceil(rows.length/PAGE_ROWS));
- for(let page=0;page<pageCount;page++){
-   const start=page*PAGE_ROWS;
-   const chunk=rows.slice(start,start+PAGE_ROWS);
+ let cursor=0;
+ let page=0;
+ do{
    const firstPage=page===0;
+   const pageRows=firstPage?FIRST_PAGE_ROWS:CONTINUATION_PAGE_ROWS;
+   const start=cursor;
+   const chunk=rows.slice(cursor,cursor+pageRows);
+   cursor+=chunk.length;
    pages.push(`<section class="official-print-page ${firstPage?"official-first-page":"official-continuation-page"}">
       ${headerMarkup}
       <div class="official-page-body">
@@ -211,16 +218,17 @@ function printAttendanceYearLevel(){
             <div>Date: <span>${esc(dateLabel(date))}</span></div>
           </div>
         </div>`:""}
-        ${tableMarkup(chunk,start+1)}
+        ${tableMarkup(chunk,start+1,pageRows)}
       </div>
       ${footerMarkup}
    </section>`);
- }
+   page++;
+ }while(cursor<rows.length || page===1);
 
  const summary=[
    ["4Ps",counts["4PS"]],
    ["IPs",counts["IPs"]],
-   ["PWDs",counts["PWD"]],
+   ["PWDs",counts["PWDs"]],
    ["Solo Parent",counts["Solo Parent"]],
    ["LGBTQIA+",counts["LGBTQIA+"]],
    ["Child of a Solo Parent",counts["Child of a Solo Parent"]]
