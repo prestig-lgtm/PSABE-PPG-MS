@@ -126,45 +126,32 @@ function printAttendanceYearLevel(){
  const title=activeEvent.event_name||"Attendance";
  const date=activeEvent.event_date||new Date().toISOString().slice(0,10);
  const rows=[...records].sort((a,b)=>String(a.student_name||"").localeCompare(String(b.student_name||"")));
- const FIRST_PAGE_ROWS=18;
- const CONTINUATION_PAGE_ROWS=24;
- const groups=["4PS","IPs","PWDs","Solo Parent","LGBTQIA+","Child of a Solo Parent"];
- const counts={"4PS":0,"IPs":0,"PWDs":0,"Solo Parent":0,"LGBTQIA+":0,"Child of a Solo Parent":0};
- rows.forEach(r=>(r.sectoral_groups||[]).forEach(g=>{
-   const key=g==="PWD"?"PWDs":g;
-   if(Object.prototype.hasOwnProperty.call(counts,key))counts[key]++;
+ const FIRST_PAGE_ROWS=7;
+ const CONTINUATION_PAGE_ROWS=13;
+ const counts={"4PS":0,"IPs":0,"PWD":0,"Solo Parent":0,"LGBTQIA+":0,"Child of a Solo Parent":0};
+ rows.forEach(r=>(Array.isArray(r?.sectoral_groups)?r.sectoral_groups:[]).forEach(g=>{
+   if(g==="PWDs") g="PWD";
+   if(Object.prototype.hasOwnProperty.call(counts,g)) counts[g]++;
  }));
 
  const headerMarkup=`<div class="official-print-header">
-      <div class="official-csu-brand">
-        <div class="official-csu-name">
-          <div class="official-republic">Republic of the Philippines</div>
-          <div class="official-university">CARAGA STATE UNIVERSITY</div>
-          <div class="official-campus">Ampayon, Butuan City 8600, Philippines</div>
-          <div class="official-values"><span>Competence</span><span>Service</span><span>Uprightness</span></div>
-        </div>
-        <div class="official-accreditation">
-          <div class="official-accreditation-box">SOCOTEC</div>
-          <div class="official-accreditation-box official-accreditation-ab">AAB</div>
-        </div>
-      </div>
-      <div class="official-osld-title">OFFICE OF STUDENT LEADERSHIP AND DEVELOPMENT</div>
-    </div>`;
- const footerMarkup=`<div class="official-print-footer"><div>LEGENDS:</div><div><strong>1</strong> - 4PS&nbsp;&nbsp; <strong>2</strong> - IPs&nbsp;&nbsp; <strong>3</strong> - PWDs&nbsp;&nbsp; <strong>4</strong> - Solo Parent&nbsp;&nbsp; <strong>5</strong> - LGBTQIA+&nbsp;&nbsp; <strong>6</strong>. Child of a Solo Parent</div></div>`;
+   <img class="official-osld-header-image" src="assets/osld-header.png" alt="Office of Student Leadership and Development">
+ </div>`;
 
  const participantCellMarkup=(r,index)=>{
-   const gs=new Set(r?.sectoral_groups||[]);
+   const gs=new Set(Array.isArray(r?.sectoral_groups)?r.sectoral_groups:[]);
    const hasRecord=!!r;
+   const has=(name)=>hasRecord&&(gs.has(name)||((name==="PWD")&&gs.has("PWDs")));
    return `<tr>
       <td>${index}.</td>
       <td class="participant-name">${hasRecord?esc(r.student_name):""}</td>
       <td></td>
-      <td>${hasRecord&&gs.has("4PS")?"✓":""}</td>
-      <td>${hasRecord&&gs.has("IPs")?"✓":""}</td>
-      <td>${hasRecord&&(gs.has("PWD")||gs.has("PWDs"))?"✓":""}</td>
-      <td>${hasRecord&&gs.has("Solo Parent")?"✓":""}</td>
-      <td>${hasRecord&&gs.has("LGBTQIA+")?"✓":""}</td>
-      <td>${hasRecord&&gs.has("Child of a Solo Parent")?"✓":""}</td>
+      <td>${has("4PS")?"✓":""}</td>
+      <td>${has("IPs")?"✓":""}</td>
+      <td>${has("PWD")?"✓":""}</td>
+      <td>${has("Solo Parent")?"✓":""}</td>
+      <td>${has("LGBTQIA+")?"✓":""}</td>
+      <td>${has("Child of a Solo Parent")?"✓":""}</td>
       <td>${hasRecord&&r.sex==="M"?"✓":""}</td>
       <td>${hasRecord&&r.sex==="F"?"✓":""}</td>
       <td class="official-present">${hasRecord&&r.time_in?"PRESENT":""}</td>
@@ -182,7 +169,7 @@ function printAttendanceYearLevel(){
       </colgroup>
       <thead>
         <tr>
-          <th rowspan="2">NO.<br>.</th>
+          <th rowspan="2">NO.</th>
           <th rowspan="2">Name of Participants</th>
           <th rowspan="2">Organization<br>(ACRONYM)</th>
           <th colspan="6">Sectoral Groups</th>
@@ -198,37 +185,46 @@ function printAttendanceYearLevel(){
     </table>`;
  };
 
+ const legendMarkup=`<div class="official-print-legend">
+   <div>LEGENDS:</div>
+   <div>1 - 4PS &nbsp; 2 - IPs &nbsp; 3 - PWDs &nbsp; 4 - Solo Parent &nbsp; 5 - LGBTQIA+ &nbsp; 6. Child of a Solo Parent</div>
+ </div>`;
+
  const pages=[];
- let cursor=0;
- let page=0;
- do{
-   const firstPage=page===0;
-   const pageRows=firstPage?FIRST_PAGE_ROWS:CONTINUATION_PAGE_ROWS;
-   const start=cursor;
-   const chunk=rows.slice(cursor,cursor+pageRows);
-   cursor+=chunk.length;
-   pages.push(`<section class="official-print-page ${firstPage?"official-first-page":"official-continuation-page"}">
+
+ // PAGE 1: exactly 7 participant rows.
+ {
+   const start=0;
+   const chunk=rows.slice(0,FIRST_PAGE_ROWS);
+   pages.push(`<section class="official-print-page official-first-page">
       ${headerMarkup}
-      <div class="official-page-body">
-        ${firstPage?`<div class="official-event-block">
-          <div class="official-event-name">${esc(title)}</div>
-          <div class="official-details">
-            <div>Title of Activity: <span>${esc(title)}</span></div>
-            <div>Venue: <span>${esc(activeEvent.venue||"")}</span></div>
-            <div>Date: <span>${esc(dateLabel(date))}</span></div>
-          </div>
-        </div>`:""}
-        ${tableMarkup(chunk,start+1,pageRows)}
+      <div class="official-event-block">
+        <div class="official-event-name">${esc(title)}</div>
+        <div class="official-details">
+          <div><span class="official-detail-label">Title of Activity:</span><span class="official-detail-line">${esc(title)}</span></div>
+          <div><span class="official-detail-label">Venue:</span><span class="official-detail-line">${esc(activeEvent.venue||"")}</span></div>
+          <div><span class="official-detail-label">Date:</span><span class="official-detail-line">${esc(dateLabel(date))}</span></div>
+        </div>
       </div>
-      ${footerMarkup}
+      ${tableMarkup(chunk,start+1,FIRST_PAGE_ROWS)}
+      ${legendMarkup}
    </section>`);
-   page++;
- }while(cursor<rows.length || page===1);
+ }
+
+ // CONTINUATION PAGES: exactly 13 participant rows per page.
+ for(let start=FIRST_PAGE_ROWS;start<rows.length;start+=CONTINUATION_PAGE_ROWS){
+   const chunk=rows.slice(start,start+CONTINUATION_PAGE_ROWS);
+   pages.push(`<section class="official-print-page official-continuation-page">
+      ${headerMarkup}
+      ${tableMarkup(chunk,start+1,CONTINUATION_PAGE_ROWS)}
+      ${legendMarkup}
+   </section>`);
+ }
 
  const summary=[
    ["4Ps",counts["4PS"]],
    ["IPs",counts["IPs"]],
-   ["PWDs",counts["PWDs"]],
+   ["PWDs",counts["PWD"]],
    ["Solo Parent",counts["Solo Parent"]],
    ["LGBTQIA+",counts["LGBTQIA+"]],
    ["Child of a Solo Parent",counts["Child of a Solo Parent"]]
@@ -236,12 +232,12 @@ function printAttendanceYearLevel(){
  pages.push(`<section class="official-print-page official-summary-page">
     ${headerMarkup}
     <div class="official-summary-wrap">
+      <div class="official-summary-title">MINORITY CLASSIFICATION</div>
       <table class="official-minority-table">
         <thead><tr><th>Minority Classification</th><th>Number of Students</th></tr></thead>
         <tbody>${summary.map(x=>`<tr><td>${esc(x[0])}</td><td>${x[1]}</td></tr>`).join("")}</tbody>
       </table>
     </div>
-    ${footerMarkup}
  </section>`);
 
  el("attendancePrintDocument").innerHTML=pages.join("");
