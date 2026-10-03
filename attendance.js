@@ -42,7 +42,19 @@ function buildModals(){
 }
 
 async function google(payload){const r=await fetch(GOOGLE_SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});if(!r.ok)throw new Error("Google Sheets request failed (HTTP "+r.status+")");return r.json()}
-async function lookup(studentId){const r=await google({action:"LOOKUP",studentId});if(!r||!r.success)throw new Error(r?.message||"Student ID was not found in the MASTERLIST.");return r}
+async function lookup(studentId){
+ const sid=String(studentId||"").trim();
+ if(!sid)throw new Error("Please enter a Student ID.");
+ const r=await supabase.from("participants").select("student_id,student_name,year_level").eq("student_id",sid).maybeSingle();
+ if(r.error)throw new Error(r.error.message||"Unable to look up the participant.");
+ if(!r.data)throw new Error("Student ID was not found in the participant list.");
+ const yearMap={1:"First Year",2:"Second Year",3:"Third Year",4:"Fourth Year"};
+ return {
+  studentId:r.data.student_id,
+  studentName:r.data.student_name,
+  yearLevel:yearMap[Number(r.data.year_level)]||String(r.data.year_level||"")
+ };
+}
 
 function renderEvent(){const e=activeEvent;el("attendanceActiveEventName").textContent=e?e.event_name:"No attendance event selected";el("attendanceActiveEventDate").textContent=e?"Date: "+dateLabel(e.event_date):"Date: —";el("attendanceActiveEventVenue").textContent=e?"Venue: "+(e.venue||"—"):"Venue: —";el("attendanceActiveEventTime").textContent="Time: "+(e?((e.start_time||"")+(e.end_time?" – "+e.end_time:"")):"—");const b=el("attendanceOpenBackup");if(b)b.style.display=e&&e.google_spreadsheet_url?"inline-flex":"none"}
 function renderStats(){const present=records.filter(r=>r.attendance_status==="PRESENT").length;const complete=records.filter(r=>r.attendance_status==="COMPLETE").length;const late=records.filter(r=>r.attendance_status==="LATE").length;const pending=records.filter(r=>r.backup_status!=="BACKED UP").length;el("attendanceStatPresent").textContent=present;el("attendanceStatComplete").textContent=complete;el("attendanceStatLate").textContent=late;el("attendanceStatPending").textContent=pending;el("attendanceBackupState").textContent=pending?"PENDING "+pending:"BACKUP READY"}
