@@ -10,6 +10,12 @@
   body.psabe-attendance-printing *{visibility:hidden!important}
   body.psabe-attendance-printing .attendance-print-document,
   body.psabe-attendance-printing .attendance-print-document *{visibility:visible!important}
+  /* =========================================================
+     OFFICIAL OSLD PRINT FORM
+     Source: supplied OFFICIAL-ATTENDANCE-SHEET-FOR-ACTIVITIES-OSLD
+     Page: A4 LANDSCAPE
+     Font: Arial
+  ========================================================= */
   .attendance-print-document{
     display:block!important;
     position:absolute!important;
@@ -22,10 +28,11 @@
     color:#000!important;
     font-family:Arial,Helvetica,sans-serif!important;
   }
+
   .attendance-print-document .official-print-page{
-    width:100%!important;
-    height:190mm!important;
-    min-height:190mm!important;
+    width:297mm!important;
+    height:210mm!important;
+    min-height:210mm!important;
     box-sizing:border-box!important;
     position:relative!important;
     overflow:hidden!important;
@@ -35,96 +42,94 @@
     margin:0!important;
     background:#fff!important;
     color:#000!important;
+    font-family:Arial,Helvetica,sans-serif!important;
   }
   .attendance-print-document .official-print-page:last-child{
     page-break-after:auto!important;
     break-after:auto!important;
   }
 
-  /* Exact OSLD header from the supplied official sample. */
+  /* The supplied OSLD header is used as-is. */
   .official-print-header{
     width:100%!important;
-    height:42mm!important;
+    height:31mm!important;
     box-sizing:border-box!important;
     display:flex!important;
     align-items:flex-start!important;
-    justify-content:center!important;
+    justify-content:flex-start!important;
     padding:0!important;
     margin:0!important;
-    border:0!important;
   }
   .official-osld-header-image{
     display:block!important;
-    width:235mm!important;
-    max-width:100%!important;
+    width:100%!important;
+    max-width:none!important;
     height:auto!important;
-    margin:0 auto!important;
+    margin:0!important;
     padding:0!important;
     border:0!important;
+    object-fit:contain!important;
+    object-position:top left!important;
   }
 
-  /* First-page event block exactly follows the sample. */
   .official-event-block{
     width:100%!important;
     box-sizing:border-box!important;
-    padding:0 0 4mm!important;
+    padding:0 0 3mm 0!important;
     margin:0!important;
   }
   .official-event-name{
     text-align:center!important;
-    font-size:8pt!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:11pt!important;
     font-weight:700!important;
-    text-transform:uppercase!important;
     line-height:1!important;
-    margin:0 0 6mm!important;
+    text-transform:uppercase!important;
+    margin:0 0 3mm!important;
     padding:0!important;
   }
   .official-details{
-    width:160mm!important;
-    max-width:100%!important;
-    font-size:7pt!important;
-    line-height:1.55!important;
+    width:100%!important;
+    box-sizing:border-box!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:9pt!important;
+    line-height:1.15!important;
     margin:0!important;
+    padding:0 8mm!important;
   }
   .official-details>div{
     display:flex!important;
-    align-items:flex-end!important;
-    height:5mm!important;
+    align-items:baseline!important;
+    width:100%!important;
+    height:5.5mm!important;
     margin:0!important;
     padding:0!important;
   }
   .official-detail-label{
     display:inline-block!important;
-    width:25mm!important;
-    flex:0 0 25mm!important;
+    flex:0 0 31mm!important;
+    width:31mm!important;
     white-space:nowrap!important;
+    font-weight:700!important;
   }
   .official-detail-line{
     display:inline-block!important;
-    width:135mm!important;
-    flex:0 0 135mm!important;
+    flex:1 1 auto!important;
     min-height:4mm!important;
     border-bottom:1px solid #000!important;
     padding:0 1mm!important;
     box-sizing:border-box!important;
   }
-  .official-continuation-page .official-print-header{
-    height:42mm!important;
-  }
-  .official-continuation-page .official-attendance-table{
-    margin-top:0!important;
-  }
 
-  /* Exact table proportions from the supplied sample. */
   .official-attendance-table{
-    width:100%!important;
+    width:289.56mm!important;
+    margin:0 0 0 4mm!important;
     table-layout:fixed!important;
     border-collapse:collapse!important;
     border-spacing:0!important;
-    margin:0!important;
     padding:0!important;
     font-family:Arial,Helvetica,sans-serif!important;
-    font-size:6.5pt!important;
+    font-size:9pt!important;
     color:#000!important;
   }
   .official-attendance-table th,
@@ -133,16 +138,18 @@
     box-sizing:border-box!important;
     vertical-align:middle!important;
     text-align:center!important;
-    padding:0 1mm!important;
-    height:6mm!important;
-    min-height:6mm!important;
-    line-height:1!important;
+    padding:0 1.2mm!important;
+    height:8.0mm!important;
+    min-height:8.0mm!important;
+    line-height:1.05!important;
   }
   .official-attendance-table thead th{
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:9pt!important;
     font-weight:700!important;
-    height:7mm!important;
-    min-height:7mm!important;
-    padding:0!important;
+    height:7.8mm!important;
+    min-height:7.8mm!important;
+    padding:0 1mm!important;
   }
   .official-attendance-table .participant-name{
     text-align:left!important;
@@ -152,51 +159,73 @@
     text-overflow:ellipsis!important;
   }
   .official-attendance-table .official-present{
-    font-size:5.5pt!important;
-    font-weight:700!important;
+    font-size:8pt!important;
+    font-weight:400!important;
   }
-  .official-attendance-table .col-no{width:10mm!important}
-  .official-attendance-table .col-name{width:96mm!important}
-  .official-attendance-table .col-org{width:66mm!important}
-  .official-attendance-table .col-sector{width:10.3mm!important}
+
+  /* Exact column proportions taken from the supplied Word form's tblGrid. */
+  .official-attendance-table .col-no{width:9.82mm!important}
+  .official-attendance-table .col-name{width:94.75mm!important}
+  .official-attendance-table .col-org{width:65.24mm!important}
+  .official-attendance-table .col-sector{width:7.50mm!important}
   .official-attendance-table .col-sex{width:8.75mm!important}
-  .official-attendance-table .col-signature{width:31.5mm!important}
+  .official-attendance-table .col-signature{width:30.00mm!important}
 
   .official-print-legend{
-    margin-top:7mm!important;
-    font-size:6pt!important;
-    line-height:1.5!important;
+    width:289.56mm!important;
+    margin:2.5mm 0 0 4mm!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:8pt!important;
+    line-height:1.25!important;
     color:#000!important;
   }
   .official-print-legend>div:first-child{font-weight:700!important}
 
-  /* Final summary is always a separate page. */
+  .official-continuation-page .official-print-header{
+    height:31mm!important;
+  }
+  .official-continuation-page .official-attendance-table{
+    margin-top:0!important;
+  }
+
+  /* Final page: the official form calls this page SUMMARY. */
   .official-summary-page .official-summary-wrap{
     width:100%!important;
-    padding-top:10mm!important;
+    padding:8mm 0 0 0!important;
+    margin:0!important;
+    box-sizing:border-box!important;
   }
   .official-summary-title{
     text-align:center!important;
-    font-size:10pt!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:12pt!important;
     font-weight:700!important;
-    margin:0 0 6mm!important;
+    margin:0 0 7mm!important;
+    padding:0!important;
   }
   .official-minority-table{
-    width:160mm!important;
+    width:155mm!important;
     border-collapse:collapse!important;
-    font-size:8pt!important;
+    table-layout:fixed!important;
+    font-family:Arial,Helvetica,sans-serif!important;
+    font-size:10pt!important;
     margin:0 auto!important;
   }
   .official-minority-table th,
   .official-minority-table td{
     border:1px solid #000!important;
-    padding:2.5mm!important;
-    height:8mm!important;
+    padding:2.5mm 3mm!important;
+    height:9mm!important;
     box-sizing:border-box!important;
   }
   .official-minority-table th{font-weight:700!important;text-align:center!important}
-  .official-minority-table td:last-child{text-align:center!important;width:45mm!important}
-}
+  .official-minority-table td:last-child{text-align:center!important;width:50mm!important}
+
+  @page{
+    size:A4 landscape;
+    margin:0;
+  }
+
 
 
 /* Scanner instruction: force true geometric centering inside the scanner panel. */
