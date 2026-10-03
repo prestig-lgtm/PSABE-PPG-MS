@@ -227,3 +227,100 @@
     text-align:center!important;
   }
 }
+
+/* Print header rebuilt in HTML/CSS. No osld-header.png dependency. */
+@media print{
+  .attendance-print-document .official-print-header{
+    width:100%!important;
+    height:38mm!important;
+    flex:0 0 38mm!important;
+    display:block!important;
+    position:relative!important;
+    overflow:visible!important;
+    font-family:"Roboto Condensed",Arial,sans-serif!important;
+    color:#000!important;
+  }
+
+  .attendance-print-document .official-csu-brand{
+    height:25mm!important;
+    display:flex!important;
+    align-items:flex-start!important;
+    justify-content:space-between!important;
+    box-sizing:border-box!important;
+  }
+
+  .attendance-print-document .official-csu-name{
+    margin-left:15mm!important;
+    padding-top:2mm!important;
+    line-height:1!important;
+  }
+
+  .attendance-print-document .official-republic{
+    font-size:9pt!important;
+    font-weight:700!important;
+    margin-bottom:1mm!important;
+  }
+
+  .attendance-print-document .official-university{
+    font-family:Georgia,"Times New Roman",serif!important;
+    font-size:18pt!important;
+    font-weight:700!important;
+    letter-spacing:.02em!important;
+    line-height:1!important;
+  }
+
+  .attendance-print-document .official-campus{
+    font-size:8pt!important;
+    font-weight:600!important;
+    margin-top:1mm!important;
+  }
+
+  .attendance-print-document .official-values{
+    display:flex!important;
+    gap:4mm!important;
+    margin-top:1.5mm!important;
+    font-size:7pt!important;
+    font-weight:700!important;
+  }
+
+  .attendance-print-document .official-values span:first-child{color:#147a35!important}
+  .attendance-print-document .official-values span:nth-child(2){color:#2f7d32!important}
+  .attendance-print-document .official-values span:nth-child(3){color:#236b35!important}
+
+  .attendance-print-document .official-accreditation{
+    display:flex!important;
+    gap:2mm!important;
+    align-items:flex-start!important;
+    padding-top:2mm!important;
+    margin-right:2mm!important;
+  }
+
+  .attendance-print-document .official-accreditation-box{
+    width:28mm!important;
+    height:20mm!important;
+    border:1px solid #42a9d5!important;
+    box-sizing:border-box!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    text-align:center!important;
+    font-size:7pt!important;
+    font-weight:700!important;
+    color:#111!important;
+  }
+
+  .attendance-print-document .official-accreditation-ab{
+    width:22mm!important;
+    border-left:0!important;
+  }
+
+  .attendance-print-document .official-osld-title{
+    position:absolute!important;
+    left:45mm!important;
+    bottom:1mm!important;
+    font-family:Arial,sans-serif!important;
+    font-size:12pt!important;
+    font-weight:700!important;
+    white-space:nowrap!important;
+  }
+}
