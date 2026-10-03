@@ -374,6 +374,20 @@ body.dashboard-data-loading .dashboard-content {
 
                 <button
                     class="nav-item"
+                    data-page="attendance"
+                >
+                    <span class="nav-icon">
+                        <svg viewBox="0 0 24 24">
+                            <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                            <path d="M8 8h8M8 12h8M8 16h5"></path>
+                        </svg>
+                    </span>
+                    <span>Attendance</span>
+                </button>
+
+
+                <button
+                    class="nav-item"
                     data-page="availability"
                 >
 
@@ -1831,7 +1845,21 @@ body.dashboard-data-loading .dashboard-content {
             <!-- =================================================
                  PLACEHOLDER PAGE FOR OTHER SECTIONS
             ================================================== -->
-            <div id="placeholderPage" class="page-section">
+            <div id="attendancePage" class="page-section attendance-page">
+  <div class="attendance-page-header">
+    <div><div class="section-label">EVENT ATTENDANCE</div><h1>Attendance Dashboard</h1><p>PSABE-PPG CSU Chapter attendance monitoring</p></div>
+    <div class="attendance-header-actions"><button class="attendance-button secondary" onclick="openAttendanceEvents()">VIEW SHEETS</button><button class="attendance-button" onclick="openAttendanceEventModal()">CREATE ATTENDANCE</button></div>
+  </div>
+  <section class="attendance-event-banner"><div><div class="attendance-event-kicker">CURRENT ATTENDANCE SHEET</div><h2 id="attendanceActiveEventName">No attendance event selected</h2><div class="attendance-event-meta"><span id="attendanceActiveEventDate">Date: —</span><span id="attendanceActiveEventVenue">Venue: —</span><span id="attendanceActiveEventTime">Time: —</span></div></div><div class="attendance-header-actions"><button class="attendance-button secondary" onclick="openAttendanceEvents()">CHANGE EVENT</button><button id="attendanceOpenBackup" class="attendance-button secondary" style="display:none" onclick="openActiveAttendanceBackup()">OPEN BACKUP SHEET</button></div></section>
+  <div class="attendance-stats"><div class="attendance-stat present"><small>PRESENT</small><strong id="attendanceStatPresent">0</strong><span>Timed In</span></div><div class="attendance-stat pending"><small>PENDING</small><strong id="attendanceStatPending">0</strong><span>Backup not synced</span></div><div class="attendance-stat complete"><small>COMPLETED</small><strong id="attendanceStatComplete">0</strong><span>Timed In &amp; Out</span></div><div class="attendance-stat late"><small>LATE</small><strong id="attendanceStatLate">0</strong><span>Late / No Time In</span></div></div>
+  <div class="attendance-grid">
+    <section class="attendance-panel"><div class="attendance-panel-head"><h3>▣ &nbsp; QR CODE SCANNER</h3><span id="attendanceScannerState">READY</span></div><div class="attendance-panel-body"><div class="attendance-mode"><button id="attendanceTimeInButton" class="active" onclick="setAttendanceRecordMode('TIME IN')">TIME IN</button><button id="attendanceTimeOutButton" onclick="setAttendanceRecordMode('TIME OUT')">TIME OUT</button></div><div class="attendance-scanner-layout"><div class="attendance-scanner"><div id="attendanceReader"></div><div class="attendance-scan-frame" id="attendanceScanFrame"><i class="a1"></i><i class="a2"></i><i class="a3"></i><i class="a4"></i></div><div id="attendanceScannerMessage">Press START CAMERA to scan an ID QR code.</div></div><div class="attendance-manual"><label>MANUAL ID NUMBER</label><input id="attendanceStudentId" type="text" inputmode="numeric" autocomplete="off" placeholder="Enter Student ID Number"><button class="attendance-submit" onclick="submitAttendanceManual()">RECORD ATTENDANCE</button><button class="attendance-button secondary" onclick="startAttendanceScanner(true)">START CAMERA</button><div class="attendance-helper">Use manual entry if the QR code cannot be scanned.</div><div id="attendancePreview" class="attendance-preview"><strong id="attendancePreviewName"></strong><span id="attendancePreviewDetail"></span></div></div></div></div></section>
+    <section class="attendance-panel"><div class="attendance-panel-head"><h3>☷ &nbsp; RECENT ATTENDANCE</h3><button class="attendance-button secondary" onclick="openAllAttendanceRecords()">VIEW ALL</button></div><div class="attendance-recent-head"><span>NAME</span><span>ID NUMBER</span><span>YEAR</span><span>STATUS</span></div><div id="attendanceRecentList" class="attendance-recent"></div></section>
+  </div>
+  <div class="attendance-bottom-grid"><section class="attendance-panel attendance-tool-panel"><div class="attendance-panel-head"><h3>READY TO PRINT</h3><span>8.5 × 11 IN</span></div><button class="attendance-tool" onclick="openAttendancePrintModal()"><strong>PRINT ATTENDANCE SHEET</strong><span>Prepared attendance format for each year level.</span></button></section><section class="attendance-panel attendance-tool-panel"><div class="attendance-panel-head"><h3>GOOGLE SHEETS BACKUP</h3><span id="attendanceBackupState">BACKUP READY</span></div><p class="attendance-helper big">Supabase is the primary database. Google Sheets is only a backup. The original MASTERLIST is never modified.</p></section></div>
+</div>
+
+<div id="placeholderPage" class="page-section">
                 <div class="placeholder-panel">
                     <span class="eyebrow">PSABE-PPG MANAGEMENT SYSTEM</span>
                     <h1 id="placeholderTitle">Coming Soon</h1>
@@ -2211,6 +2239,11 @@ body.dashboard-data-loading .dashboard-content {
                         "calendarPage"
                     );
 
+                const attendancePage =
+                    document.getElementById(
+                        "attendancePage"
+                    );
+
 
                 const availabilityPage =
                     document.getElementById(
@@ -2308,6 +2341,10 @@ body.dashboard-data-loading .dashboard-content {
                         "active-page"
                     );
 
+                    if (attendancePage) {
+                        attendancePage.classList.remove("active-page");
+                    }
+
                     availabilityPage.classList.remove(
                         "active-page"
                     );
@@ -2368,6 +2405,13 @@ body.dashboard-data-loading .dashboard-content {
                             renderCalendar();
                         }
 
+                    }
+
+
+                    else if (page === "attendance") {
+                        if (attendancePage) attendancePage.classList.add("active-page");
+                        setActiveNavigation("attendance");
+                        if (typeof window.loadAttendanceData === "function") window.loadAttendanceData();
                     }
 
 
@@ -3577,6 +3621,8 @@ body.dashboard-data-loading .dashboard-content {
             }
         }
     );
+
+    window.psabeSupabase = supabaseClient;
 
     /* =====================================================
        ROLE / ACCESS LEVEL
@@ -6791,6 +6837,8 @@ body.dashboard-data-loading .dashboard-content {
 })();
 </script>
 
+<link rel="stylesheet" href="attendance.css">
+<script src="attendance.js"></script>
 </body>
 
 </html>
