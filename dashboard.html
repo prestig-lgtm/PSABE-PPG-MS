@@ -2606,7 +2606,9 @@ body.dashboard-data-loading .dashboard-content {
 
                         button.addEventListener(
                             "click",
-                            function () {
+                            function (event) {
+                                event.preventDefault();
+                                event.stopPropagation();
 
                                 showPage(
                                     button.dataset.page
@@ -4577,15 +4579,18 @@ body.dashboard-data-loading .dashboard-content {
         updateDashboardGreeting();
 
         try {
-            // Load the cached dashboard data first so the Management System
-            // opens quickly. Background refresh keeps the data current.
+            /*
+               Dashboard reads go directly to Supabase on every refresh.
+               This deliberately bypasses the short-lived IndexedDB cache so
+               changes made by another officer are reflected on the dashboard.
+            */
             const results = await Promise.all([
-                fetchJson("getTasks"),
-                fetchJson("getEvents"),
-                fetchJson("getMeetings"),
-                fetchJson("getAvailability"),
-                fetchJson("getOfficers"),
-                fetchJson("getAnnouncements")
+                refreshSupabaseData("getTasks"),
+                refreshSupabaseData("getEvents"),
+                refreshSupabaseData("getMeetings"),
+                refreshSupabaseData("getAvailability"),
+                refreshSupabaseData("getOfficers"),
+                refreshSupabaseData("getAnnouncements")
             ]);
 
             const tasks = results[0] && Array.isArray(results[0].data)
@@ -6382,41 +6387,6 @@ body.dashboard-data-loading .dashboard-content {
 
 
     /* =====================================================
-       ATTENDANCE SETTINGS MENU ISOLATION
-       Attendance controls must never remain open when the user
-       navigates to another Management System section.
-    ===================================================== */
-    function closeAttendanceSettingsMenu() {
-        const menu = document.getElementById("attendanceSettingsMenu") ||
-            document.getElementById("settingsMenu");
-        if (menu) menu.classList.remove("open", "show", "active");
-    }
-
-    document.addEventListener("click", function (event) {
-        const menu = document.getElementById("attendanceSettingsMenu") ||
-            document.getElementById("settingsMenu");
-        if (!menu) return;
-
-        const trigger = event.target.closest && event.target.closest(
-            '[data-attendance-settings], [aria-controls="attendanceSettingsMenu"], [aria-controls="settingsMenu"]'
-        );
-
-        if (!trigger && !menu.contains(event.target)) {
-            menu.classList.remove("open", "show", "active");
-        }
-    }, true);
-
-    window.closeAttendanceSettingsMenu = closeAttendanceSettingsMenu;
-
-    document.addEventListener("click", function (event) {
-        const navigationTarget = event.target.closest && event.target.closest(
-            '[data-page], [data-section], .sidebar-item, .nav-item, .menu-item, a[href*="dashboard"], a[href*="calendar"], a[href*="settings"]'
-        );
-        if (navigationTarget) closeAttendanceSettingsMenu();
-    }, true);
-
-
-    /* =====================================================
        INITIALIZE AVAILABILITY CONTROLS
     ===================================================== */
 
@@ -6654,39 +6624,83 @@ body.dashboard-data-loading .dashboard-content {
            background so a large Google Sheet does not block the first view.
         */
         /*
-           Load each data source independently. A failure in Tasks, Events,
-           or another dashboard section must never prevent Availability from
-           loading. Availability is a separate Supabase-backed feature.
+           FAST FIRST PAINT
+           Only the data needed for the first dashboard view is allowed to
+           hold the loading screen. Everything else loads in the background.
+           This also prevents duplicate requests on startup.
         */
-        loadTasks().catch(function (error) {
-            console.error("Task loading error:", error);
-        });
+        Promise.all([
+            fetchJson("getTasks"),
+            fetchJson("getEvents"),
+            fetchJson("getMeetings")
+        ]).then(function (results) {
+            const tasksResult = results[0] || {};
+            const eventResult = results[1] || {};
+            const meetingResult = results[2] || {};
 
-        loadDashboardData().catch(function (error) {
-            console.error("Dashboard data loading error:", error);
-        });
+            tasksData = Array.isArray(tasksResult.data) ? tasksResult.data : [];
+            const eventRows = Array.isArray(eventResult.data) ? eventResult.data : [];
+            const meetingRows = Array.isArray(meetingResult.data) ? meetingResult.data : [];
+            const events = eventRows.concat(meetingRows.map(function (meeting) {
+                return {
+                    "Event ID": getRecordValue(meeting, "Meeting ID"),
+                    Title: getRecordValue(meeting, "Title"),
+                    Description: getRecordValue(meeting, "Description"),
+                    Date: getRecordValue(meeting, "Date"),
+                    "Start Time": getRecordValue(meeting, "Start Time"),
+                    "End Time": getRecordValue(meeting, "End Time"),
+                    Location: getRecordValue(meeting, "Location"),
+                    Type: "Meeting",
+                    Status: getRecordValue(meeting, "Status"),
+                    "Created By": getRecordValue(meeting, "Created By")
+                };
+            }));
 
-        Promise.allSettled([
-            loadOfficerProfile(),
-            loadAvailability(),
-            loadAnnouncements()
-        ]).then(function () {
-            updateOfficerProfile();
-            renderOfficerDirectory();
+            renderLiveDashboard(tasksData, events);
             updateDashboardGreeting();
-            renderAvailabilityTable();
-            renderDashboardAvailability();
+            document.body.classList.remove("dashboard-data-loading");
+
+            /* Non-blocking data refresh after the dashboard is visible. */
+            Promise.allSettled([
+                fetchJson("getAvailability"),
+                fetchJson("getOfficers"),
+                fetchJson("getAnnouncements")
+            ]).then(function (results) {
+                if (results[0].status === "fulfilled") {
+                    availabilityRecords = Array.isArray(results[0].value.data) ? results[0].value.data : [];
+                }
+                if (results[1].status === "fulfilled") {
+                    officersData = Array.isArray(results[1].value.data) ? results[1].value.data : [];
+                }
+                if (results[2].status === "fulfilled") {
+                    announcementsData = Array.isArray(results[2].value.data) ? results[2].value.data : [];
+                }
+
+                rebuildAvailabilityTableData();
+                renderAvailabilityTable();
+                renderDashboardAvailability();
+                renderOfficerDirectory();
+                renderAnnouncements();
+                updateDashboardAnnouncement();
+
+                const currentUsername = normalizeUsername(CURRENT_USERNAME);
+                const freshOfficer = officersData.find(function (officer) {
+                    return normalizeUsername(getRecordValue(officer, "Username")) === currentUsername;
+                });
+                if (freshOfficer) {
+                    currentOfficer = freshOfficer;
+                    updateOfficerProfile();
+                }
+            });
         }).catch(function (error) {
-            console.error("Background dashboard data loading error:", error);
-        }).finally(function () {
+            console.error("Critical dashboard data loading error:", error);
             document.body.classList.remove("dashboard-data-loading");
         });
 
-        // Keep dashboard information current without blocking the UI.
-        // The refresh happens in the background every 30 seconds.
+        // Refresh in the background. Never make the dashboard wait for this.
         setInterval(function () {
             updateDashboardGreeting();
-            Promise.all([
+            Promise.allSettled([
                 refreshSupabaseData("getTasks"),
                 refreshSupabaseData("getEvents"),
                 refreshSupabaseData("getMeetings"),
@@ -6694,11 +6708,11 @@ body.dashboard-data-loading .dashboard-content {
                 refreshSupabaseData("getOfficers"),
                 refreshSupabaseData("getAnnouncements")
             ]).then(function () {
-                return loadDashboardData();
-            }).catch(function (error) {
-                console.warn("Background dashboard refresh failed:", error);
+                loadDashboardData().catch(function (error) {
+                    console.warn("Background dashboard refresh failed:", error);
+                });
             });
-        }, 30000);
+        }, 60000);
 
         setInterval(function () {
             renderDashboardAvailability();
