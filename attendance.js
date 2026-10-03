@@ -34,9 +34,40 @@ function buildModals(){
  document.body.insertAdjacentHTML("beforeend",`
  <div id="attendanceEventModal" class="attendance-modal-overlay"><div class="attendance-modal"><div class="attendance-modal-head"><div><div class="attendance-event-kicker">NEW ATTENDANCE</div><h2>Create Attendance Event</h2><p>Creates the Supabase event and the Google Sheets backup workbook.</p></div><button class="attendance-modal-close" onclick="closeAttendanceEventModal()">×</button></div><div class="attendance-form"><div class="attendance-form-grid"><div class="attendance-field full"><label>EVENT / ACTIVITY NAME</label><input id="attendanceEventName" placeholder="e.g. 1st General Assembly"></div><div class="attendance-field"><label>DATE</label><input id="attendanceEventDate" type="date"></div><div class="attendance-field"><label>VENUE</label><input id="attendanceEventVenue" placeholder="e.g. Hinang Auditorium"></div><div class="attendance-field"><label>START TIME</label><input id="attendanceEventStart" type="time"></div><div class="attendance-field"><label>END TIME</label><input id="attendanceEventEnd" type="time"></div></div><div class="attendance-form-actions"><button class="attendance-button secondary" onclick="closeAttendanceEventModal()">CANCEL</button><button class="attendance-button" onclick="createAttendanceEvent()">CREATE ATTENDANCE</button></div></div></div></div>
  <div id="attendanceEventsModal" class="attendance-modal-overlay"><div class="attendance-modal"><div class="attendance-modal-head"><div><div class="attendance-event-kicker">ATTENDANCE RECORDS</div><h2>Attendance Sheets</h2><p>Select an event to open its attendance.</p></div><button class="attendance-modal-close" onclick="closeAttendanceEvents()">×</button></div><div id="attendanceEventList" class="attendance-list"></div></div></div>
- <div id="attendanceSectorModal" class="attendance-modal-overlay"><div class="attendance-modal"><div class="attendance-modal-head"><div><div class="attendance-event-kicker">PARTICIPANT CLASSIFICATION</div><h2>Select Sectoral Group</h2><p id="attendanceSectorModalStudent">Student ID</p></div><button class="attendance-modal-close" onclick="closeAttendanceSectorModal()">×</button></div><div class="attendance-sex-options"><span class="attendance-inline-label">SEX</span><label><input type="radio" name="attendanceSex" value="M"> M</label><label><input type="radio" name="attendanceSex" value="F"> F</label></div><div class="attendance-sector-options"><label><input type="checkbox" value="4PS"> 4PS</label><label><input type="checkbox" value="IPs"> IPs</label><label><input type="checkbox" value="PWDs"> PWDs</label><label><input type="checkbox" value="Solo Parent"> Solo Parent</label><label><input type="checkbox" value="LGBTQIA+"> LGBTQIA+</label><label><input type="checkbox" value="Child of a Solo Parent"> Child of a Solo Parent</label></div><button id="attendanceSectorNA" class="attendance-sector-na" onclick="toggleAttendanceSectorNA()">N/A · NONE OF THE ABOVE</button><div class="attendance-modal-actions"><button class="attendance-button secondary" onclick="closeAttendanceSectorModal()">CANCEL</button><button class="attendance-button" onclick="confirmAttendanceSector()">CONFIRM &amp; RECORD</button></div></div></div>
+ <div id="attendanceSectorModal" class="sectoral-modal" aria-hidden="true">
+   <div class="sectoral-modal-backdrop" onclick="closeAttendanceSectorModal()"></div>
+   <div class="sectoral-modal-card" role="dialog" aria-modal="true" aria-labelledby="attendanceSectorModalTitle">
+     <div class="sectoral-modal-head">
+       <div>
+         <div class="sectoral-modal-kicker">PARTICIPANT CLASSIFICATION</div>
+         <h3 id="attendanceSectorModalTitle">Select Sectoral Group</h3>
+         <p id="attendanceSectorModalStudent">Student ID</p>
+       </div>
+       <button type="button" class="sectoral-modal-close" onclick="closeAttendanceSectorModal()">×</button>
+     </div>
+     <div class="sectoral-modal-note">You may select more than one group. Choose N/A if the participant does not belong to any listed group.</div>
+     <div class="sectoral-modal-options">
+       <label><input type="checkbox" value="4PS"> <span><b>1</b> 4PS</span></label>
+       <label><input type="checkbox" value="IPs"> <span><b>2</b> IPs</span></label>
+       <label><input type="checkbox" value="PWDs"> <span><b>3</b> PWDs</span></label>
+       <label><input type="checkbox" value="Solo Parent"> <span><b>4</b> Solo Parent</span></label>
+       <label><input type="checkbox" value="LGBTQIA+"> <span><b>5</b> LGBTQIA+</span></label>
+       <label><input type="checkbox" value="Child of a Solo Parent"> <span><b>6</b> Child of a Solo Parent</span></label>
+     </div>
+     <button type="button" id="attendanceSectorNA" class="sector-na-modal" onclick="toggleAttendanceSectorNA()">N/A · NONE OF THE ABOVE</button>
+     <div class="sex-selection-title">SEX</div>
+     <div class="sex-selection-options">
+       <label><input type="radio" name="attendanceSex" value="M"> <span><b>M</b> Male</span></label>
+       <label><input type="radio" name="attendanceSex" value="F"> <span><b>F</b> Female</span></label>
+     </div>
+     <div class="sectoral-modal-actions">
+       <button type="button" class="sector-cancel" onclick="closeAttendanceSectorModal()">CANCEL</button>
+       <button type="button" class="sector-confirm" onclick="confirmAttendanceSector()">CONFIRM &amp; SUBMIT</button>
+     </div>
+   </div>
+ </div>
  <div id="attendanceAllModal" class="attendance-modal-overlay"><div class="attendance-modal"><div class="attendance-modal-head"><div><div class="attendance-event-kicker">ATTENDANCE RECORDS</div><h2>All Attendees</h2><p>Records retrieved from Supabase.</p></div><button class="attendance-modal-close" onclick="closeAllAttendanceRecords()">×</button></div><div id="attendanceAllList" class="attendance-list"></div></div></div>
- <div id="attendancePrintModal" class="attendance-modal-overlay"><div class="attendance-modal"><div class="attendance-modal-head"><div><div class="attendance-event-kicker">READY TO PRINT</div><h2>Print Attendance Sheet</h2><p>Prepared for 8.5 × 11 inch paper.</p></div><button class="attendance-modal-close" onclick="closeAttendancePrintModal()">×</button></div><div class="attendance-form"><p class="attendance-print-note">The printout follows the official OSLD format. Participant pages continue automatically, numbering continues, and the minority-classification summary is always printed on a separate final page.</p><div class="attendance-form-actions"><button class="attendance-button secondary" onclick="closeAttendancePrintModal()">CANCEL</button><button class="attendance-button" onclick="printAttendanceYearLevel()">PRINT</button></div></div></div></div>
+ <div id="attendancePrintModal" class="attendance-modal-overlay"><div class="attendance-modal"><div class="attendance-modal-head"><div><div class="attendance-event-kicker">READY TO PRINT</div><h2>Print Attendance Sheet</h2><p>Prepared for A4 (210 × 297 mm) paper.</p></div><button class="attendance-modal-close" onclick="closeAttendancePrintModal()">×</button></div><div class="attendance-form"><p class="attendance-print-note">The printout follows the official OSLD format. Participant pages continue automatically, numbering continues, and the minority-classification summary is always printed on a separate final page.</p><div class="attendance-form-actions"><button class="attendance-button secondary" onclick="closeAttendancePrintModal()">CANCEL</button><button class="attendance-button" onclick="printAttendanceYearLevel()">PRINT</button></div></div></div></div>
  <div id="attendancePrintDocument" class="attendance-print-document"></div>`);
  document.querySelectorAll(".attendance-modal-overlay").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("show")}));
 }
@@ -74,8 +105,8 @@ async function createAttendanceEvent(){const name=el("attendanceEventName").valu
 
 function setAttendanceRecordMode(mode){recordMode=mode;el("attendanceTimeInButton").classList.toggle("active",mode==="TIME IN");el("attendanceTimeOutButton").classList.toggle("active",mode==="TIME OUT");el("attendanceScannerState").textContent=mode}
 function sectorGroups(){return [...document.querySelectorAll("#attendanceSectorModal input[type=checkbox]:checked")].map(x=>x.value)}
-function openAttendanceSectorModal(studentId,source){pendingStudentId=studentId;pendingSource=source;pendingSex="";el("attendanceSectorModalStudent").textContent="Student ID: "+studentId;document.querySelectorAll("#attendanceSectorModal input[type=checkbox]").forEach(x=>x.checked=false);document.querySelectorAll("#attendanceSectorModal input[name=attendanceSex]").forEach(x=>x.checked=false);el("attendanceSectorNA").classList.remove("active");el("attendanceSectorModal").classList.add("show")}
-function closeAttendanceSectorModal(){el("attendanceSectorModal")?.classList.remove("show");pendingStudentId="";pendingSource="";pendingSex=""}
+function openAttendanceSectorModal(studentId,source){pendingStudentId=studentId;pendingSource=source;pendingSex="";el("attendanceSectorModalStudent").textContent="Student ID: "+studentId;document.querySelectorAll("#attendanceSectorModal input[type=checkbox]").forEach(x=>x.checked=false);document.querySelectorAll("#attendanceSectorModal input[name=attendanceSex]").forEach(x=>x.checked=false);el("attendanceSectorNA").classList.remove("active");el("attendanceSectorModal").classList.add("show","open");el("attendanceSectorModal").setAttribute("aria-hidden","false")}
+function closeAttendanceSectorModal(){const m=el("attendanceSectorModal");if(m){m.classList.remove("show","open");m.setAttribute("aria-hidden","true")}pendingStudentId="";pendingSource="";pendingSex=""}
 function toggleAttendanceSectorNA(){const b=el("attendanceSectorNA");b.classList.toggle("active");if(b.classList.contains("active"))document.querySelectorAll("#attendanceSectorModal input[type=checkbox]").forEach(x=>x.checked=false)}
 async function confirmAttendanceSector(){const g=sectorGroups(),na=el("attendanceSectorNA").classList.contains("active"),sex=document.querySelector("#attendanceSectorModal input[name=attendanceSex]:checked")?.value||"";if(!sex){alert("Please select Sex: M or F.");return}if(!g.length&&!na){alert("Please select a sectoral group or N/A.");return}const sid=pendingStudentId,src=pendingSource;closeAttendanceSectorModal();await recordAttendance(sid,src,na?["N/A"]:g,sex)}
 
