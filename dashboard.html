@@ -2367,6 +2367,12 @@ body.dashboard-data-loading .dashboard-content {
                         );
                     }
 
+                    if (settingsPage) {
+                        settingsPage.classList.remove(
+                            "active-page"
+                        );
+                    }
+
                     placeholderPage.classList.remove(
                         "active-page"
                     );
@@ -6895,8 +6901,8 @@ body.dashboard-data-loading .dashboard-content {
 })();
 </script>
 
-<link rel="stylesheet" href="attendance.css">
-<script src="attendance.js"></script>
+<link rel="stylesheet" href="attendance.css?v=official-2">
+<script src="attendance.js?v=official-2"></script>
 </body>
 
 </html>
