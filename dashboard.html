@@ -372,6 +372,10 @@ body.dashboard-data-loading .dashboard-content {
 
 
 
+
+
+
+
                 <button
                     class="nav-item"
                     data-page="attendance"
@@ -1842,10 +1846,7 @@ body.dashboard-data-loading .dashboard-content {
                 </section>
             </div>
 
-            <!-- =================================================
-                 PLACEHOLDER PAGE FOR OTHER SECTIONS
-            ================================================== -->
-            <div id="attendancePage" class="page-section attendance-page">
+<div id="attendancePage" class="page-section attendance-page">
   <div class="attendance-page-header">
     <div><div class="section-label">EVENT ATTENDANCE</div><h1>Attendance Dashboard</h1><p>PSABE-PPG CSU Chapter attendance monitoring</p></div>
     <div class="attendance-header-actions"><button class="attendance-button secondary" onclick="openAttendanceEvents()">VIEW SHEETS</button><button class="attendance-button" onclick="openAttendanceEventModal()">CREATE ATTENDANCE</button></div>
@@ -1859,7 +1860,12 @@ body.dashboard-data-loading .dashboard-content {
   <div class="attendance-bottom-grid"><section class="attendance-panel attendance-tool-panel"><div class="attendance-panel-head"><h3>READY TO PRINT</h3><span>A4 LANDSCAPE</span></div><button class="attendance-tool" onclick="openAttendancePrintModal()"><strong>PRINT ATTENDANCE SHEET</strong><span>Prepared attendance format for each year level.</span></button></section><section class="attendance-panel attendance-tool-panel"><div class="attendance-panel-head"><h3>GOOGLE SHEETS BACKUP</h3><span id="attendanceBackupState">BACKUP READY</span></div><p class="attendance-helper big">Supabase is the primary database. Google Sheets is only a backup. The original MASTERLIST is never modified.</p></section></div>
 </div>
 
-<div id="placeholderPage" class="page-section">
+
+
+            <!-- =================================================
+                 PLACEHOLDER PAGE FOR OTHER SECTIONS
+            ================================================== -->
+            <div id="placeholderPage" class="page-section">
                 <div class="placeholder-panel">
                     <span class="eyebrow">PSABE-PPG MANAGEMENT SYSTEM</span>
                     <h1 id="placeholderTitle">Coming Soon</h1>
@@ -2239,6 +2245,7 @@ body.dashboard-data-loading .dashboard-content {
                         "calendarPage"
                     );
 
+
                 const attendancePage =
                     document.getElementById(
                         "attendancePage"
@@ -2342,7 +2349,9 @@ body.dashboard-data-loading .dashboard-content {
                     );
 
                     if (attendancePage) {
-                        attendancePage.classList.remove("active-page");
+                        attendancePage.classList.remove(
+                            "active-page"
+                        );
                     }
 
                     availabilityPage.classList.remove(
@@ -2414,10 +2423,24 @@ body.dashboard-data-loading .dashboard-content {
                     }
 
 
-                    else if (page === "attendance") {
-                        if (attendancePage) attendancePage.classList.add("active-page");
-                        setActiveNavigation("attendance");
-                        if (typeof window.loadAttendanceData === "function") window.loadAttendanceData();
+                    else if (
+                        page === "attendance"
+                    ) {
+
+                        if (attendancePage) {
+                            attendancePage.classList.add(
+                                "active-page"
+                            );
+                        }
+
+                        setActiveNavigation(
+                            "attendance"
+                        );
+
+                        if (typeof window.loadAttendanceData === "function") {
+                            window.loadAttendanceData();
+                        }
+
                     }
 
 
@@ -2612,9 +2635,7 @@ body.dashboard-data-loading .dashboard-content {
 
                         button.addEventListener(
                             "click",
-                            function (event) {
-                                event.preventDefault();
-                                event.stopPropagation();
+                            function () {
 
                                 showPage(
                                     button.dataset.page
@@ -3630,6 +3651,7 @@ body.dashboard-data-loading .dashboard-content {
         }
     );
 
+    /* Attendance module uses the same existing Supabase client. */
     window.psabeSupabase = supabaseClient;
 
     /* =====================================================
@@ -6630,95 +6652,39 @@ body.dashboard-data-loading .dashboard-content {
            background so a large Google Sheet does not block the first view.
         */
         /*
-           FAST FIRST PAINT
-           Only the data needed for the first dashboard view is allowed to
-           hold the loading screen. Everything else loads in the background.
-           This also prevents duplicate requests on startup.
+           Load each data source independently. A failure in Tasks, Events,
+           or another dashboard section must never prevent Availability from
+           loading. Availability is a separate Supabase-backed feature.
         */
-        Promise.all([
-            fetchJson("getTasks"),
-            fetchJson("getEvents"),
-            fetchJson("getMeetings")
-        ]).then(function (results) {
-            const tasksResult = results[0] || {};
-            const eventResult = results[1] || {};
-            const meetingResult = results[2] || {};
+        loadTasks().catch(function (error) {
+            console.error("Task loading error:", error);
+        });
 
-            tasksData = Array.isArray(tasksResult.data) ? tasksResult.data : [];
-            const eventRows = Array.isArray(eventResult.data) ? eventResult.data : [];
-            const meetingRows = Array.isArray(meetingResult.data) ? meetingResult.data : [];
-            const events = eventRows.concat(meetingRows.map(function (meeting) {
-                return {
-                    "Event ID": getRecordValue(meeting, "Meeting ID"),
-                    Title: getRecordValue(meeting, "Title"),
-                    Description: getRecordValue(meeting, "Description"),
-                    Date: getRecordValue(meeting, "Date"),
-                    "Start Time": getRecordValue(meeting, "Start Time"),
-                    "End Time": getRecordValue(meeting, "End Time"),
-                    Location: getRecordValue(meeting, "Location"),
-                    Type: "Meeting",
-                    Status: getRecordValue(meeting, "Status"),
-                    "Created By": getRecordValue(meeting, "Created By")
-                };
-            }));
+        loadDashboardData().catch(function (error) {
+            console.error("Dashboard data loading error:", error);
+        });
 
-            renderLiveDashboard(tasksData, events);
+        Promise.allSettled([
+            loadOfficerProfile(),
+            loadAvailability(),
+            loadAnnouncements()
+        ]).then(function () {
+            updateOfficerProfile();
+            renderOfficerDirectory();
             updateDashboardGreeting();
-            document.body.classList.remove("dashboard-data-loading");
-
-            /* Non-blocking data refresh after the dashboard is visible. */
-            Promise.allSettled([
-                fetchJson("getAvailability"),
-                fetchJson("getOfficers"),
-                fetchJson("getAnnouncements")
-            ]).then(function (results) {
-                if (results[0].status === "fulfilled") {
-                    availabilityRecords = Array.isArray(results[0].value.data) ? results[0].value.data : [];
-                }
-                if (results[1].status === "fulfilled") {
-                    officersData = Array.isArray(results[1].value.data) ? results[1].value.data : [];
-                }
-                if (results[2].status === "fulfilled") {
-                    announcementsData = Array.isArray(results[2].value.data) ? results[2].value.data : [];
-                }
-
-                rebuildAvailabilityTableData();
-                renderAvailabilityTable();
-                renderDashboardAvailability();
-                renderOfficerDirectory();
-                renderAnnouncements();
-                updateDashboardAnnouncement();
-
-                const currentUsername = normalizeUsername(CURRENT_USERNAME);
-                const freshOfficer = officersData.find(function (officer) {
-                    return normalizeUsername(getRecordValue(officer, "Username")) === currentUsername;
-                });
-                if (freshOfficer) {
-                    currentOfficer = freshOfficer;
-                    updateOfficerProfile();
-                }
-            });
+            renderAvailabilityTable();
+            renderDashboardAvailability();
         }).catch(function (error) {
-            console.error("Critical dashboard data loading error:", error);
+            console.error("Background dashboard data loading error:", error);
+        }).finally(function () {
             document.body.classList.remove("dashboard-data-loading");
         });
 
-        // Refresh in the background. Never make the dashboard wait for this.
+        // Keep dashboard information current without requiring a page reload.
         setInterval(function () {
             updateDashboardGreeting();
-            Promise.allSettled([
-                refreshSupabaseData("getTasks"),
-                refreshSupabaseData("getEvents"),
-                refreshSupabaseData("getMeetings"),
-                refreshSupabaseData("getAvailability"),
-                refreshSupabaseData("getOfficers"),
-                refreshSupabaseData("getAnnouncements")
-            ]).then(function () {
-                loadDashboardData().catch(function (error) {
-                    console.warn("Background dashboard refresh failed:", error);
-                });
-            });
-        }, 60000);
+            loadDashboardData();
+        }, 15000);
 
         setInterval(function () {
             renderDashboardAvailability();
@@ -6901,8 +6867,9 @@ body.dashboard-data-loading .dashboard-content {
 })();
 </script>
 
-<link rel="stylesheet" href="attendance.css?v=official-2">
-<script src="attendance.js?v=official-2"></script>
+<link rel="stylesheet" href="attendance.css?v=20261004-2">
+<script src="attendance.js?v=20261004-2"></script>
+
 </body>
 
 </html>
