@@ -72,7 +72,14 @@ function buildModals(){
  document.querySelectorAll(".attendance-modal-overlay").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("show")}));
 }
 
-async function google(payload){const r=await fetch(GOOGLE_SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});if(!r.ok)throw new Error("Google Sheets request failed (HTTP "+r.status+")");return r.json()}
+async function google(payload){
+  const r=await fetch(GOOGLE_SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload),redirect:"follow"});
+  const text=await r.text();
+  if(!r.ok) throw new Error("Google Sheets request failed (HTTP "+r.status+")");
+  let data;
+  try{data=JSON.parse(text)}catch(e){throw new Error("Google Sheets backup returned an invalid response. Make sure the Apps Script is deployed as a Web App with access set to Anyone.")}
+  return data;
+}
 async function lookup(studentId){
  const sid=String(studentId||"").trim();
  if(!sid)throw new Error("Please enter a Student ID.");
@@ -98,8 +105,48 @@ function openAttendanceEventModal(){buildModals();el("attendanceEventModal").cla
 function openAttendanceEvents(){renderEventList();el("attendanceEventsModal").classList.add("show")}function closeAttendanceEvents(){el("attendanceEventsModal")?.classList.remove("show")}
 function openAllAttendanceRecords(){renderAll();el("attendanceAllModal").classList.add("show")}function closeAllAttendanceRecords(){el("attendanceAllModal")?.classList.remove("show")}function openActiveAttendanceBackup(){if(activeEvent?.google_spreadsheet_url)window.open(activeEvent.google_spreadsheet_url,"_blank","noopener,noreferrer")}
 function openAttendancePrintModal(){el("attendancePrintModal").classList.add("show")}function closeAttendancePrintModal(){el("attendancePrintModal")?.classList.remove("show")}
-function renderEventList(){const box=el("attendanceEventList");if(!events.length){box.innerHTML='<div class="attendance-empty">No attendance events have been created yet.</div>';return}box.innerHTML=events.map(e=>`<button class="attendance-event-row" onclick="selectAttendanceEvent('${String(e.event_id).replace(/'/g,"\\'")}')"><span style="text-align:left"><strong>${esc(e.event_name)}</strong><small>${esc(dateLabel(e.event_date))} · ${esc(e.venue||"No venue")}</small></span><span class="attendance-badge ${e.status==="OPEN"?"present":"pending"}">${esc(e.status||"OPEN")}</span></button>`).join("")}
+function renderEventList(){
+ const box=el("attendanceEventList");
+ if(!events.length){box.innerHTML='<div class="attendance-empty">No attendance events have been created yet.</div>';return}
+ box.innerHTML=events.map(e=>{
+   const eid=esc(e.event_id);
+   return `<div class="attendance-event-row attendance-event-row-with-delete">
+     <button type="button" class="attendance-event-select" onclick="selectAttendanceEvent('${String(e.event_id).replace(/'/g,"\\'")}')">
+       <span style="text-align:left"><strong>${esc(e.event_name)}</strong><small>${esc(dateLabel(e.event_date))} · ${esc(e.venue||"No venue")}</small></span>
+       <span class="attendance-badge ${e.status==="OPEN"?"present":"pending"}">${esc(e.status||"OPEN")}</span>
+     </button>
+     <button type="button" class="attendance-event-delete" title="Delete attendance sheet" aria-label="Delete ${eid}" onclick="deleteAttendanceEvent('${String(e.event_id).replace(/'/g,"\\'")}',this)">DELETE</button>
+   </div>`;
+ }).join("");
+}
 async function selectAttendanceEvent(eventId){activeEvent=events.find(e=>e.event_id===eventId)||null;closeAttendanceEvents();renderEvent();await loadRecords()}
+
+async function deleteAttendanceEvent(eventId,clickEvent){
+  if(clickEvent) clickEvent.stopPropagation();
+  const eventToDelete=events.find(e=>e.event_id===eventId);
+  if(!eventToDelete)return;
+  const ok=window.confirm('Delete the attendance sheet for "'+eventToDelete.event_name+'"?\n\nThis will delete its attendance records and move its Google Sheets backup workbook to the Google Drive trash. This cannot be undone from the attendance system.');
+  if(!ok)return;
+  try{
+    if(eventToDelete.google_spreadsheet_id){
+      const gs=await google({action:"DELETE_ATTENDANCE_WORKBOOK",spreadsheetId:eventToDelete.google_spreadsheet_id});
+      if(!gs?.success)throw new Error(gs?.message||"Google Sheets workbook could not be deleted.");
+    }
+    const delRecords=await supabase.from("attendance_records").delete().eq("event_id",eventId);
+    if(delRecords.error)throw delRecords.error;
+    const delEvent=await supabase.from("attendance_events").delete().eq("event_id",eventId);
+    if(delEvent.error)throw delEvent.error;
+    events=events.filter(e=>e.event_id!==eventId);
+    if(activeEvent?.event_id===eventId)activeEvent=events[0]||null;
+    closeAttendanceEvents();
+    renderEvent();
+    await loadRecords();
+    alert('Attendance sheet deleted successfully.');
+  }catch(e){
+    console.error(e);
+    alert(e.message||'Unable to delete the attendance sheet.');
+  }
+}
 
 async function createAttendanceEvent(){const name=el("attendanceEventName").value.trim(),date=el("attendanceEventDate").value,venue=el("attendanceEventVenue").value.trim(),start=el("attendanceEventStart").value,end=el("attendanceEventEnd").value;if(!name||!date){alert("Please enter the event name and date.");return}const eventId=id("ATT-EVT-");const payload={event_id:eventId,event_name:name,event_date:date,venue:venue||null,start_time:start||null,end_time:end||null,created_by:CURRENT_USERNAME,status:"OPEN",backup_status:"PENDING"};const ins=await supabase.from("attendance_events").insert(payload).select().single();if(ins.error){alert(ins.error.message);return}const event=ins.data;try{const gs=await google({action:"CREATE_ATTENDANCE_WORKBOOK",eventId,eventName:name});if(gs?.success){const up=await supabase.from("attendance_events").update({google_spreadsheet_id:gs.spreadsheetId,google_spreadsheet_url:gs.spreadsheetUrl||null,backup_status:"READY",updated_at:now()}).eq("event_id",eventId).select().single();if(!up.error)Object.assign(event,up.data)}}catch(e){console.warn("Google backup workbook not ready:",e)}events.unshift(event);activeEvent=event;closeAttendanceEventModal();renderEvent();await loadRecords();el("attendanceEventName").value="";el("attendanceEventDate").value="";el("attendanceEventVenue").value="";el("attendanceEventStart").value="";el("attendanceEventEnd").value="";alert("Attendance event created successfully.")}
 
@@ -135,7 +182,7 @@ function printAttendanceYearLevel(){
  }));
 
  const headerMarkup=`<div class="official-print-header">
-   <img class="official-osld-header-image" src="assets/osld-header.png" alt="Office of Student Leadership and Development">
+   <img class="official-osld-header-image" src="assets/osld-header.png?v=official-1" alt="Office of Student Leadership and Development">
  </div>`;
 
  const participantCellMarkup=(r,index)=>{
@@ -241,6 +288,14 @@ function printAttendanceYearLevel(){
  </section>`);
 
  el("attendancePrintDocument").innerHTML=pages.join("");
+ const printHeader=el("attendancePrintDocument").querySelector(".official-osld-header-image");
+ if(printHeader && !printHeader.complete){
+   await new Promise(resolve=>{
+     printHeader.addEventListener("load",resolve,{once:true});
+     printHeader.addEventListener("error",resolve,{once:true});
+     setTimeout(resolve,1500);
+   });
+ }
  closeAttendancePrintModal();
  document.body.classList.add("psabe-attendance-printing");
  window.print();
@@ -249,5 +304,5 @@ function printAttendanceYearLevel(){
 
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&document.activeElement?.id==="attendanceStudentId"){e.preventDefault();submitAttendanceManual()}});
 
-Object.assign(window,{loadAttendanceData,openAttendanceEventModal,closeAttendanceEventModal,openAttendanceEvents,closeAttendanceEvents,selectAttendanceEvent,createAttendanceEvent,setAttendanceRecordMode,submitAttendanceManual,startAttendanceScanner,openAttendanceSectorModal,closeAttendanceSectorModal,toggleAttendanceSectorNA,confirmAttendanceSector,openAllAttendanceRecords,closeAllAttendanceRecords,openActiveAttendanceBackup,openAttendancePrintModal,closeAttendancePrintModal,printAttendanceYearLevel});
+Object.assign(window,{loadAttendanceData,openAttendanceEventModal,closeAttendanceEventModal,openAttendanceEvents,closeAttendanceEvents,selectAttendanceEvent,deleteAttendanceEvent,createAttendanceEvent,setAttendanceRecordMode,submitAttendanceManual,startAttendanceScanner,openAttendanceSectorModal,closeAttendanceSectorModal,toggleAttendanceSectorNA,confirmAttendanceSector,openAllAttendanceRecords,closeAllAttendanceRecords,openActiveAttendanceBackup,openAttendancePrintModal,closeAttendancePrintModal,printAttendanceYearLevel});
 })();
