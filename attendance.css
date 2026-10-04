@@ -465,11 +465,3 @@
   z-index:6!important;
   pointer-events:none!important;
 }
-
-
-/* Attendance event list / delete control */
-.attendance-event-row-with-delete{display:flex!important;align-items:stretch;gap:8px;width:100%;box-sizing:border-box}
-.attendance-event-select{flex:1;min-width:0;border:0;background:transparent;color:inherit;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;text-align:left;cursor:pointer;font:inherit}
-.attendance-event-select:hover{background:rgba(255,255,255,.035)}
-.attendance-event-delete{flex:0 0 auto;align-self:center;margin-right:10px;border:1px solid rgba(214,104,104,.35);background:rgba(214,104,104,.08);color:#f0a2a2;border-radius:7px;padding:7px 9px;font-size:10px;font-weight:800;letter-spacing:.05em;cursor:pointer}
-.attendance-event-delete:hover{background:rgba(214,104,104,.18);color:#fff}
