@@ -467,6 +467,14 @@
 }
 
 
+/* Hide the instructional text while the camera is actively scanning.
+   attendance.js adds the "success" class when the scanner is running.
+   The ID selector is intentionally stronger than the existing scanner
+   positioning rule so the display:flex!important above cannot override it. */
+.attendance-scanner > #attendanceScannerMessage.success{
+  display:none!important;
+}
+
 /* =========================================================
    FINAL PRINT OVERRIDES - OFFICIAL OSLD A4 LANDSCAPE
    These rules intentionally override the earlier print rules
