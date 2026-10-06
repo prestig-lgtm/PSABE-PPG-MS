@@ -19,19 +19,19 @@
   .official-osld-header-image{position:absolute!important;left:10mm!important;top:0!important;width:276mm!important;height:48.6mm!important;max-width:none!important;display:block!important;margin:0!important;padding:0!important;border:0!important;object-fit:fill!important}
 
   /* Official first-page information block. */
-  .official-first-page .official-event-name{position:absolute!important;top:53.8mm!important;left:15mm!important;width:262.4mm!important;text-align:center!important;font-family:"Century Gothic","Roboto Condensed",Arial,sans-serif!important;font-size:12pt!important;font-weight:700!important;line-height:1!important;margin:0!important;padding:0!important}
-  .official-details{position:absolute!important;left:15mm!important;top:63.5mm!important;width:158mm!important;font-family:"Roboto Condensed",Arial,sans-serif!important;font-size:12pt!important;line-height:1!important;color:#000!important}
+   .official-first-page .official-event-name{position:absolute!important;top:58mm!important;left:15mm!important;width:262.4mm!important;text-align:center!important;font-family:"Century Gothic","Roboto Condensed",Arial,sans-serif!important;font-size:12pt!important;font-weight:700!important;line-height:1!important;margin:0!important;padding:0!important}
+  .official-details{position:absolute!important;left:15mm!important;top:69.5mm!important;width:158mm!important;font-family:"Roboto Condensed",Arial,sans-serif!important;font-size:12pt!important;line-height:1!important;color:#000!important}
   .official-details>div{height:6.2mm!important;display:flex!important;align-items:flex-end!important;margin:0!important;padding:0!important;white-space:nowrap!important}
   .official-details>div>span:first-child{display:inline-block!important;width:27mm!important;flex:0 0 27mm!important}
   .official-details .detail-line{display:inline-block!important;width:131mm!important;flex:0 0 131mm!important;border-bottom:1px solid #000!important;height:5mm!important;line-height:5mm!important;box-sizing:border-box!important}
 
   /* The official table is 14874 twips wide, with the exact source grid proportions. */
-  .official-attendance-table{position:absolute!important;left:15mm!important;top:89.5mm!important;width:262.36mm!important;height:auto!important;table-layout:fixed!important;border-collapse:collapse!important;border-spacing:0!important;margin:0!important;padding:0!important;font-family:"Roboto Condensed",Arial,sans-serif!important;font-size:12pt!important;font-weight:400!important;color:#000!important}
+  .official-attendance-table{position:absolute!important;left:15mm!important;top:94.3mm!important;width:262.36mm!important;height:auto!important;table-layout:fixed!important;border-collapse:collapse!important;border-spacing:0!important;margin:0!important;padding:0!important;font-family:"Roboto Condensed",Arial,sans-serif!important;font-size:12pt!important;font-weight:400!important;color:#000!important}
   .official-continuation-page .official-attendance-table{top:48mm!important}
   .official-attendance-table th,.official-attendance-table td{border:1px solid #000!important;box-sizing:border-box!important;vertical-align:middle!important;text-align:center!important;padding:0 1.2mm!important;color:#000!important;font-family:"Roboto Condensed",Arial,sans-serif!important;font-size:12pt!important;line-height:1!important;font-weight:400!important}
-  .official-attendance-table thead tr:first-child th{height:17.5mm!important;min-height:17.5mm!important;font-weight:400!important}
+  .official-attendance-table thead tr:first-child th{height:18.1mm!important;min-height:18.1mm!important;font-weight:400!important}
   .official-attendance-table thead tr:nth-child(2) th{height:8.9mm!important;min-height:8.9mm!important;font-weight:400!important}
-  .official-attendance-table tbody td{height:7.55mm!important;min-height:7.55mm!important}
+  .official-attendance-table tbody td{height:8.9mm!important;min-height:8.9mm!important}
   .official-attendance-table .participant-name{text-align:left!important;padding-left:2mm!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
   .official-attendance-table .official-present{font-size:12pt!important;font-weight:400!important}
 
@@ -52,8 +52,8 @@
   .official-print-legend>div:first-child{font-weight:400!important;margin-bottom:1.5mm!important}
 
   /* Final page: SUMMARY title is intentionally used instead of the source's old page-2 heading. */
-  .official-summary-page .official-summary-title{position:absolute!important;left:15mm!important;top:45mm!important;width:262mm!important;text-align:center!important;font-family:"Roboto Condensed",Arial,sans-serif!important;font-size:12pt!important;font-weight:700!important;line-height:1!important;margin:0!important;padding:0!important}
-  .official-minority-table{position:absolute!important;left:15mm!important;top:51.5mm!important;width:256.5mm!important;border-collapse:collapse!important;table-layout:fixed!important;margin:0!important;padding:0!important;font-family:"Roboto Condensed",Arial,sans-serif!important;font-size:12pt!important;color:#000!important}
+  .official-summary-page .official-summary-title{position:absolute!important;left:15mm!important;top:58mm!important;width:262mm!important;text-align:center!important;font-family:"Roboto Condensed",Arial,sans-serif!important;font-size:12pt!important;font-weight:700!important;line-height:1!important;margin:0!important;padding:0!important}
+  .official-minority-table{position:absolute!important;left:17.3mm!important;top:62.8mm!important;width:257.7mm!important;border-collapse:collapse!important;table-layout:fixed!important;margin:0!important;padding:0!important;font-family:"Roboto Condensed",Arial,sans-serif!important;font-size:12pt!important;color:#000!important}
   .official-minority-table th,.official-minority-table td{border:1px solid #000!important;height:5.1mm!important;min-height:5.1mm!important;padding:0 1mm!important;box-sizing:border-box!important;text-align:center!important;vertical-align:middle!important;font-family:"Roboto Condensed",Arial,sans-serif!important;font-size:12pt!important;color:#000!important}
   .official-minority-table th{font-weight:700!important}
   .official-minority-table th:first-child,.official-minority-table td:first-child{width:50%!important}
@@ -76,6 +76,7 @@
 
 /* Scanner instruction: force true geometric centering inside the scanner panel. */
 .attendance-scanner-message{
+  display:none!important;
   position:absolute!important;
   top:50%!important;
   left:50%!important;
@@ -340,3 +341,7 @@
   z-index:6!important;
   pointer-events:none!important;
 }
+
+
+/* The official scanner UI uses only the red corner frame. No instruction text is shown over the camera feed. */
+.attendance-scanner > #attendanceScannerMessage{display:none!important}
