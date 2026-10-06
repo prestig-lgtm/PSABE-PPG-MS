@@ -9,6 +9,7 @@
 const supabase = window.psabeSupabase;
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyPWMqQzXUI50IiaMPOc8SK3mYl6vF8jF5Yg-4pstArZ_oVfuBAoJHwgvv65OT3hggCvQ/exec";
 const CURRENT_USERNAME = sessionStorage.getItem("psabeUsername") || "Mac";
+
 let events=[];
 let activeEvent=null;
 let records=[];
@@ -21,1115 +22,2827 @@ let pendingSource="";
 let pendingSex="";
 let qrLibraryPromise=null;
 
-function el(id){return document.getElementById(id)}
-function esc(v){const d=document.createElement("div");d.textContent=String(v??"");return d.innerHTML}
-function now(){return new Date().toISOString()}
-function id(prefix){return prefix+Date.now().toString(36).toUpperCase()+"-"+Math.random().toString(36).slice(2,8).toUpperCase()}
-function dateLabel(v){if(!v)return"—";const d=new Date(String(v).includes("T")?v:v+"T00:00:00");return isNaN(d)?String(v):d.toLocaleDateString("en-PH",{month:"long",day:"numeric",year:"numeric"})}
-function timeLabel(v){if(!v)return"—";const d=new Date(v);return isNaN(d)?String(v):d.toLocaleTimeString("en-PH",{hour:"numeric",minute:"2-digit",second:"2-digit"})}
-function badgeClass(v){v=String(v||"").toUpperCase();return v==="COMPLETE"?"complete":v==="LATE"?"late":v==="PENDING"?"pending":"present"}
+function el(id){
+  return document.getElementById(id);
+}
+
+function esc(v){
+  const d=document.createElement("div");
+  d.textContent=String(v??"");
+  return d.innerHTML;
+}
+
+function now(){
+  return new Date().toISOString();
+}
+
+function id(prefix){
+  return prefix+
+    Date.now().toString(36).toUpperCase()+
+    "-"+
+    Math.random().toString(36).slice(2,8).toUpperCase();
+}
+
+function dateLabel(v){
+  if(!v)return"—";
+
+  const d=new Date(
+    String(v).includes("T")
+      ? v
+      : v+"T00:00:00"
+  );
+
+  return isNaN(d)
+    ? String(v)
+    : d.toLocaleDateString("en-PH",{
+        month:"long",
+        day:"numeric",
+        year:"numeric"
+      });
+}
+
+function timeLabel(v){
+  if(!v)return"—";
+
+  const d=new Date(v);
+
+  return isNaN(d)
+    ? String(v)
+    : d.toLocaleTimeString("en-PH",{
+        hour:"numeric",
+        minute:"2-digit",
+        second:"2-digit"
+      });
+}
+
+function badgeClass(v){
+  v=String(v||"").toUpperCase();
+
+  return v==="COMPLETE"
+    ?"complete"
+    :v==="LATE"
+      ?"late"
+      :v==="PENDING"
+        ?"pending"
+        :"present";
+}
+
+
+/* =========================================================
+   MODALS
+========================================================= */
 
 function buildModals(){
- if(el("attendanceEventModal"))return;
- document.body.insertAdjacentHTML("beforeend",`
- <div id="attendanceEventModal" class="attendance-modal-overlay"><div class="attendance-modal"><div class="attendance-modal-head"><div><div class="attendance-event-kicker">NEW ATTENDANCE</div><h2>Create Attendance Event</h2><p>Creates the Supabase event and the Google Sheets backup workbook.</p></div><button class="attendance-modal-close" onclick="closeAttendanceEventModal()">×</button></div><div class="attendance-form"><div class="attendance-form-grid"><div class="attendance-field full"><label>EVENT / ACTIVITY NAME</label><input id="attendanceEventName" placeholder="e.g. 1st General Assembly"></div><div class="attendance-field"><label>DATE</label><input id="attendanceEventDate" type="date"></div><div class="attendance-field"><label>VENUE</label><input id="attendanceEventVenue" placeholder="e.g. Hinang Auditorium"></div><div class="attendance-field"><label>START TIME</label><input id="attendanceEventStart" type="time"></div><div class="attendance-field"><label>END TIME</label><input id="attendanceEventEnd" type="time"></div></div><div class="attendance-form-actions"><button class="attendance-button secondary" onclick="closeAttendanceEventModal()">CANCEL</button><button class="attendance-button" onclick="createAttendanceEvent()">CREATE ATTENDANCE</button></div></div></div></div>
- <div id="attendanceEventsModal" class="attendance-modal-overlay"><div class="attendance-modal"><div class="attendance-modal-head"><div><div class="attendance-event-kicker">ATTENDANCE RECORDS</div><h2>Attendance Sheets</h2><p>Select an event to open its attendance.</p></div><button class="attendance-modal-close" onclick="closeAttendanceEvents()">×</button></div><div id="attendanceEventList" class="attendance-list"></div></div></div>
- <div id="attendanceSectorModal" class="sectoral-modal" aria-hidden="true">
-   <div class="sectoral-modal-backdrop" onclick="closeAttendanceSectorModal()"></div>
-   <div class="sectoral-modal-card" role="dialog" aria-modal="true" aria-labelledby="attendanceSectorModalTitle">
-     <div class="sectoral-modal-head">
-       <div>
-         <div class="sectoral-modal-kicker">PARTICIPANT CLASSIFICATION</div>
-         <h3 id="attendanceSectorModalTitle">Select Sectoral Group</h3>
-         <p id="attendanceSectorModalStudent">Student ID</p>
-       </div>
-       <button type="button" class="sectoral-modal-close" onclick="closeAttendanceSectorModal()">×</button>
-     </div>
-     <div class="sectoral-modal-note">You may select more than one group. Choose N/A if the participant does not belong to any listed group.</div>
-     <div class="sectoral-modal-options">
-       <label><input type="checkbox" value="4PS"> <span><b>1</b> 4PS</span></label>
-       <label><input type="checkbox" value="IPs"> <span><b>2</b> IPs</span></label>
-       <label><input type="checkbox" value="PWDs"> <span><b>3</b> PWDs</span></label>
-       <label><input type="checkbox" value="Solo Parent"> <span><b>4</b> Solo Parent</span></label>
-       <label><input type="checkbox" value="LGBTQIA+"> <span><b>5</b> LGBTQIA+</span></label>
-       <label><input type="checkbox" value="Child of a Solo Parent"> <span><b>6</b> Child of a Solo Parent</span></label>
-     </div>
-     <button type="button" id="attendanceSectorNA" class="sector-na-modal" onclick="toggleAttendanceSectorNA()">N/A · NONE OF THE ABOVE</button>
-     <div class="sex-selection-title">SEX</div>
-     <div class="sex-selection-options">
-       <label><input type="radio" name="attendanceSex" value="M"> <span><b>M</b> Male</span></label>
-       <label><input type="radio" name="attendanceSex" value="F"> <span><b>F</b> Female</span></label>
-     </div>
-     <div class="sectoral-modal-actions">
-       <button type="button" class="sector-cancel" onclick="closeAttendanceSectorModal()">CANCEL</button>
-       <button type="button" class="sector-confirm" onclick="confirmAttendanceSector()">CONFIRM &amp; SUBMIT</button>
-     </div>
-   </div>
- </div>
- <div id="attendanceAllModal" class="attendance-modal-overlay"><div class="attendance-modal"><div class="attendance-modal-head"><div><div class="attendance-event-kicker">ATTENDANCE RECORDS</div><h2>All Attendees</h2><p>Records retrieved from Supabase.</p></div><button class="attendance-modal-close" onclick="closeAllAttendanceRecords()">×</button></div><div id="attendanceAllList" class="attendance-list"></div></div></div>
- <div id="attendancePrintModal" class="attendance-modal-overlay"><div class="attendance-modal"><div class="attendance-modal-head"><div><div class="attendance-event-kicker">READY TO PRINT</div><h2>Print Attendance Sheet</h2><p>Prepared for A4 (210 × 297 mm) paper.</p></div><button class="attendance-modal-close" onclick="closeAttendancePrintModal()">×</button></div><div class="attendance-form"><p class="attendance-print-note">The printout follows the official OSLD format. Participant pages continue automatically, numbering continues, and the minority-classification summary is always printed on a separate final page.</p><div class="attendance-form-actions"><button class="attendance-button secondary" onclick="closeAttendancePrintModal()">CANCEL</button><button class="attendance-button" onclick="printAttendanceYearLevel()">PRINT</button></div></div></div></div>
- <div id="attendancePrintDocument" class="attendance-print-document"></div>`);
- document.querySelectorAll(".attendance-modal-overlay").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("show")}));
+
+  if(el("attendanceEventModal"))return;
+
+  document.body.insertAdjacentHTML("beforeend",`
+
+    <div id="attendanceEventModal"
+         class="attendance-modal-overlay">
+
+      <div class="attendance-modal">
+
+        <div class="attendance-modal-head">
+
+          <div>
+            <div class="attendance-event-kicker">
+              NEW ATTENDANCE
+            </div>
+
+            <h2>Create Attendance Event</h2>
+
+            <p>
+              Creates the Supabase event and the Google Sheets
+              backup workbook.
+            </p>
+          </div>
+
+          <button
+            class="attendance-modal-close"
+            onclick="closeAttendanceEventModal()">
+            ×
+          </button>
+
+        </div>
+
+        <div class="attendance-form">
+
+          <div class="attendance-form-grid">
+
+            <div class="attendance-field full">
+              <label>EVENT / ACTIVITY NAME</label>
+
+              <input
+                id="attendanceEventName"
+                placeholder="e.g. 1st General Assembly">
+            </div>
+
+            <div class="attendance-field">
+              <label>DATE</label>
+
+              <input
+                id="attendanceEventDate"
+                type="date">
+            </div>
+
+            <div class="attendance-field">
+              <label>VENUE</label>
+
+              <input
+                id="attendanceEventVenue"
+                placeholder="e.g. Hinang Auditorium">
+            </div>
+
+            <div class="attendance-field">
+              <label>START TIME</label>
+
+              <input
+                id="attendanceEventStart"
+                type="time">
+            </div>
+
+            <div class="attendance-field">
+              <label>END TIME</label>
+
+              <input
+                id="attendanceEventEnd"
+                type="time">
+            </div>
+
+          </div>
+
+          <div class="attendance-form-actions">
+
+            <button
+              class="attendance-button secondary"
+              onclick="closeAttendanceEventModal()">
+              CANCEL
+            </button>
+
+            <button
+              class="attendance-button"
+              onclick="createAttendanceEvent()">
+              CREATE ATTENDANCE
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div id="attendanceEventsModal"
+         class="attendance-modal-overlay">
+
+      <div class="attendance-modal">
+
+        <div class="attendance-modal-head">
+
+          <div>
+            <div class="attendance-event-kicker">
+              ATTENDANCE RECORDS
+            </div>
+
+            <h2>Attendance Sheets</h2>
+
+            <p>
+              Select an event to open its attendance.
+            </p>
+          </div>
+
+          <button
+            class="attendance-modal-close"
+            onclick="closeAttendanceEvents()">
+            ×
+          </button>
+
+        </div>
+
+        <div
+          id="attendanceEventList"
+          class="attendance-list">
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div id="attendanceSectorModal"
+         class="sectoral-modal"
+         aria-hidden="true">
+
+      <div
+        class="sectoral-modal-backdrop"
+        onclick="closeAttendanceSectorModal()">
+      </div>
+
+      <div
+        class="sectoral-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="attendanceSectorModalTitle">
+
+        <div class="sectoral-modal-head">
+
+          <div>
+
+            <div class="sectoral-modal-kicker">
+              PARTICIPANT CLASSIFICATION
+            </div>
+
+            <h3 id="attendanceSectorModalTitle">
+              Select Sectoral Group
+            </h3>
+
+            <p id="attendanceSectorModalStudent">
+              Student ID
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            class="sectoral-modal-close"
+            onclick="closeAttendanceSectorModal()">
+            ×
+          </button>
+
+        </div>
+
+        <div class="sectoral-modal-note">
+          You may select more than one group.
+          Choose N/A if the participant does not belong
+          to any listed group.
+        </div>
+
+        <div class="sectoral-modal-options">
+
+          <label>
+            <input
+              type="checkbox"
+              value="4PS">
+
+            <span>
+              <b>1</b> 4PS
+            </span>
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              value="IPs">
+
+            <span>
+              <b>2</b> IPs
+            </span>
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              value="PWDs">
+
+            <span>
+              <b>3</b> PWDs
+            </span>
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              value="Solo Parent">
+
+            <span>
+              <b>4</b> Solo Parent
+            </span>
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              value="LGBTQIA+">
+
+            <span>
+              <b>5</b> LGBTQIA+
+            </span>
+          </label>
+
+          <label>
+            <input
+              type="checkbox"
+              value="Child of a Solo Parent">
+
+            <span>
+              <b>6</b> Child of a Solo Parent
+            </span>
+          </label>
+
+        </div>
+
+        <button
+          type="button"
+          id="attendanceSectorNA"
+          class="sector-na-modal"
+          onclick="toggleAttendanceSectorNA()">
+          N/A · NONE OF THE ABOVE
+        </button>
+
+        <div class="sex-selection-title">
+          SEX
+        </div>
+
+        <div class="sex-selection-options">
+
+          <label>
+            <input
+              type="radio"
+              name="attendanceSex"
+              value="M">
+
+            <span>
+              <b>M</b> Male
+            </span>
+          </label>
+
+          <label>
+            <input
+              type="radio"
+              name="attendanceSex"
+              value="F">
+
+            <span>
+              <b>F</b> Female
+            </span>
+          </label>
+
+        </div>
+
+        <div class="sectoral-modal-actions">
+
+          <button
+            type="button"
+            class="sector-cancel"
+            onclick="closeAttendanceSectorModal()">
+            CANCEL
+          </button>
+
+          <button
+            type="button"
+            class="sector-confirm"
+            onclick="confirmAttendanceSector()">
+            CONFIRM &amp; SUBMIT
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div id="attendanceAllModal"
+         class="attendance-modal-overlay">
+
+      <div class="attendance-modal">
+
+        <div class="attendance-modal-head">
+
+          <div>
+
+            <div class="attendance-event-kicker">
+              ATTENDANCE RECORDS
+            </div>
+
+            <h2>All Attendees</h2>
+
+            <p>
+              Records retrieved from Supabase.
+            </p>
+
+          </div>
+
+          <button
+            class="attendance-modal-close"
+            onclick="closeAllAttendanceRecords()">
+            ×
+          </button>
+
+        </div>
+
+        <div
+          id="attendanceAllList"
+          class="attendance-list">
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div id="attendancePrintModal"
+         class="attendance-modal-overlay">
+
+      <div class="attendance-modal">
+
+        <div class="attendance-modal-head">
+
+          <div>
+
+            <div class="attendance-event-kicker">
+              READY TO PRINT
+            </div>
+
+            <h2>Print Attendance Sheet</h2>
+
+            <p>
+              Prepared for A4 (210 × 297 mm) paper.
+            </p>
+
+          </div>
+
+          <button
+            class="attendance-modal-close"
+            onclick="closeAttendancePrintModal()">
+            ×
+          </button>
+
+        </div>
+
+        <div class="attendance-form">
+
+          <p class="attendance-print-note">
+            The printout follows the official OSLD format.
+            Participant pages continue automatically,
+            numbering continues, and the summary is always
+            printed on a separate final page.
+          </p>
+
+          <div class="attendance-form-actions">
+
+            <button
+              class="attendance-button secondary"
+              onclick="closeAttendancePrintModal()">
+              CANCEL
+            </button>
+
+            <button
+              class="attendance-button"
+              onclick="printAttendanceYearLevel()">
+              PRINT
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div
+      id="attendancePrintDocument"
+      class="attendance-print-document">
+    </div>
+
+  `);
+
+  document
+    .querySelectorAll(".attendance-modal-overlay")
+    .forEach(m =>
+      m.addEventListener("click",e=>{
+        if(e.target===m)
+          m.classList.remove("show");
+      })
+    );
 }
+
+
+/* =========================================================
+   GOOGLE SHEETS
+========================================================= */
 
 async function google(payload){
- const r=await fetch(GOOGLE_SCRIPT_URL,{
-  method:"POST",
-  headers:{"Content-Type":"text/plain;charset=utf-8"},
-  body:JSON.stringify(payload)
- });
- if(!r.ok)throw new Error("Google Sheets request failed (HTTP "+r.status+")");
- return r.json()
+
+  const r=await fetch(
+    GOOGLE_SCRIPT_URL,
+    {
+      method:"POST",
+      headers:{
+        "Content-Type":
+          "text/plain;charset=utf-8"
+      },
+      body:JSON.stringify(payload),
+      redirect:"follow"
+    }
+  );
+
+  const text=await r.text();
+
+  if(!r.ok){
+    throw new Error(
+      "Google Sheets request failed (HTTP "+
+      r.status+
+      ")"
+    );
+  }
+
+  try{
+    return JSON.parse(text);
+  }catch(e){
+    throw new Error(
+      "Google Sheets backup returned an invalid response. "+
+      "Make sure the Apps Script is deployed as a Web App "+
+      "with access set to Anyone."
+    );
+  }
 }
+
+
+/* =========================================================
+   PARTICIPANT LOOKUP
+========================================================= */
 
 async function lookup(studentId){
- const sid=String(studentId||"").trim();
- if(!sid)throw new Error("Please enter a Student ID.");
- const r=await supabase.from("participants").select("student_id,student_name,year_level").eq("student_id",sid).maybeSingle();
- if(r.error)throw new Error(r.error.message||"Unable to look up the participant.");
- if(!r.data)throw new Error("Student ID was not found in the participant list.");
- const yearMap={1:"First Year",2:"Second Year",3:"Third Year",4:"Fourth Year"};
- return {
-  studentId:r.data.student_id,
-  studentName:r.data.student_name,
-  yearLevel:yearMap[Number(r.data.year_level)]||String(r.data.year_level||"")
- };
+
+  const sid=String(studentId||"").trim();
+
+  if(!sid)
+    throw new Error("Please enter a Student ID.");
+
+  const r=await supabase
+    .from("participants")
+    .select(
+      "student_id,student_name,year_level"
+    )
+    .eq("student_id",sid)
+    .maybeSingle();
+
+  if(r.error)
+    throw new Error(
+      r.error.message ||
+      "Unable to look up the participant."
+    );
+
+  if(!r.data)
+    throw new Error(
+      "Student ID was not found in the participant list."
+    );
+
+  const yearMap={
+    1:"First Year",
+    2:"Second Year",
+    3:"Third Year",
+    4:"Fourth Year"
+  };
+
+  return{
+    studentId:r.data.student_id,
+    studentName:r.data.student_name,
+    yearLevel:
+      yearMap[Number(r.data.year_level)] ||
+      String(r.data.year_level||"")
+  };
 }
+
+
+/* =========================================================
+   EVENT DISPLAY
+========================================================= */
 
 function renderEvent(){
- const e=activeEvent;
- el("attendanceActiveEventName").textContent=e?e.event_name:"No attendance event selected";
- el("attendanceActiveEventDate").textContent=e?"Date: "+dateLabel(e.event_date):"Date: —";
- el("attendanceActiveEventVenue").textContent=e?"Venue: "+(e.venue||"—"):"Venue: —";
- el("attendanceActiveEventTime").textContent="Time: "+(e?((e.start_time||"")+(e.end_time?" – "+e.end_time:"")):"—");
- const b=el("attendanceOpenBackup");
- if(b)b.style.display=e&&e.google_spreadsheet_url?"inline-flex":"none"
+
+  const e=activeEvent;
+
+  el("attendanceActiveEventName").textContent=
+    e
+      ? e.event_name
+      : "No attendance event selected";
+
+  el("attendanceActiveEventDate").textContent=
+    e
+      ? "Date: "+dateLabel(e.event_date)
+      : "Date: —";
+
+  el("attendanceActiveEventVenue").textContent=
+    e
+      ? "Venue: "+(e.venue||"—")
+      : "Venue: —";
+
+  el("attendanceActiveEventTime").textContent=
+    "Time: "+
+    (
+      e
+        ? (
+            (e.start_time||"")+
+            (
+              e.end_time
+                ? " – "+e.end_time
+                : ""
+            )
+          )
+        : "—"
+    );
+
+  const b=el("attendanceOpenBackup");
+
+  if(b){
+    b.style.display=
+      e &&
+      e.google_spreadsheet_url
+        ? "inline-flex"
+        : "none";
+  }
 }
+
+
+/* =========================================================
+   STATISTICS
+========================================================= */
 
 function renderStats(){
- const present=records.filter(r=>r.attendance_status==="PRESENT").length;
- const complete=records.filter(r=>r.attendance_status==="COMPLETE").length;
- const late=records.filter(r=>r.attendance_status==="LATE").length;
- const pending=records.filter(r=>r.backup_status!=="BACKED UP").length;
- el("attendanceStatPresent").textContent=present;
- el("attendanceStatComplete").textContent=complete;
- el("attendanceStatLate").textContent=late;
- el("attendanceStatPending").textContent=pending;
- el("attendanceBackupState").textContent=pending?"PENDING "+pending:"BACKUP READY"
+
+  const present=
+    records.filter(
+      r=>r.attendance_status==="PRESENT"
+    ).length;
+
+  const complete=
+    records.filter(
+      r=>r.attendance_status==="COMPLETE"
+    ).length;
+
+  const late=
+    records.filter(
+      r=>r.attendance_status==="LATE"
+    ).length;
+
+  const pending=
+    records.filter(
+      r=>r.backup_status!=="BACKED UP"
+    ).length;
+
+  el("attendanceStatPresent").textContent=present;
+  el("attendanceStatComplete").textContent=complete;
+  el("attendanceStatLate").textContent=late;
+  el("attendanceStatPending").textContent=pending;
+
+  el("attendanceBackupState").textContent=
+    pending
+      ? "PENDING "+pending
+      : "BACKUP READY";
 }
+
+
+/* =========================================================
+   RECENT ATTENDANCE
+========================================================= */
 
 function renderRecent(){
- const box=el("attendanceRecentList");
- if(!box)return;
- if(!records.length){
-  box.innerHTML='<div class="attendance-empty">No attendance has been recorded for this event yet.</div>';
-  return
- }
- box.innerHTML=records.slice(0,30).map(r=>`
-  <div class="attendance-recent-row">
-   <div class="attendance-recent-name">${esc(r.student_name)}</div>
-   <div class="attendance-recent-muted attendance-id">${esc(r.student_id)}</div>
-   <div class="attendance-recent-muted">${esc(r.year_level||"—")}</div>
-   <div><span class="attendance-badge ${badgeClass(r.attendance_status)}">${esc(r.attendance_status||"")}</span></div>
-  </div>
- `).join("")
+
+  const box=el("attendanceRecentList");
+
+  if(!box)return;
+
+  if(!records.length){
+
+    box.innerHTML=
+      '<div class="attendance-empty">'+
+      'No attendance has been recorded for this event yet.'+
+      '</div>';
+
+    return;
+  }
+
+  box.innerHTML=
+    records
+      .slice(0,30)
+      .map(r=>`
+
+        <div class="attendance-recent-row">
+
+          <div class="attendance-recent-name">
+            ${esc(r.student_name)}
+          </div>
+
+          <div class="attendance-recent-muted attendance-id">
+            ${esc(r.student_id)}
+          </div>
+
+          <div class="attendance-recent-muted">
+            ${esc(r.year_level||"—")}
+          </div>
+
+          <div>
+            <span class="attendance-badge ${badgeClass(r.attendance_status)}">
+              ${esc(r.attendance_status||"")}
+            </span>
+          </div>
+
+        </div>
+
+      `)
+      .join("");
 }
+
+
+/* =========================================================
+   LOAD ATTENDANCE
+========================================================= */
 
 async function loadAttendanceData(){
- buildModals();
- if(!supabase){
-  console.error("Supabase client unavailable");
-  return
- }
- try{
-  const r=await supabase.from("attendance_events").select("*").order("created_at",{ascending:false});
-  if(r.error)throw r.error;
-  events=r.data||[];
-  renderEventList();
-  if(!activeEvent&&events.length)selectAttendanceEvent(events[0].event_id);
-  else if(activeEvent){
-   const fresh=events.find(x=>x.event_id===activeEvent.event_id);
-   if(fresh)activeEvent=fresh;
-   renderEvent();
-   await loadRecords();
+
+  buildModals();
+
+  if(!supabase){
+    console.error("Supabase client unavailable");
+    return;
   }
- }catch(e){
-  console.error(e);
- }
-}
 
-function renderEventList(){
- const box=el("attendanceEventList");
- if(!box)return;
- if(!events.length){
-  box.innerHTML='<div class="attendance-empty">No attendance events have been created yet.</div>';
-  return
- }
- box.innerHTML=events.map(e=>`
-  <div class="attendance-event-row">
-   <span style="text-align:left">
-    <strong>${esc(e.event_name)}</strong>
-    <small>${esc(dateLabel(e.event_date))} · ${esc(e.venue||"—")}</small>
-   </span>
-   <button class="attendance-button" onclick="selectAttendanceEvent('${esc(e.event_id)}')">OPEN</button>
-  </div>
- `).join("")
-}
+  try{
 
-function openAttendanceEventModal(){
- buildModals();
- const modal=el("attendanceEventModal");
- if(modal)modal.classList.add("show");
-}
+    const r=await supabase
+      .from("attendance_events")
+      .select("*")
+      .order("event_date",{ascending:false})
+      .order("created_at",{ascending:false});
 
-function closeAttendanceEventModal(){
- const modal=el("attendanceEventModal");
- if(modal)modal.classList.remove("show");
-}
+    if(r.error)
+      throw r.error;
 
-function openAttendanceEvents(){
- buildModals();
- renderEventList();
- const modal=el("attendanceEventsModal");
- if(modal)modal.classList.add("show");
-}
+    events=r.data||[];
 
-function closeAttendanceEvents(){
- const modal=el("attendanceEventsModal");
- if(modal)modal.classList.remove("show");
-}
+    if(
+      !activeEvent ||
+      !events.some(
+        e=>e.event_id===activeEvent.event_id
+      )
+    ){
+      activeEvent=events[0]||null;
+    }
 
-async function selectAttendanceEvent(eventId){
- const e=events.find(x=>x.event_id===eventId);
- if(!e)return;
- activeEvent=e;
- closeAttendanceEvents();
- renderEvent();
- await loadRecords();
-}
+    renderEvent();
 
-async function createAttendanceEvent(){
- const name=el("attendanceEventName").value.trim();
- const date=el("attendanceEventDate").value;
- const venue=el("attendanceEventVenue").value.trim();
- const start=el("attendanceEventStart").value;
- const end=el("attendanceEventEnd").value;
+    await loadRecords();
 
- if(!name||!date){
-  alert("Please enter the event name and date.");
-  return
- }
+    if(
+      activeEvent &&
+      !qrRunning
+    ){
+      startAttendanceScanner(false)
+        .catch(()=>{});
+    }
 
- const eventId=id("ATT-EVT-");
+  }catch(e){
 
- const payload={
-  event_id:eventId,
-  event_name:name,
-  event_date:date,
-  venue:venue||null,
-  start_time:start||null,
-  end_time:end||null,
-  created_by:CURRENT_USERNAME,
-  status:"OPEN",
-  backup_status:"PENDING"
- };
+    console.error(e);
 
- const ins=await supabase.from("attendance_events").insert(payload).select().single();
-
- if(ins.error){
-  alert(ins.error.message);
-  return
- }
-
- const event=ins.data;
-
- try{
-  const gs=await google({
-   action:"CREATE_ATTENDANCE_WORKBOOK",
-   eventId,
-   eventName:name
-  });
-
-  if(gs?.success){
-   const up=await supabase.from("attendance_events")
-    .update({
-     google_spreadsheet_id:gs.spreadsheetId,
-     google_spreadsheet_url:gs.spreadsheetUrl||null,
-     backup_status:"READY",
-     updated_at:now()
-    })
-    .eq("event_id",eventId)
-    .select()
-    .single();
-
-   if(!up.error)Object.assign(event,up.data)
+    renderEvent();
+    renderStats();
+    renderRecent();
   }
- }catch(e){
-  console.warn("Google backup workbook not ready:",e)
- }
-
- events.unshift(event);
- activeEvent=event;
- closeAttendanceEventModal();
- renderEvent();
- await loadRecords();
-
- el("attendanceEventName").value="";
- el("attendanceEventDate").value="";
- el("attendanceEventVenue").value="";
- el("attendanceEventStart").value="";
- el("attendanceEventEnd").value="";
-
- alert("Attendance event created successfully.")
 }
 
-function setAttendanceRecordMode(mode){
- recordMode=mode==="TIME OUT"?"TIME OUT":"TIME IN";
-
- const timeIn=el("attendanceTimeInButton");
- const timeOut=el("attendanceTimeOutButton");
-
- if(timeIn)timeIn.classList.toggle("active",recordMode==="TIME IN");
- if(timeOut)timeOut.classList.toggle("active",recordMode==="TIME OUT");
-}
-
-function sectorGroups(){
- return [...document.querySelectorAll("#attendanceSectorModal input[type=checkbox]:checked")]
-  .map(x=>x.value)
-}
-
-function openAttendanceSectorModal(studentId,source){
- pendingStudentId=String(studentId||"").trim();
- pendingSource=source||"manual";
- pendingSex="";
-
- const modal=el("attendanceSectorModal");
- if(!modal)return;
-
- const studentLabel=el("attendanceSectorModalStudent");
- if(studentLabel)studentLabel.textContent="Student ID: "+pendingStudentId;
-
- document.querySelectorAll("#attendanceSectorModal input[type=checkbox]").forEach(x=>x.checked=false);
- document.querySelectorAll("#attendanceSectorModal input[name=attendanceSex]").forEach(x=>x.checked=false);
-
- const na=el("attendanceSectorNA");
- if(na)na.classList.remove("active");
-
- modal.classList.add("show");
- modal.setAttribute("aria-hidden","false");
-}
-
-function closeAttendanceSectorModal(){
- const modal=el("attendanceSectorModal");
- if(!modal)return;
- modal.classList.remove("show");
- modal.setAttribute("aria-hidden","true");
- pendingStudentId="";
- pendingSource="";
- pendingSex="";
-}
-
-function toggleAttendanceSectorNA(){
- const button=el("attendanceSectorNA");
- if(!button)return;
-
- const active=button.classList.toggle("active");
-
- if(active){
-  document.querySelectorAll("#attendanceSectorModal input[type=checkbox]").forEach(x=>x.checked=false);
- }
-}
-
-async function confirmAttendanceSector(){
- const g=sectorGroups();
- const na=el("attendanceSectorNA").classList.contains("active");
- const sex=document.querySelector("#attendanceSectorModal input[name=attendanceSex]:checked")?.value||"";
-
- if(!sex){
-  alert("Please select Sex: M or F.");
-  return
- }
-
- if(!g.length&&!na){
-  alert("Please select a sectoral group or N/A.");
-  return
- }
-
- const sid=pendingStudentId;
- const src=pendingSource;
-
- closeAttendanceSectorModal();
-
- await recordAttendance(
-  sid,
-  src,
-  na?["N/A"]:g,
-  sex
-)
-}
 
 async function loadRecords(){
- if(!activeEvent){
-  records=[];
-  renderStats();
-  renderRecent();
-  return
- }
 
- try{
+  if(!activeEvent){
+
+    records=[];
+
+    renderStats();
+    renderRecent();
+
+    return;
+  }
+
   const r=await supabase
-   .from("attendance_records")
-   .select("*")
-   .eq("event_id",activeEvent.event_id)
-   .order("created_at",{ascending:false});
+    .from("attendance_records")
+    .select("*")
+    .eq("event_id",activeEvent.event_id)
+    .order("created_at",{ascending:false});
 
-  if(r.error)throw r.error;
+  if(r.error)
+    throw r.error;
 
   records=r.data||[];
 
   renderStats();
   renderRecent();
- }catch(e){
-  console.error(e);
- }
 }
 
-async function recordAttendance(studentId,source,groups,sex=""){
- if(!activeEvent){
-  alert("Please create or select an attendance event first.");
-  return
- }
 
- const button=document.querySelector(".attendance-submit");
- if(button)button.disabled=true;
+/* =========================================================
+   EVENT MODALS
+========================================================= */
 
- try{
-  const student=await lookup(studentId);
-  const name=student.studentName||student.name||"";
-  const year=student.yearLevel||student.year_level||"";
+function openAttendanceEventModal(){
 
-  const existing=records.find(
-   r=>String(r.student_id).toUpperCase()===String(studentId).toUpperCase()
+  buildModals();
+
+  el("attendanceEventModal")
+    .classList.add("show");
+}
+
+function closeAttendanceEventModal(){
+
+  el("attendanceEventModal")
+    ?.classList.remove("show");
+}
+
+function openAttendanceEvents(){
+
+  renderEventList();
+
+  el("attendanceEventsModal")
+    .classList.add("show");
+}
+
+function closeAttendanceEvents(){
+
+  el("attendanceEventsModal")
+    ?.classList.remove("show");
+}
+
+function openAllAttendanceRecords(){
+
+  renderAll();
+
+  el("attendanceAllModal")
+    .classList.add("show");
+}
+
+function closeAllAttendanceRecords(){
+
+  el("attendanceAllModal")
+    ?.classList.remove("show");
+}
+
+function openActiveAttendanceBackup(){
+
+  if(
+    activeEvent?.google_spreadsheet_url
+  ){
+    window.open(
+      activeEvent.google_spreadsheet_url,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  }
+}
+
+function openAttendancePrintModal(){
+
+  el("attendancePrintModal")
+    .classList.add("show");
+}
+
+function closeAttendancePrintModal(){
+
+  el("attendancePrintModal")
+    ?.classList.remove("show");
+}
+
+
+/* =========================================================
+   EVENT LIST
+========================================================= */
+
+function renderEventList(){
+
+  const box=el("attendanceEventList");
+
+  if(!events.length){
+
+    box.innerHTML=
+      '<div class="attendance-empty">'+
+      'No attendance events have been created yet.'+
+      '</div>';
+
+    return;
+  }
+
+  box.innerHTML=
+    events
+      .map(e=>`
+
+        <button
+          class="attendance-event-row"
+          onclick="selectAttendanceEvent('${String(e.event_id).replace(/'/g,"\\'")}')">
+
+          <span style="text-align:left">
+
+            <strong>
+              ${esc(e.event_name)}
+            </strong>
+
+            <small>
+              ${esc(dateLabel(e.event_date))}
+              ·
+              ${esc(e.venue||"No venue")}
+            </small>
+
+          </span>
+
+          <span
+            class="attendance-badge ${
+              e.status==="OPEN"
+                ?"present"
+                :"pending"
+            }">
+
+            ${esc(e.status||"OPEN")}
+
+          </span>
+
+        </button>
+
+      `)
+      .join("");
+}
+
+
+async function selectAttendanceEvent(eventId){
+
+  activeEvent=
+    events.find(
+      e=>e.event_id===eventId
+    )||null;
+
+  closeAttendanceEvents();
+
+  renderEvent();
+
+  await loadRecords();
+}
+
+
+/* =========================================================
+   CREATE EVENT
+========================================================= */
+
+async function createAttendanceEvent(){
+
+  const name=
+    el("attendanceEventName")
+      .value.trim();
+
+  const date=
+    el("attendanceEventDate")
+      .value;
+
+  const venue=
+    el("attendanceEventVenue")
+      .value.trim();
+
+  const start=
+    el("attendanceEventStart")
+      .value;
+
+  const end=
+    el("attendanceEventEnd")
+      .value;
+
+  if(!name||!date){
+
+    alert(
+      "Please enter the event name and date."
+    );
+
+    return;
+  }
+
+  const eventId=id("ATT-EVT-");
+
+  const payload={
+    event_id:eventId,
+    event_name:name,
+    event_date:date,
+    venue:venue||null,
+    start_time:start||null,
+    end_time:end||null,
+    created_by:CURRENT_USERNAME,
+    status:"OPEN",
+    backup_status:"PENDING"
+  };
+
+  const ins=
+    await supabase
+      .from("attendance_events")
+      .insert(payload)
+      .select()
+      .single();
+
+  if(ins.error){
+
+    alert(ins.error.message);
+
+    return;
+  }
+
+  const event=ins.data;
+
+  try{
+
+    const gs=
+      await google({
+        action:"CREATE_ATTENDANCE_WORKBOOK",
+        eventId,
+        eventName:name
+      });
+
+    if(gs?.success){
+
+      const up=
+        await supabase
+          .from("attendance_events")
+          .update({
+            google_spreadsheet_id:
+              gs.spreadsheetId,
+
+            google_spreadsheet_url:
+              gs.spreadsheetUrl||null,
+
+            backup_status:"READY",
+
+            updated_at:now()
+          })
+          .eq("event_id",eventId)
+          .select()
+          .single();
+
+      if(!up.error)
+        Object.assign(
+          event,
+          up.data
+        );
+    }
+
+  }catch(e){
+
+    console.warn(
+      "Google backup workbook not ready:",
+      e
+    );
+  }
+
+  events.unshift(event);
+
+  activeEvent=event;
+
+  closeAttendanceEventModal();
+
+  renderEvent();
+
+  await loadRecords();
+
+  el("attendanceEventName").value="";
+  el("attendanceEventDate").value="";
+  el("attendanceEventVenue").value="";
+  el("attendanceEventStart").value="";
+  el("attendanceEventEnd").value="";
+
+  alert(
+    "Attendance event created successfully."
   );
+}
 
-  const stamp=now();
 
-  el("attendancePreview").style.display="block";
-  el("attendancePreviewName").textContent=name;
-  el("attendancePreviewDetail").textContent=year+" · ID Number: "+studentId;
+/* =========================================================
+   TIME IN / TIME OUT
+========================================================= */
 
-  let saved;
+function setAttendanceRecordMode(mode){
+
+  recordMode=mode;
+
+  el("attendanceTimeInButton")
+    .classList.toggle(
+      "active",
+      mode==="TIME IN"
+    );
+
+  el("attendanceTimeOutButton")
+    .classList.toggle(
+      "active",
+      mode==="TIME OUT"
+    );
+
+  el("attendanceScannerState")
+    .textContent=mode;
+}
+
+
+/* =========================================================
+   SECTORAL GROUPS
+========================================================= */
+
+function sectorGroups(){
+
+  return [
+    ...document.querySelectorAll(
+      "#attendanceSectorModal input[type=checkbox]:checked"
+    )
+  ].map(x=>x.value);
+}
+
+
+function openAttendanceSectorModal(
+  studentId,
+  source
+){
+
+  pendingStudentId=studentId;
+  pendingSource=source;
+  pendingSex="";
+
+  el("attendanceSectorModalStudent")
+    .textContent=
+      "Student ID: "+studentId;
+
+  document
+    .querySelectorAll(
+      "#attendanceSectorModal input[type=checkbox]"
+    )
+    .forEach(
+      x=>x.checked=false
+    );
+
+  document
+    .querySelectorAll(
+      "#attendanceSectorModal input[name=attendanceSex]"
+    )
+    .forEach(
+      x=>x.checked=false
+    );
+
+  el("attendanceSectorNA")
+    .classList.remove("active");
+
+  el("attendanceSectorModal")
+    .classList.add("show","open");
+
+  el("attendanceSectorModal")
+    .setAttribute(
+      "aria-hidden",
+      "false"
+    );
+}
+
+
+function closeAttendanceSectorModal(){
+
+  const m=
+    el("attendanceSectorModal");
+
+  if(m){
+
+    m.classList.remove(
+      "show",
+      "open"
+    );
+
+    m.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+  }
+
+  pendingStudentId="";
+  pendingSource="";
+  pendingSex="";
+}
+
+
+function toggleAttendanceSectorNA(){
+
+  const b=
+    el("attendanceSectorNA");
+
+  b.classList.toggle("active");
+
+  if(
+    b.classList.contains("active")
+  ){
+
+    document
+      .querySelectorAll(
+        "#attendanceSectorModal input[type=checkbox]"
+      )
+      .forEach(
+        x=>x.checked=false
+      );
+  }
+}
+
+
+async function confirmAttendanceSector(){
+
+  const g=sectorGroups();
+
+  const na=
+    el("attendanceSectorNA")
+      .classList.contains("active");
+
+  const sex=
+    document.querySelector(
+      "#attendanceSectorModal input[name=attendanceSex]:checked"
+    )?.value||"";
+
+  if(!sex){
+
+    alert(
+      "Please select Sex: M or F."
+    );
+
+    return;
+  }
+
+  if(!g.length&&!na){
+
+    alert(
+      "Please select a sectoral group or N/A."
+    );
+
+    return;
+  }
+
+  const sid=pendingStudentId;
+  const src=pendingSource;
+
+  closeAttendanceSectorModal();
+
+  await recordAttendance(
+    sid,
+    src,
+    na
+      ? ["N/A"]
+      : g,
+    sex
+  );
+}
+
+
+/* =========================================================
+   RECORD ATTENDANCE
+========================================================= */
+
+async function recordAttendance(
+  studentId,
+  source,
+  groups,
+  sex=""
+){
+
+  if(!activeEvent){
+
+    alert(
+      "Please create or select an attendance event first."
+    );
+
+    return;
+  }
+
+  const button=
+    document.querySelector(
+      ".attendance-submit"
+    );
+
+  if(button)
+    button.disabled=true;
+
+  try{
+
+    const student=
+      await lookup(studentId);
+
+    const name=
+      student.studentName||
+      student.name||
+      "";
+
+    const year=
+      student.yearLevel||
+      student.year_level||
+      "";
+
+    const existing=
+      records.find(
+        r=>
+          String(r.student_id)
+            .toUpperCase()===
+          String(studentId)
+            .toUpperCase()
+      );
+
+    const stamp=now();
+
+    el("attendancePreview")
+      .style.display="block";
+
+    el("attendancePreviewName")
+      .textContent=name;
+
+    el("attendancePreviewDetail")
+      .textContent=
+        year+
+        " · ID Number: "+
+        studentId;
+
+    let saved;
+
+    /* -----------------------------------------------------
+       TIME IN
+    ----------------------------------------------------- */
+
+    if(recordMode==="TIME IN"){
+
+      if(
+        existing?.time_in &&
+        !existing?.time_out
+      ){
+
+        alert(
+          name+
+          " is already marked Present."
+        );
+
+        return;
+      }
+
+      if(
+        existing?.time_in &&
+        existing?.time_out
+      ){
+
+        alert(
+          name+
+          " already completed attendance."
+        );
+
+        return;
+      }
+
+      const late=
+        !!activeEvent.start_time &&
+        new Date()
+          .toTimeString()
+          .slice(0,5) >
+        String(
+          activeEvent.start_time
+        ).slice(0,5);
+
+      const data={
+
+        event_id:
+          activeEvent.event_id,
+
+        student_id:
+          studentId,
+
+        student_name:
+          name,
+
+        year_level:
+          year,
+
+        time_in:
+          stamp,
+
+        time_out:
+          null,
+
+        late_no_time_in:
+          late
+            ? "LATE"
+            : null,
+
+        attendance_status:
+          late
+            ? "LATE"
+            : "PRESENT",
+
+        recorded_via:
+          source==="qr"
+            ? "QR"
+            : "MANUAL",
+
+        recorded_by:
+          CURRENT_USERNAME,
+
+        sex:
+          sex||
+          existing?.sex||
+          null,
+
+        sectoral_groups:
+          groups||[],
+
+        backup_status:
+          "PENDING",
+
+        updated_at:
+          stamp
+      };
+
+      let r;
+
+      if(existing){
+
+        r=
+          await supabase
+            .from("attendance_records")
+            .update(data)
+            .eq(
+              "attendance_id",
+              existing.attendance_id
+            )
+            .select()
+            .single();
+
+      }else{
+
+        data.attendance_id=
+          id("ATT-REC-");
+
+        data.created_at=stamp;
+
+        r=
+          await supabase
+            .from("attendance_records")
+            .insert(data)
+            .select()
+            .single();
+      }
+
+      if(r.error)
+        throw r.error;
+
+      saved=r.data;
+
+    }
+
+    /* -----------------------------------------------------
+       TIME OUT
+    ----------------------------------------------------- */
+
+    else{
+
+      if(existing?.time_out){
+
+        alert(
+          name+
+          " already has a Time Out."
+        );
+
+        return;
+      }
+
+      const data={
+
+        time_out:
+          stamp,
+
+        late_no_time_in:
+          existing?.time_in
+            ? (
+                existing.late_no_time_in||
+                null
+              )
+            : "NO TIME IN",
+
+        attendance_status:
+          existing?.time_in
+            ? "COMPLETE"
+            : "LATE",
+
+        recorded_via:
+          source==="qr"
+            ? "QR"
+            : "MANUAL",
+
+        recorded_by:
+          CURRENT_USERNAME,
+
+        backup_status:
+          "PENDING",
+
+        updated_at:
+          stamp
+      };
+
+      let r;
+
+      if(existing){
+
+        r=
+          await supabase
+            .from("attendance_records")
+            .update(data)
+            .eq(
+              "attendance_id",
+              existing.attendance_id
+            )
+            .select()
+            .single();
+
+      }else{
+
+        Object.assign(
+          data,
+          {
+            attendance_id:
+              id("ATT-REC-"),
+
+            event_id:
+              activeEvent.event_id,
+
+            student_id:
+              studentId,
+
+            student_name:
+              name,
+
+            year_level:
+              year,
+
+            sex:
+              existing?.sex||
+              null,
+
+            time_in:
+              null,
+
+            created_at:
+              stamp,
+
+            sectoral_groups:
+              []
+          }
+        );
+
+        r=
+          await supabase
+            .from("attendance_records")
+            .insert(data)
+            .select()
+            .single();
+      }
+
+      if(r.error)
+        throw r.error;
+
+      saved=r.data;
+    }
+
+    await backupRecord(saved);
+
+    await loadRecords();
+
+    alert(
+      name+
+      " — "+
+      saved.attendance_status+
+      " recorded."
+    );
+
+  }catch(e){
+
+    console.error(e);
+
+    alert(
+      e.message||
+      "Unable to record attendance."
+    );
+
+  }finally{
+
+    if(button)
+      button.disabled=false;
+
+    const input=
+      el("attendanceStudentId");
+
+    if(input){
+
+      input.value="";
+      input.focus();
+    }
+  }
+}
+
+
+/* =========================================================
+   GOOGLE SHEETS BACKUP
+========================================================= */
+
+async function backupRecord(record){
+
+  try{
+
+    if(
+      !activeEvent?.google_spreadsheet_id
+    ){
+      throw new Error(
+        "Google backup workbook is not ready."
+      );
+    }
+
+    const r=
+      await google({
+        action:
+          "BACKUP_ATTENDANCE",
+
+        spreadsheetId:
+          activeEvent.google_spreadsheet_id,
+
+        eventName:
+          activeEvent.event_name,
+
+        attendance:
+          record
+      });
+
+    if(!r?.success){
+
+      throw new Error(
+        r?.message||
+        "Google Sheets backup failed."
+      );
+    }
+
+    await supabase
+      .from("attendance_records")
+      .update({
+        backup_status:
+          "BACKED UP",
+
+        last_backup_at:
+          now(),
+
+        updated_at:
+          now()
+      })
+      .eq(
+        "attendance_id",
+        record.attendance_id
+      );
+
+  }catch(e){
+
+    console.warn(e);
+
+    await supabase
+      .from("attendance_records")
+      .update({
+        backup_status:
+          "PENDING",
+
+        updated_at:
+          now()
+      })
+      .eq(
+        "attendance_id",
+        record.attendance_id
+      );
+  }
+}
+
+
+/* =========================================================
+   MANUAL ATTENDANCE
+========================================================= */
+
+function submitAttendanceManual(){
+
+  const input=
+    el("attendanceStudentId");
+
+  const sid=
+    input?.value.trim();
+
+  if(!sid){
+
+    alert(
+      "Please enter a Student ID."
+    );
+
+    input?.focus();
+
+    return;
+  }
 
   if(recordMode==="TIME IN"){
 
-   if(existing?.time_in&&!existing?.time_out){
-    alert(name+" is already marked Present.");
-    return
-   }
-
-   if(existing?.time_in&&existing?.time_out){
-    alert(name+" already completed attendance.");
-    return
-   }
-
-   const late=
-    !!activeEvent.start_time &&
-    new Date().toTimeString().slice(0,5)>
-    String(activeEvent.start_time).slice(0,5);
-
-   const data={
-    event_id:activeEvent.event_id,
-    student_id:studentId,
-    student_name:name,
-    year_level:year,
-    time_in:stamp,
-    time_out:null,
-    late_no_time_in:late?"LATE":null,
-    attendance_status:late?"LATE":"PRESENT",
-    recorded_via:source==="qr"?"QR":"MANUAL",
-    recorded_by:CURRENT_USERNAME,
-    sex:sex||existing?.sex||null,
-    sectoral_groups:groups||[],
-    backup_status:"PENDING",
-    updated_at:stamp
-   };
-
-   let r;
-
-   if(existing){
-    r=await supabase
-     .from("attendance_records")
-     .update(data)
-     .eq("attendance_id",existing.attendance_id)
-     .select()
-     .single();
-   }else{
-    data.attendance_id=id("ATT-REC-");
-    data.created_at=stamp;
-
-    r=await supabase
-     .from("attendance_records")
-     .insert(data)
-     .select()
-     .single();
-   }
-
-   if(r.error)throw r.error;
-
-   saved=r.data;
+    openAttendanceSectorModal(
+      sid,
+      "manual"
+    );
 
   }else{
 
-   if(existing?.time_out){
-    alert(name+" already has a Time Out.");
-    return
-   }
-
-   const data={
-    time_out:stamp,
-    late_no_time_in:existing?.time_in?(existing.late_no_time_in||null):"NO TIME IN",
-    attendance_status:existing?.time_in?"COMPLETE":"LATE",
-    recorded_via:source==="qr"?"QR":"MANUAL",
-    recorded_by:CURRENT_USERNAME,
-    backup_status:"PENDING",
-    updated_at:stamp
-   };
-
-   let r;
-
-   if(existing){
-    r=await supabase
-     .from("attendance_records")
-     .update(data)
-     .eq("attendance_id",existing.attendance_id)
-     .select()
-     .single();
-   }else{
-    Object.assign(data,{
-     attendance_id:id("ATT-REC-"),
-     event_id:activeEvent.event_id,
-     student_id:studentId,
-     student_name:name,
-     year_level:year,
-     sex:existing?.sex||null,
-     time_in:null,
-     created_at:stamp,
-     sectoral_groups:[]
-    });
-
-    r=await supabase
-     .from("attendance_records")
-     .insert(data)
-     .select()
-     .single();
-   }
-
-   if(r.error)throw r.error;
-
-   saved=r.data;
+    recordAttendance(
+      sid,
+      "manual",
+      []
+    );
   }
-
-  /*
-     Attendance is saved silently.
-     The previous successful-record browser alert
-     has intentionally been removed.
-  */
-  await backupRecord(saved);
-  await loadRecords();
-
- }catch(e){
-  console.error(e);
-  alert(e.message||"Unable to record attendance.");
- }finally{
-  if(button)button.disabled=false;
-
-  const input=el("attendanceStudentId");
-
-  if(input){
-   input.value="";
-   input.focus();
-  }
- }
 }
 
-async function backupRecord(record){
- try{
-  if(!activeEvent?.google_spreadsheet_id)
-   throw new Error("Google backup workbook is not ready.");
 
-  const r=await google({
-   action:"BACKUP_ATTENDANCE",
-   spreadsheetId:activeEvent.google_spreadsheet_id,
-   eventName:activeEvent.event_name,
-   attendance:record
-  });
-
-  if(!r?.success)
-   throw new Error(r?.message||"Google Sheets backup failed.");
-
-  await supabase
-   .from("attendance_records")
-   .update({
-    backup_status:"BACKED UP",
-    last_backup_at:now(),
-    updated_at:now()
-   })
-   .eq("attendance_id",record.attendance_id);
-
- }catch(e){
-  console.warn(e);
-
-  await supabase
-   .from("attendance_records")
-   .update({
-    backup_status:"PENDING",
-    updated_at:now()
-   })
-   .eq("attendance_id",record.attendance_id);
- }
-}
-
-function submitAttendanceManual(){
- const input=el("attendanceStudentId");
- const sid=input?.value.trim();
-
- if(!sid){
-  alert("Please enter a Student ID.");
-  input?.focus();
-  return
- }
-
- if(recordMode==="TIME IN")
-  openAttendanceSectorModal(sid,"manual");
- else
-  recordAttendance(sid,"manual",[])
-}
+/* =========================================================
+   QR CODE
+========================================================= */
 
 function extractQr(v){
- let s=String(v||"")
-  .replace(/[\u200B-\u200D\uFEFF]/g,"")
-  .trim();
 
- try{
-  const o=JSON.parse(s);
+  let s=
+    String(v||"")
+      .replace(
+        /[\u200B-\u200D\uFEFF]/g,
+        ""
+      )
+      .trim();
 
-  if(o&&typeof o==="object")
-   s=o.studentId||o.studentID||o.id||o.ID||s;
- }catch{}
+  try{
 
- try{
-  if(/^https?:\/\//i.test(s)){
-   const u=new URL(s);
-   s=
-    u.searchParams.get("studentId")||
-    u.searchParams.get("studentID")||
-    u.searchParams.get("id")||
-    s;
-  }
- }catch{}
+    const o=JSON.parse(s);
 
- return s
-  .replace(/^student\s*id\s*(number)?\s*[:#-]?\s*/i,"")
-  .replace(/^id\s*[:#-]?\s*/i,"")
-  .trim()
+    if(
+      o &&
+      typeof o==="object"
+    ){
+
+      s=
+        o.studentId||
+        o.studentID||
+        o.id||
+        o.ID||
+        s;
+    }
+
+  }catch{}
+
+  try{
+
+    if(
+      /^https?:\/\//i.test(s)
+    ){
+
+      const u=
+        new URL(s);
+
+      s=
+        u.searchParams.get(
+          "studentId"
+        )||
+        u.searchParams.get(
+          "studentID"
+        )||
+        u.searchParams.get(
+          "id"
+        )||
+        s;
+    }
+
+  }catch{}
+
+  return s
+    .replace(
+      /^student\s*id\s*(number)?\s*[:#-]?\s*/i,
+      ""
+    )
+    .replace(
+      /^id\s*[:#-]?\s*/i,
+      ""
+    )
+    .trim();
 }
+
 
 async function qrSuccess(text){
- const sid=extractQr(text);
 
- if(!sid)return;
+  const sid=
+    extractQr(text);
 
- el("attendanceScanFrame").classList.add("detected");
+  if(!sid)return;
 
- setTimeout(
-  ()=>el("attendanceScanFrame").classList.remove("detected"),
-  700
- );
+  el("attendanceScanFrame")
+    .classList.add("detected");
 
- await stopAttendanceScanner();
-
- if(recordMode==="TIME IN")
-  openAttendanceSectorModal(sid,"qr");
- else
-  await recordAttendance(sid,"qr",[])
-}
-
-async function ensureQrLibrary(){
- if(window.Html5Qrcode)return true;
-
- if(qrLibraryPromise)return qrLibraryPromise;
-
- qrLibraryPromise=new Promise((resolve,reject)=>{
-  const s=document.createElement("script");
-
-  s.src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js";
-
-  s.onload=()=>resolve(true);
-  s.onerror=reject;
-
-  document.head.appendChild(s);
- });
-
- return qrLibraryPromise
-}
-
-async function startAttendanceScanner(userRequested){
- if(qrRunning||qrStarting)return;
-
- qrStarting=true;
-
- try{
-  await ensureQrLibrary();
-
-  qr=new Html5Qrcode("attendanceReader");
-
-  await qr.start(
-   {facingMode:"environment"},
-   {
-    fps:10,
-    qrbox:{
-     width:240,
-     height:240
-    }
-   },
-   qrSuccess,
-   ()=>{}
+  setTimeout(
+    ()=>
+      el("attendanceScanFrame")
+        .classList.remove("detected"),
+    700
   );
 
-  qrRunning=true;
+  await stopAttendanceScanner();
 
-  el("attendanceScannerState").textContent="SCANNING";
+  if(recordMode==="TIME IN"){
 
-  el("attendanceScannerMessage").textContent=
-   "Center the QR code inside the red corners.";
+    openAttendanceSectorModal(
+      sid,
+      "qr"
+    );
 
-  el("attendanceScannerMessage").className=
-   "attendance-scanner-message success";
+  }else{
 
- }catch(e){
-
-  el("attendanceScannerState").textContent="CAMERA ERROR";
-
-  el("attendanceScannerMessage").textContent=
-   userRequested?
-   "Camera access was denied or unavailable. Use Manual ID instead.":
-   "Press START CAMERA to scan an ID QR code.";
-
-  el("attendanceScannerMessage").className=
-   "attendance-scanner-message error";
-
-  console.warn(e);
-
- }finally{
-  qrStarting=false;
- }
+    await recordAttendance(
+      sid,
+      "qr",
+      []
+    );
+  }
 }
+
+
+async function ensureQrLibrary(){
+
+  if(window.Html5Qrcode)
+    return true;
+
+  if(qrLibraryPromise)
+    return qrLibraryPromise;
+
+  qrLibraryPromise=
+    new Promise(
+      (resolve,reject)=>{
+
+        const s=
+          document.createElement(
+            "script"
+          );
+
+        s.src=
+          "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js";
+
+        s.onload=()=>
+          resolve(true);
+
+        s.onerror=reject;
+
+        document.head.appendChild(s);
+      }
+    );
+
+  return qrLibraryPromise;
+}
+
+
+async function startAttendanceScanner(
+  userRequested
+){
+
+  if(
+    qrRunning||
+    qrStarting
+  ){
+    return;
+  }
+
+  qrStarting=true;
+
+  try{
+
+    await ensureQrLibrary();
+
+    qr=
+      new Html5Qrcode(
+        "attendanceReader"
+      );
+
+    await qr.start(
+
+      {
+        facingMode:
+          "environment"
+      },
+
+      {
+        fps:10,
+
+        qrbox:{
+          width:240,
+          height:240
+        }
+      },
+
+      qrSuccess,
+
+      ()=>{}
+    );
+
+    qrRunning=true;
+
+    el("attendanceScannerState")
+      .textContent="SCANNING";
+
+    el("attendanceScannerMessage")
+      .textContent=
+        "Center the QR code inside the red corners.";
+
+    el("attendanceScannerMessage")
+      .className=
+        "attendance-scanner-message success";
+
+  }catch(e){
+
+    el("attendanceScannerState")
+      .textContent=
+        "CAMERA ERROR";
+
+    el("attendanceScannerMessage")
+      .textContent=
+        userRequested
+          ? "Camera access was denied or unavailable. Use Manual ID instead."
+          : "Press START CAMERA to scan an ID QR code.";
+
+    el("attendanceScannerMessage")
+      .className=
+        "attendance-scanner-message error";
+
+    console.warn(e);
+
+  }finally{
+
+    qrStarting=false;
+  }
+}
+
 
 async function stopAttendanceScanner(){
- try{
-  if(qr&&qrRunning)
-   await qr.stop().catch(()=>{});
 
-  if(qr)
-   await qr.clear().catch(()=>{});
- }catch{}
+  try{
 
- qr=null;
- qrRunning=false;
+    if(
+      qr &&
+      qrRunning
+    ){
+
+      await qr
+        .stop()
+        .catch(()=>{});
+    }
+
+    if(qr){
+
+      await qr
+        .clear()
+        .catch(()=>{});
+    }
+
+  }catch{}
+
+  qr=null;
+  qrRunning=false;
 }
+
+
+/* =========================================================
+   ALL RECORDS
+========================================================= */
 
 function renderAll(){
- const box=el("attendanceAllList");
 
- if(!records.length){
-  box.innerHTML='<div class="attendance-empty">No attendance records.</div>';
-  return
- }
+  const box=
+    el("attendanceAllList");
 
- box.innerHTML=records.map(r=>`
-  <div class="attendance-event-row">
-   <span style="text-align:left">
-    <strong>${esc(r.student_name)}</strong>
-    <small>
-     ${esc(r.student_id)} ·
-     ${esc(r.year_level||"—")} ·
-     Time In: ${esc(timeLabel(r.time_in))} ·
-     Time Out: ${esc(timeLabel(r.time_out))}
-    </small>
-   </span>
-   <span class="attendance-badge ${badgeClass(r.attendance_status)}">
-    ${esc(r.attendance_status)}
-   </span>
-  </div>
- `).join("")
+  if(!records.length){
+
+    box.innerHTML=
+      '<div class="attendance-empty">'+
+      'No attendance records.'+
+      '</div>';
+
+    return;
+  }
+
+  box.innerHTML=
+    records
+      .map(r=>`
+
+        <div class="attendance-event-row">
+
+          <span style="text-align:left">
+
+            <strong>
+              ${esc(r.student_name)}
+            </strong>
+
+            <small>
+
+              ${esc(r.student_id)}
+              ·
+              ${esc(r.year_level||"—")}
+              · Time In:
+              ${esc(timeLabel(r.time_in))}
+              · Time Out:
+              ${esc(timeLabel(r.time_out))}
+
+            </small>
+
+          </span>
+
+          <span
+            class="attendance-badge ${badgeClass(r.attendance_status)}">
+
+            ${esc(r.attendance_status)}
+
+          </span>
+
+        </div>
+
+      `)
+      .join("");
 }
+
+
+/* =========================================================
+   OFFICIAL OSLD PRINT
+========================================================= */
 
 function printAttendanceYearLevel(){
 
- if(!activeEvent){
-  alert("Please create or select an attendance event first.");
-  return
- }
+  if(!activeEvent){
 
- const title=activeEvent.event_name||"Attendance";
- const date=activeEvent.event_date||
-  new Date().toISOString().slice(0,10);
+    alert(
+      "Please create or select an attendance event first."
+    );
 
- const rows=[...records].sort((a,b)=>
-  String(a.student_name||"")
-  .localeCompare(String(b.student_name||""))
- );
+    return;
+  }
 
- const FIRST_PAGE_ROWS=7;
- const CONTINUATION_PAGE_ROWS=13;
+  const title=
+    activeEvent.event_name||
+    "Attendance";
 
- const counts={
-  "4PS":0,
-  "IPs":0,
-  "PWD":0,
-  "Solo Parent":0,
-  "LGBTQIA+":0,
-  "Child of a Solo Parent":0
- };
+  const date=
+    activeEvent.event_date||
+    new Date()
+      .toISOString()
+      .slice(0,10);
 
- rows.forEach(r=>
-  (Array.isArray(r?.sectoral_groups)?
-   r.sectoral_groups:[])
-  .forEach(g=>{
-   if(g==="PWDs")g="PWD";
+  /*
+   * Sort alphabetically.
+   *
+   * The numbering is then based on this sorted list.
+   */
+  const rows=
+    [...records].sort(
+      (a,b)=>
+        String(a.student_name||"")
+          .localeCompare(
+            String(b.student_name||"")
+          )
+    );
 
-   if(Object.prototype.hasOwnProperty.call(counts,g))
-    counts[g]++;
-  })
- );
 
- const headerMarkup=`
- <div class="official-print-header">
-  <img
-   class="official-osld-header-image"
-   src="assets/osld-header.png"
-   alt="Office of Student Leadership and Development"
-  >
- </div>`;
+  /*
+   * OFFICIAL PAGINATION
+   *
+   * PAGE 1:
+   * 1–7
+   *
+   * PAGE 2:
+   * 8–20
+   *
+   * PAGE 3:
+   * 21–33
+   *
+   * PAGE 4:
+   * 34–46
+   *
+   * and so on.
+   *
+   * The SUMMARY is ALWAYS generated
+   * after all participant pages.
+   */
 
- const participantCellMarkup=(r,index)=>{
+  const FIRST_PAGE_ROWS=7;
+  const CONTINUATION_PAGE_ROWS=13;
 
-  const gs=new Set(
-   Array.isArray(r?.sectoral_groups)?
-   r.sectoral_groups:[]
-  );
 
-  const hasRecord=!!r;
+  /* =======================================================
+     SUMMARY COUNTS
+  ======================================================= */
 
-  const has=(name)=>
-   hasRecord&&(
-    gs.has(name)||
-    ((name==="PWD")&&gs.has("PWDs"))
-   );
+  const counts={
+    "4PS":0,
+    "IPs":0,
+    "PWD":0,
+    "Solo Parent":0,
+    "LGBTQIA+":0,
+    "Child of a Solo Parent":0
+  };
 
-  return `
-   <tr>
-    <td>${index}.</td>
+  rows.forEach(r=>{
 
-    <td class="participant-name">
-     ${hasRecord?esc(r.student_name):""}
-    </td>
+    const groups=
+      Array.isArray(
+        r?.sectoral_groups
+      )
+        ? r.sectoral_groups
+        : [];
 
-    <td></td>
+    groups.forEach(g=>{
 
-    <td>${has("4PS")?"✓":""}</td>
-    <td>${has("IPs")?"✓":""}</td>
-    <td>${has("PWD")?"✓":""}</td>
-    <td>${has("Solo Parent")?"✓":""}</td>
-    <td>${has("LGBTQIA+")?"✓":""}</td>
-    <td>${has("Child of a Solo Parent")?"✓":""}</td>
+      if(g==="PWDs")
+        g="PWD";
 
-    <td>${hasRecord&&r.sex==="M"?"✓":""}</td>
-    <td>${hasRecord&&r.sex==="F"?"✓":""}</td>
+      if(
+        Object.prototype.hasOwnProperty.call(
+          counts,
+          g
+        )
+      ){
+        counts[g]++;
+      }
 
-    <td class="official-present">
-     ${hasRecord&&r.time_in?"PRESENT":""}
-    </td>
-   </tr>`;
- };
+    });
+  });
 
- const tableMarkup=(chunk,startNumber,rowCount)=>{
 
-  let body="";
+  /* =======================================================
+     HEADER
+  ======================================================= */
 
-  for(let i=0;i<rowCount;i++)
-   body+=participantCellMarkup(
-    chunk[i]||null,
-    startNumber+i
-   );
+  const headerMarkup=`
 
-  return `
-   <table class="official-attendance-table">
+    <div class="official-print-header">
 
-    <colgroup>
-     <col class="col-no">
-     <col class="col-name">
-     <col class="col-org">
-
-     <col class="col-sector">
-     <col class="col-sector">
-     <col class="col-sector">
-     <col class="col-sector">
-     <col class="col-sector">
-     <col class="col-sector">
-
-     <col class="col-sex">
-     <col class="col-sex">
-
-     <col class="col-signature">
-    </colgroup>
-
-    <thead>
-     <tr>
-      <th rowspan="2">NO.</th>
-      <th rowspan="2">Name of Participants</th>
-      <th rowspan="2">
-       Organization<br>(ACRONYM)
-      </th>
-      <th colspan="6">Sectoral Groups</th>
-      <th colspan="2">Sex</th>
-      <th rowspan="2">Signature</th>
-     </tr>
-
-     <tr>
-      <th>1</th>
-      <th>2</th>
-      <th>3</th>
-      <th>4</th>
-      <th>5</th>
-      <th>6</th>
-      <th>M</th>
-      <th>F</th>
-     </tr>
-    </thead>
-
-    <tbody>
-     ${body}
-    </tbody>
-
-   </table>`;
- };
-
- const legendMarkup=`
- <div class="official-print-legend">
-  <div>LEGENDS:</div>
-  <div>
-   1 - 4PS &nbsp;
-   2 - IPs &nbsp;
-   3 - PWDs &nbsp;
-   4 - Solo Parent &nbsp;
-   5 - LGBTQIA+ &nbsp;
-   6. Child of a Solo Parent
-  </div>
- </div>`;
-
- const pages=[];
-
- /*
-   PAGE 1
-   Exactly 7 participant rows.
- */
- {
-  const start=0;
-  const chunk=rows.slice(0,FIRST_PAGE_ROWS);
-
-  pages.push(`
-   <section class="official-print-page official-first-page">
-
-    ${headerMarkup}
-
-    <div class="official-event-block">
-
-     <div class="official-event-name">
-      ${esc(title)}
-     </div>
-
-     <div class="official-details">
-
-      <div>
-       <span class="official-detail-label">
-        Title of Activity:
-       </span>
-
-       <span class="official-detail-line">
-        ${esc(title)}
-       </span>
-      </div>
-
-      <div>
-       <span class="official-detail-label">
-        Venue:
-       </span>
-
-       <span class="official-detail-line">
-        ${esc(activeEvent.venue||"")}
-       </span>
-      </div>
-
-      <div>
-       <span class="official-detail-label">
-        Date:
-       </span>
-
-       <span class="official-detail-line">
-        ${esc(dateLabel(date))}
-       </span>
-      </div>
-
-     </div>
+      <img
+        class="official-osld-header-image"
+        src="assets/osld-header.png"
+        alt="Office of Student Leadership and Development">
 
     </div>
 
-    ${tableMarkup(
-     chunk,
-     start+1,
-     FIRST_PAGE_ROWS
-    )}
+  `;
 
-    ${legendMarkup}
 
-   </section>
-  `);
- }
+  /* =======================================================
+     PARTICIPANT ROW
+  ======================================================= */
 
- /*
-   CONTINUATION PAGES
-   13 participant rows per page.
- */
- for(
-  let start=FIRST_PAGE_ROWS;
-  start<rows.length;
-  start+=CONTINUATION_PAGE_ROWS
- ){
+  const participantCellMarkup=
+    (r,index)=>{
 
-  const chunk=rows.slice(
-   start,
-   start+CONTINUATION_PAGE_ROWS
-  );
+      const groups=
+        new Set(
+          Array.isArray(
+            r?.sectoral_groups
+          )
+            ? r.sectoral_groups
+            : []
+        );
 
-  pages.push(`
-   <section class="official-print-page official-continuation-page">
+      const hasRecord=!!r;
 
-    ${headerMarkup}
+      const has=name=>{
 
-    ${tableMarkup(
-     chunk,
-     start+1,
-     CONTINUATION_PAGE_ROWS
-    )}
+        if(!hasRecord)
+          return false;
 
-    ${legendMarkup}
+        if(name==="PWD"){
 
-   </section>
-  `);
- }
+          return(
+            groups.has("PWD")||
+            groups.has("PWDs")
+          );
+        }
 
- /*
-   FINAL SUMMARY PAGE
-   Always last.
- */
- const summary=[
-  ["4Ps",counts["4PS"]],
-  ["IPs",counts["IPs"]],
-  ["PWDs",counts["PWD"]],
-  ["Solo Parent",counts["Solo Parent"]],
-  ["LGBTQIA+",counts["LGBTQIA+"]],
-  [
-   "Child of a Solo Parent",
-   counts["Child of a Solo Parent"]
-  ]
- ];
+        return groups.has(name);
+      };
 
- pages.push(`
-  <section class="official-print-page official-summary-page">
 
-   ${headerMarkup}
+      return`
 
-   <div class="official-summary-wrap">
+        <tr>
 
-    <div class="official-summary-title">
-     MINORITY CLASSIFICATION
+          <td>
+            ${index}.
+          </td>
+
+          <td class="participant-name">
+            ${
+              hasRecord
+                ? esc(r.student_name)
+                : ""
+            }
+          </td>
+
+          <!-- Organization intentionally blank -->
+          <td></td>
+
+
+          <!-- Sectoral Groups -->
+
+          <td>
+            ${
+              has("4PS")
+                ? "✓"
+                : ""
+            }
+          </td>
+
+          <td>
+            ${
+              has("IPs")
+                ? "✓"
+                : ""
+            }
+          </td>
+
+          <td>
+            ${
+              has("PWD")
+                ? "✓"
+                : ""
+            }
+          </td>
+
+          <td>
+            ${
+              has("Solo Parent")
+                ? "✓"
+                : ""
+            }
+          </td>
+
+          <td>
+            ${
+              has("LGBTQIA+")
+                ? "✓"
+                : ""
+            }
+          </td>
+
+          <td>
+            ${
+              has(
+                "Child of a Solo Parent"
+              )
+                ? "✓"
+                : ""
+            }
+          </td>
+
+
+          <!-- Sex -->
+
+          <td>
+            ${
+              hasRecord &&
+              r.sex==="M"
+                ? "✓"
+                : ""
+            }
+          </td>
+
+          <td>
+            ${
+              hasRecord &&
+              r.sex==="F"
+                ? "✓"
+                : ""
+            }
+          </td>
+
+
+          <!-- Signature -->
+
+          <td class="official-present">
+
+            ${
+              hasRecord &&
+              r.time_in
+                ? "PRESENT"
+                : ""
+            }
+
+          </td>
+
+        </tr>
+
+      `;
+    };
+
+
+  /* =======================================================
+     TABLE
+  ======================================================= */
+
+  const tableMarkup=
+    (
+      chunk,
+      startNumber,
+      rowCount
+    )=>{
+
+      let body="";
+
+      /*
+       * Always create the exact number of
+       * physical rows required for that page.
+       *
+       * Page 1 = 7
+       * Other pages = 13
+       */
+
+      for(
+        let i=0;
+        i<rowCount;
+        i++
+      ){
+
+        body+=
+          participantCellMarkup(
+            chunk[i]||null,
+            startNumber+i
+          );
+      }
+
+
+      return`
+
+        <table
+          class="official-attendance-table">
+
+          <colgroup>
+
+            <col class="col-no">
+
+            <col class="col-name">
+
+            <col class="col-org">
+
+            <col class="col-sector">
+            <col class="col-sector">
+            <col class="col-sector">
+            <col class="col-sector">
+            <col class="col-sector">
+            <col class="col-sector">
+
+            <col class="col-sex">
+            <col class="col-sex">
+
+            <col class="col-signature">
+
+          </colgroup>
+
+
+          <thead>
+
+            <tr>
+
+              <th rowspan="2">
+                NO.
+              </th>
+
+              <th rowspan="2">
+                Name of Participants
+              </th>
+
+              <th rowspan="2">
+                Organization
+                <br>
+                (ACRONYM)
+              </th>
+
+              <th colspan="6">
+                Sectoral Groups
+              </th>
+
+              <th colspan="2">
+                Sex
+              </th>
+
+              <th rowspan="2">
+                Signature
+              </th>
+
+            </tr>
+
+
+            <tr>
+
+              <th>1</th>
+              <th>2</th>
+              <th>3</th>
+              <th>4</th>
+              <th>5</th>
+              <th>6</th>
+
+              <th>M</th>
+              <th>F</th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            ${body}
+
+          </tbody>
+
+        </table>
+
+      `;
+    };
+
+
+  /* =======================================================
+     LEGENDS
+  ======================================================= */
+
+  const legendMarkup=`
+
+    <div class="official-print-legend">
+
+      <div>
+        LEGENDS:
+      </div>
+
+      <div>
+        1 - 4PS&nbsp;&nbsp;
+        2 - IPs&nbsp;&nbsp;
+        3 - PWDs&nbsp;&nbsp;
+        4 - Solo Parent&nbsp;&nbsp;
+        5 - LGBTQIA+&nbsp;&nbsp;
+        6 - Child of a Solo Parent
+      </div>
+
     </div>
 
-    <table class="official-minority-table">
+  `;
 
-     <thead>
-      <tr>
-       <th>Minority Classification</th>
-       <th>Number of Students</th>
-      </tr>
-     </thead>
 
-     <tbody>
-      ${summary.map(x=>`
-       <tr>
-        <td>${esc(x[0])}</td>
-        <td>${x[1]}</td>
-       </tr>
-      `).join("")}
-     </tbody>
+  /* =======================================================
+     PAGE ARRAY
+  ======================================================= */
 
-    </table>
+  const pages=[];
 
-   </div>
 
-  </section>
- `);
+  /* =======================================================
+     PAGE 1
+     EXACTLY 7 ROWS
+     NUMBERING 1–7
+  ======================================================= */
 
- el("attendancePrintDocument").innerHTML=pages.join("");
+  const firstPageChunk=
+    rows.slice(
+      0,
+      FIRST_PAGE_ROWS
+    );
 
- closeAttendancePrintModal();
 
- document.body.classList.add(
-  "psabe-attendance-printing"
- );
+  pages.push(`
 
- window.print();
+    <section
+      class="official-print-page official-first-page">
 
- setTimeout(
-  ()=>document.body.classList.remove(
-   "psabe-attendance-printing"
-  ),
-  700
- );
+      ${headerMarkup}
+
+
+      <div class="official-event-block">
+
+        <div class="official-event-name">
+          ${esc(title)}
+        </div>
+
+
+        <div class="official-details">
+
+          <div>
+
+            <span class="official-detail-label">
+              Title of Activity:
+            </span>
+
+            <span class="official-detail-line">
+              ${esc(title)}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <span class="official-detail-label">
+              Venue:
+            </span>
+
+            <span class="official-detail-line">
+              ${esc(
+                activeEvent.venue||""
+              )}
+            </span>
+
+          </div>
+
+
+          <div>
+
+            <span class="official-detail-label">
+              Date:
+            </span>
+
+            <span class="official-detail-line">
+              ${esc(
+                dateLabel(date)
+              )}
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      ${tableMarkup(
+        firstPageChunk,
+        1,
+        FIRST_PAGE_ROWS
+      )}
+
+
+      ${legendMarkup}
+
+    </section>
+
+  `);
+
+
+  /* =======================================================
+     CONTINUATION PAGES
+     
+     PAGE 2  = 8–20
+     PAGE 3  = 21–33
+     PAGE 4  = 34–46
+     
+     ALWAYS 13 ROWS.
+  ======================================================= */
+
+  for(
+    let start=
+      FIRST_PAGE_ROWS;
+
+    start<
+      rows.length;
+
+    start+=
+      CONTINUATION_PAGE_ROWS
+  ){
+
+    const chunk=
+      rows.slice(
+        start,
+        start+
+          CONTINUATION_PAGE_ROWS
+      );
+
+
+    pages.push(`
+
+      <section
+        class="official-print-page official-continuation-page">
+
+        ${headerMarkup}
+
+
+        ${tableMarkup(
+          chunk,
+          start+1,
+          CONTINUATION_PAGE_ROWS
+        )}
+
+
+        ${legendMarkup}
+
+      </section>
+
+    `);
+  }
+
+
+  /* =======================================================
+     FINAL SUMMARY PAGE
+     
+     THIS IS ALWAYS THE LAST PAGE.
+  ======================================================= */
+
+  const summary=[
+
+    [
+      "4Ps",
+      counts["4PS"]
+    ],
+
+    [
+      "IPs",
+      counts["IPs"]
+    ],
+
+    [
+      "PWDs",
+      counts["PWD"]
+    ],
+
+    [
+      "Solo Parent",
+      counts["Solo Parent"]
+    ],
+
+    [
+      "LGBTQIA+",
+      counts["LGBTQIA+"]
+    ],
+
+    [
+      "Child of a Solo Parent",
+      counts[
+        "Child of a Solo Parent"
+      ]
+    ]
+
+  ];
+
+
+  pages.push(`
+
+    <section
+      class="official-print-page official-summary-page">
+
+      ${headerMarkup}
+
+
+      <div class="official-summary-wrap">
+
+        <div class="official-summary-title">
+          SUMMARY
+        </div>
+
+
+        <table
+          class="official-minority-table">
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Minority Classification
+              </th>
+
+              <th>
+                Number of Students
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            ${
+              summary
+                .map(item=>`
+
+                  <tr>
+
+                    <td>
+                      ${esc(item[0])}
+                    </td>
+
+                    <td>
+                      ${item[1]}
+                    </td>
+
+                  </tr>
+
+                `)
+                .join("")
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      ${legendMarkup}
+
+    </section>
+
+  `);
+
+
+  /* =======================================================
+     OUTPUT
+  ======================================================= */
+
+  el(
+    "attendancePrintDocument"
+  ).innerHTML=
+    pages.join("");
+
+
+  closeAttendancePrintModal();
+
+
+  document.body.classList.add(
+    "psabe-attendance-printing"
+  );
+
+
+  window.print();
+
+
+  setTimeout(
+    ()=>{
+      document.body.classList.remove(
+        "psabe-attendance-printing"
+      );
+    },
+    700
+  );
 }
 
-document.addEventListener("keydown",e=>{
- if(
-  e.key==="Enter"&&
-  document.activeElement?.id==="attendanceStudentId"
- ){
-  e.preventDefault();
-  submitAttendanceManual()
- }
-});
 
-Object.assign(window,{
- loadAttendanceData,
- openAttendanceEventModal,
- closeAttendanceEventModal,
- openAttendanceEvents,
- closeAttendanceEvents,
- selectAttendanceEvent,
- createAttendanceEvent,
- setAttendanceRecordMode,
- submitAttendanceManual,
- startAttendanceScanner,
- openAttendanceSectorModal,
- closeAttendanceSectorModal,
- toggleAttendanceSectorNA,
- confirmAttendanceSector,
- openAllAttendanceRecords,
- closeAllAttendanceRecords,
- openActiveAttendanceBackup,
- openAttendancePrintModal,
- closeAttendancePrintModal,
- printAttendanceYearLevel
-});
+/* =========================================================
+   ENTER KEY FOR MANUAL ID
+========================================================= */
+
+document.addEventListener(
+  "keydown",
+  e=>{
+
+    if(
+      e.key==="Enter" &&
+      document.activeElement?.id===
+        "attendanceStudentId"
+    ){
+
+      e.preventDefault();
+
+      submitAttendanceManual();
+    }
+
+  }
+);
+
+
+/* =========================================================
+   GLOBAL EXPORTS
+========================================================= */
+
+Object.assign(
+  window,
+  {
+
+    loadAttendanceData,
+
+    openAttendanceEventModal,
+    closeAttendanceEventModal,
+
+    openAttendanceEvents,
+    closeAttendanceEvents,
+
+    selectAttendanceEvent,
+    createAttendanceEvent,
+
+    setAttendanceRecordMode,
+    submitAttendanceManual,
+    startAttendanceScanner,
+
+    openAttendanceSectorModal,
+    closeAttendanceSectorModal,
+    toggleAttendanceSectorNA,
+    confirmAttendanceSector,
+
+    openAllAttendanceRecords,
+    closeAllAttendanceRecords,
+
+    openActiveAttendanceBackup,
+
+    openAttendancePrintModal,
+    closeAttendancePrintModal,
+
+    printAttendanceYearLevel
+
+  }
+);
 
 })();
