@@ -20,6 +20,7 @@ let pendingStudentId="";
 let pendingSource="";
 let pendingSex="";
 let qrLibraryPromise=null;
+let editingAttendanceRecord=null;
 
 function el(id){return document.getElementById(id)}
 function esc(v){const d=document.createElement("div");d.textContent=String(v??"");return d.innerHTML}
@@ -388,10 +389,13 @@ function renderRecent(){
        ${esc(r.year_level||"—")}
      </div>
 
-     <div>
+     <div class="attendance-recent-status">
        <span class="attendance-badge ${badgeClass(r.attendance_status)}">
          ${esc(r.attendance_status||"")}
        </span>
+       <button type="button" class="attendance-edit-button"
+               data-attendance-id="${esc(r.attendance_id||"")}"
+               onclick="openAttendanceEdit(this.dataset.attendanceId)">EDIT</button>
      </div>
    </div>
  `).join("");
@@ -744,30 +748,31 @@ function sectorGroups(){
  ].map(x=>x.value);
 }
 
-function openAttendanceSectorModal(studentId,source){
- pendingStudentId=studentId;
- pendingSource=source;
- pendingSex="";
-
- el("attendanceSectorModalStudent").textContent=
-   "Student ID: "+studentId;
-
- document
-   .querySelectorAll("#attendanceSectorModal input[type=checkbox]")
-   .forEach(x=>x.checked=false);
-
- document
-   .querySelectorAll("#attendanceSectorModal input[name=attendanceSex]")
-   .forEach(x=>x.checked=false);
-
- el("attendanceSectorNA")
-   .classList.remove("active");
-
- el("attendanceSectorModal")
-   .classList.add("show","open");
-
- el("attendanceSectorModal")
-   .setAttribute("aria-hidden","false");
+function openAttendanceSectorModal(studentId,source,existingRecord=null){
+ pendingStudentId=studentId; pendingSource=source; pendingSex="";
+ editingAttendanceRecord=existingRecord||null;
+ el("attendanceSectorModalStudent").textContent="Student ID: "+studentId;
+ document.querySelectorAll("#attendanceSectorModal input[type=checkbox]").forEach(x=>x.checked=false);
+ document.querySelectorAll("#attendanceSectorModal input[name=attendanceSex]").forEach(x=>x.checked=false);
+ el("attendanceSectorNA").classList.remove("active");
+ const modal=el("attendanceSectorModal"), title=el("attendanceSectorModalTitle");
+ const kicker=modal?.querySelector(".sectoral-modal-kicker"), button=modal?.querySelector(".sector-confirm");
+ if(existingRecord){
+   if(kicker)kicker.textContent="EDIT PARTICIPANT CLASSIFICATION";
+   if(title)title.textContent="Edit Sectoral Group";
+   if(button)button.textContent="SAVE CHANGES";
+   const groups=Array.isArray(existingRecord.sectoral_groups)?existingRecord.sectoral_groups:[];
+   if(groups.includes("N/A")) el("attendanceSectorNA").classList.add("active");
+   else document.querySelectorAll("#attendanceSectorModal input[type=checkbox]").forEach(x=>x.checked=groups.includes(x.value));
+   const sex=String(existingRecord.sex||"").toUpperCase();
+   const sexInput=document.querySelector('#attendanceSectorModal input[name="attendanceSex"][value="'+sex+'"]');
+   if(sexInput)sexInput.checked=true;
+ }else{
+   if(kicker)kicker.textContent="PARTICIPANT CLASSIFICATION";
+   if(title)title.textContent="Select Sectoral Group";
+   if(button)button.textContent="CONFIRM & SUBMIT";
+ }
+ modal.classList.add("show","open"); modal.setAttribute("aria-hidden","false");
 }
 
 function closeAttendanceSectorModal(){
@@ -799,38 +804,35 @@ function toggleAttendanceSectorNA(){
 
 async function confirmAttendanceSector(){
  const g=sectorGroups();
-
- const na=
-   el("attendanceSectorNA")
-     .classList.contains("active");
-
- const sex=
-   document
-     .querySelector(
-       "#attendanceSectorModal input[name=attendanceSex]:checked"
-     )?.value||"";
-
- if(!sex){
-   alert("Please select Sex: M or F.");
-   return;
- }
-
- if(!g.length&&!na){
-   alert("Please select a sectoral group or N/A.");
-   return;
- }
-
- const sid=pendingStudentId;
- const src=pendingSource;
-
+ const na=el("attendanceSectorNA").classList.contains("active");
+ const sex=document.querySelector("#attendanceSectorModal input[name=attendanceSex]:checked")?.value||"";
+ if(!sex){alert("Please select Sex: M or F.");return}
+ if(!g.length&&!na){alert("Please select a sectoral group or N/A.");return}
+ const sid=pendingStudentId, src=pendingSource, record=editingAttendanceRecord, groups=na?["N/A"]:g;
  closeAttendanceSectorModal();
+ if(record){await updateAttendanceClassification(record,groups,sex);return}
+ await recordAttendance(sid,src,groups,sex);
+}
 
- await recordAttendance(
-   sid,
-   src,
-   na?["N/A"]:g,
-   sex
- );
+async function updateAttendanceClassification(record,groups,sex){
+ try{
+   if(!supabase)throw new Error("Supabase client unavailable.");
+   const attendanceId=String(record?.attendance_id||"").trim();
+   if(!attendanceId)throw new Error("This attendance record cannot be edited because its attendance ID is missing.");
+   const r=await supabase.from("attendance_records").update({sectoral_groups:groups,sex:sex,updated_at:now()}).eq("attendance_id",attendanceId).select().single();
+   if(r.error)throw r.error;
+   const i=records.findIndex(x=>String(x.attendance_id)===attendanceId);
+   if(i>=0)records[i]=r.data;
+   renderStats(); renderRecent();
+   if(el("attendanceAllModal")?.classList.contains("show"))renderAll();
+   alert("Participant classification updated successfully.");
+ }catch(e){console.error(e);alert(e.message||"Unable to save the participant classification changes.")}
+}
+
+function openAttendanceEdit(attendanceId){
+ const record=records.find(r=>String(r.attendance_id)===String(attendanceId));
+ if(!record){alert("Attendance record not found.");return}
+ openAttendanceSectorModal(record.student_id,"edit",record);
 }
 
 async function recordAttendance(
@@ -1774,8 +1776,10 @@ Object.assign(
    submitAttendanceManual,
    startAttendanceScanner,
    openAttendanceSectorModal,
+   openAttendanceEdit,
    closeAttendanceSectorModal,
    toggleAttendanceSectorNA,
+   updateAttendanceClassification,
    confirmAttendanceSector,
    openAllAttendanceRecords,
    closeAllAttendanceRecords,
