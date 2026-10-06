@@ -920,3 +920,32 @@
     position:absolute!important;
   }
 }
+
+/* =========================================================
+   ATTENDANCE RECORD EDITING
+========================================================= */
+.attendance-recent-status,
+.attendance-record-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.attendance-edit-button{
+  border:0;
+  border-radius:8px;
+  padding:6px 10px;
+  background:#2563eb;
+  color:#fff;
+  font:700 12px/1 "Roboto Condensed",sans-serif;
+  cursor:pointer;
+  transition:opacity .15s ease,transform .15s ease;
+}
+.attendance-edit-button:hover{opacity:.9;transform:translateY(-1px)}
+.attendance-edit-button:active{transform:translateY(0)}
+.attendance-edit-button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media(max-width:640px){
+  .attendance-edit-button{padding:7px 9px;font-size:11px}
+  .attendance-recent-status,.attendance-record-actions{gap:5px}
+}
