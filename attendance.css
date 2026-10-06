@@ -838,3 +838,85 @@
 .attendance-scanner-message.success{
   display:none!important;
 }
+
+/* =========================================================
+   FINAL PRINT FOOTER FIX
+   Keep LEGENDS in the footer and never let them overlap
+   the participant table.
+========================================================= */
+@media print{
+  .attendance-print-document .official-print-page{
+    position:relative!important;
+    overflow:hidden!important;
+  }
+
+  /* PAGE 1: fit all 7 participant rows above the footer. */
+  .attendance-print-document .official-first-page .official-attendance-table thead tr:first-child th{
+    height:10mm!important;
+  }
+
+  .attendance-print-document .official-first-page .official-attendance-table thead tr:nth-child(2) th{
+    height:8mm!important;
+  }
+
+  .attendance-print-document .official-first-page .official-attendance-table tbody td{
+    height:9mm!important;
+  }
+
+  /*
+     LEGENDS is a true footer now. It is anchored to the bottom
+     of the physical A4 page instead of being placed immediately
+     after the table.
+  */
+  .attendance-print-document .official-first-page .official-print-legend,
+  .attendance-print-document .official-continuation-page .official-print-legend,
+  .attendance-print-document .official-summary-page .official-print-legend{
+    position:absolute!important;
+    left:14mm!important;
+    right:14mm!important;
+    bottom:8mm!important;
+    top:auto!important;
+    width:auto!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0!important;
+    padding:0!important;
+    box-sizing:border-box!important;
+    font-family:"Roboto Condensed",Arial,Helvetica,sans-serif!important;
+    font-size:8pt!important;
+    line-height:1.25!important;
+    color:#000!important;
+    z-index:20!important;
+    background:#fff!important;
+  }
+
+  .attendance-print-document .official-print-legend > div{
+    margin:0!important;
+    padding:0!important;
+    white-space:normal!important;
+  }
+
+  .attendance-print-document .official-print-legend > div:first-child{
+    margin-bottom:1mm!important;
+    font-weight:400!important;
+  }
+
+  /* CONTINUATION PAGES: 13 rows must finish before the footer. */
+  .attendance-print-document .official-continuation-page .official-attendance-table thead tr:first-child th{
+    height:10mm!important;
+  }
+
+  .attendance-print-document .official-continuation-page .official-attendance-table thead tr:nth-child(2) th{
+    height:8mm!important;
+  }
+
+  .attendance-print-document .official-continuation-page .official-attendance-table tbody td{
+    height:8mm!important;
+  }
+
+  /* Summary page keeps its legend at the bottom too. */
+  .attendance-print-document .official-summary-page .official-summary-wrap{
+    position:absolute!important;
+  }
+}
