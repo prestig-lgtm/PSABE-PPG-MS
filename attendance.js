@@ -72,7 +72,7 @@ function buildModals(){
  document.querySelectorAll(".attendance-modal-overlay").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("show")}));
 }
 
-async function google(payload){const r=await fetch(GOOGLE_SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});if(!r.ok)throw new Error("Google Sheets request failed (HTTP "+r.status+")");return r.json()}
+async function google(payload){const r=await fetch(GOOGLE_SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload),redirect:"follow"});const text=await r.text();if(!r.ok)throw new Error("Google Sheets request failed (HTTP "+r.status+")");try{return JSON.parse(text)}catch(e){throw new Error("Google Sheets backup returned an invalid response. Make sure the Apps Script is deployed as a Web App with access set to Anyone.")}}
 async function lookup(studentId){
  const sid=String(studentId||"").trim();
  if(!sid)throw new Error("Please enter a Student ID.");
@@ -98,8 +98,9 @@ function openAttendanceEventModal(){buildModals();el("attendanceEventModal").cla
 function openAttendanceEvents(){renderEventList();el("attendanceEventsModal").classList.add("show")}function closeAttendanceEvents(){el("attendanceEventsModal")?.classList.remove("show")}
 function openAllAttendanceRecords(){renderAll();el("attendanceAllModal").classList.add("show")}function closeAllAttendanceRecords(){el("attendanceAllModal")?.classList.remove("show")}function openActiveAttendanceBackup(){if(activeEvent?.google_spreadsheet_url)window.open(activeEvent.google_spreadsheet_url,"_blank","noopener,noreferrer")}
 function openAttendancePrintModal(){el("attendancePrintModal").classList.add("show")}function closeAttendancePrintModal(){el("attendancePrintModal")?.classList.remove("show")}
-function renderEventList(){const box=el("attendanceEventList");if(!events.length){box.innerHTML='<div class="attendance-empty">No attendance events have been created yet.</div>';return}box.innerHTML=events.map(e=>`<button class="attendance-event-row" onclick="selectAttendanceEvent('${String(e.event_id).replace(/'/g,"\\'")}')"><span style="text-align:left"><strong>${esc(e.event_name)}</strong><small>${esc(dateLabel(e.event_date))} · ${esc(e.venue||"No venue")}</small></span><span class="attendance-badge ${e.status==="OPEN"?"present":"pending"}">${esc(e.status||"OPEN")}</span></button>`).join("")}
+function renderEventList(){const box=el("attendanceEventList");if(!events.length){box.innerHTML='<div class="attendance-empty">No attendance events have been created yet.</div>';return}box.innerHTML=events.map(e=>{const eid=String(e.event_id).replace(/'/g,"\\'");return `<div class="attendance-event-row-with-delete"><button class="attendance-event-select" onclick="selectAttendanceEvent('${eid}')"><span style="text-align:left"><strong>${esc(e.event_name)}</strong><small>${esc(dateLabel(e.event_date))} · ${esc(e.venue||"No venue")}</small></span><span class="attendance-badge ${e.status==="OPEN"?"present":"pending"}">${esc(e.status||"OPEN")}</span></button><button class="attendance-event-delete" title="Delete attendance sheet" onclick="deleteAttendanceEvent('${eid}',event)">DELETE</button></div>`}).join("")}
 async function selectAttendanceEvent(eventId){activeEvent=events.find(e=>e.event_id===eventId)||null;closeAttendanceEvents();renderEvent();await loadRecords()}
+async function deleteAttendanceEvent(eventId,clickEvent){if(clickEvent)clickEvent.stopPropagation();const eventToDelete=events.find(e=>e.event_id===eventId);if(!eventToDelete)return;const ok=window.confirm('Delete the attendance sheet for "'+eventToDelete.event_name+'"?\n\nThis will delete its attendance records and move its Google Sheets backup workbook to the Google Drive trash.');if(!ok)return;try{if(eventToDelete.google_spreadsheet_id){const gs=await google({action:"DELETE_ATTENDANCE_WORKBOOK",spreadsheetId:eventToDelete.google_spreadsheet_id});if(!gs?.success)throw new Error(gs?.message||"Google Sheets workbook could not be deleted.")}const a=await supabase.from("attendance_records").delete().eq("event_id",eventId);if(a.error)throw a.error;const b=await supabase.from("attendance_events").delete().eq("event_id",eventId);if(b.error)throw b.error;events=events.filter(e=>e.event_id!==eventId);if(activeEvent?.event_id===eventId)activeEvent=events[0]||null;closeAttendanceEvents();renderEvent();await loadRecords();alert("Attendance sheet deleted successfully.")}catch(e){console.error(e);alert(e.message||"Unable to delete the attendance sheet.")}}
 
 async function createAttendanceEvent(){const name=el("attendanceEventName").value.trim(),date=el("attendanceEventDate").value,venue=el("attendanceEventVenue").value.trim(),start=el("attendanceEventStart").value,end=el("attendanceEventEnd").value;if(!name||!date){alert("Please enter the event name and date.");return}const eventId=id("ATT-EVT-");const payload={event_id:eventId,event_name:name,event_date:date,venue:venue||null,start_time:start||null,end_time:end||null,created_by:CURRENT_USERNAME,status:"OPEN",backup_status:"PENDING"};const ins=await supabase.from("attendance_events").insert(payload).select().single();if(ins.error){alert(ins.error.message);return}const event=ins.data;try{const gs=await google({action:"CREATE_ATTENDANCE_WORKBOOK",eventId,eventName:name});if(gs?.success){const up=await supabase.from("attendance_events").update({google_spreadsheet_id:gs.spreadsheetId,google_spreadsheet_url:gs.spreadsheetUrl||null,backup_status:"READY",updated_at:now()}).eq("event_id",eventId).select().single();if(!up.error)Object.assign(event,up.data)}}catch(e){console.warn("Google backup workbook not ready:",e)}events.unshift(event);activeEvent=event;closeAttendanceEventModal();renderEvent();await loadRecords();el("attendanceEventName").value="";el("attendanceEventDate").value="";el("attendanceEventVenue").value="";el("attendanceEventStart").value="";el("attendanceEventEnd").value="";alert("Attendance event created successfully.")}
 
@@ -122,132 +123,26 @@ async function stopAttendanceScanner(){try{if(qr&&qrRunning)await qr.stop().catc
 function renderAll(){const box=el("attendanceAllList");if(!records.length){box.innerHTML='<div class="attendance-empty">No attendance records.</div>';return}box.innerHTML=records.map(r=>`<div class="attendance-event-row"><span style="text-align:left"><strong>${esc(r.student_name)}</strong><small>${esc(r.student_id)} · ${esc(r.year_level||"—")} · Time In: ${esc(timeLabel(r.time_in))} · Time Out: ${esc(timeLabel(r.time_out))}</small></span><span class="attendance-badge ${badgeClass(r.attendance_status)}">${esc(r.attendance_status)}</span></div>`).join("")}
 function printAttendanceYearLevel(){
  if(!activeEvent){alert("Please create or select an attendance event first.");return}
-
  const title=activeEvent.event_name||"Attendance";
  const date=activeEvent.event_date||new Date().toISOString().slice(0,10);
  const rows=[...records].sort((a,b)=>String(a.student_name||"").localeCompare(String(b.student_name||"")));
  const FIRST_PAGE_ROWS=7;
  const CONTINUATION_PAGE_ROWS=13;
  const counts={"4PS":0,"IPs":0,"PWD":0,"Solo Parent":0,"LGBTQIA+":0,"Child of a Solo Parent":0};
- rows.forEach(r=>(Array.isArray(r?.sectoral_groups)?r.sectoral_groups:[]).forEach(g=>{
-   if(g==="PWDs") g="PWD";
-   if(Object.prototype.hasOwnProperty.call(counts,g)) counts[g]++;
- }));
-
- const headerMarkup=`<div class="official-print-header">
-   <img class="official-osld-header-image" src="assets/osld-header.png" alt="Office of Student Leadership and Development">
- </div>`;
-
- const participantCellMarkup=(r,index)=>{
-   const gs=new Set(Array.isArray(r?.sectoral_groups)?r.sectoral_groups:[]);
-   const hasRecord=!!r;
-   const has=(name)=>hasRecord&&(gs.has(name)||((name==="PWD")&&gs.has("PWDs")));
-   return `<tr>
-      <td>${index}.</td>
-      <td class="participant-name">${hasRecord?esc(r.student_name):""}</td>
-      <td></td>
-      <td>${has("4PS")?"✓":""}</td>
-      <td>${has("IPs")?"✓":""}</td>
-      <td>${has("PWD")?"✓":""}</td>
-      <td>${has("Solo Parent")?"✓":""}</td>
-      <td>${has("LGBTQIA+")?"✓":""}</td>
-      <td>${has("Child of a Solo Parent")?"✓":""}</td>
-      <td>${hasRecord&&r.sex==="M"?"✓":""}</td>
-      <td>${hasRecord&&r.sex==="F"?"✓":""}</td>
-      <td class="official-present">${hasRecord&&r.time_in?"PRESENT":""}</td>
-    </tr>`;
- };
-
- const tableMarkup=(chunk,startNumber,rowCount)=>{
-   let body="";
-   for(let i=0;i<rowCount;i++) body+=participantCellMarkup(chunk[i]||null,startNumber+i);
-   return `<table class="official-attendance-table">
-      <colgroup>
-        <col class="col-no"><col class="col-name"><col class="col-org">
-        <col class="col-sector"><col class="col-sector"><col class="col-sector"><col class="col-sector"><col class="col-sector"><col class="col-sector">
-        <col class="col-sex"><col class="col-sex"><col class="col-signature">
-      </colgroup>
-      <thead>
-        <tr>
-          <th rowspan="2">NO.</th>
-          <th rowspan="2">Name of Participants</th>
-          <th rowspan="2">Organization<br>(ACRONYM)</th>
-          <th colspan="6">Sectoral Groups</th>
-          <th colspan="2">Sex</th>
-          <th rowspan="2">Signature</th>
-        </tr>
-        <tr>
-          <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th>
-          <th>M</th><th>F</th>
-        </tr>
-      </thead>
-      <tbody>${body}</tbody>
-    </table>`;
- };
-
- const legendMarkup=`<div class="official-print-legend">
-   <div>LEGENDS:</div>
-   <div>1 - 4PS &nbsp; 2 - IPs &nbsp; 3 - PWDs &nbsp; 4 - Solo Parent &nbsp; 5 - LGBTQIA+ &nbsp; 6. Child of a Solo Parent</div>
- </div>`;
-
+ rows.forEach(r=>(Array.isArray(r?.sectoral_groups)?r.sectoral_groups:[]).forEach(g=>{if(g==="PWDs")g="PWD";if(g==="4Ps")g="4PS";if(Object.prototype.hasOwnProperty.call(counts,g))counts[g]++}));
+ const headerMarkup=`<div class="official-print-header"><img class="official-osld-header-image" src="assets/osld-header.png" alt=""></div>`;
+ const participantCellMarkup=(r,index)=>{const gs=new Set(Array.isArray(r?.sectoral_groups)?r.sectoral_groups:[]);const hasRecord=!!r;const has=(name)=>hasRecord&&(gs.has(name)||((name==="PWD")&&gs.has("PWDs")));return `<tr><td>${index}.</td><td class="participant-name">${hasRecord?esc(r.student_name):""}</td><td></td><td>${has("4PS")?"✓":""}</td><td>${has("IPs")?"✓":""}</td><td>${has("PWD")?"✓":""}</td><td>${has("Solo Parent")?"✓":""}</td><td>${has("LGBTQIA+")?"✓":""}</td><td>${has("Child of a Solo Parent")?"✓":""}</td><td>${hasRecord&&r.sex==="M"?"✓":""}</td><td>${hasRecord&&r.sex==="F"?"✓":""}</td><td class="official-present">${hasRecord&&r.time_in?"PRESENT":""}</td></tr>`};
+ const tableMarkup=(chunk,startNumber,rowCount)=>{let body="";for(let i=0;i<rowCount;i++)body+=participantCellMarkup(chunk[i]||null,startNumber+i);return `<table class="official-attendance-table"><colgroup><col class="col-no"><col class="col-name"><col class="col-org"><col class="col-s1"><col class="col-s2"><col class="col-s3"><col class="col-s4"><col class="col-s5"><col class="col-s6"><col class="col-sex-m"><col class="col-sex-f"><col class="col-signature"></colgroup><thead><tr><th rowspan="2">NO.</th><th rowspan="2">Name of Participants</th><th rowspan="2">Organization<br>(ACRONYM)</th><th colspan="6">Sectoral Groups</th><th colspan="2">Sex</th><th rowspan="2">Signature</th></tr><tr><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>M</th><th>F</th></tr></thead><tbody>${body}</tbody></table>`};
+ const legendMarkup=`<div class="official-print-legend"><div>LEGENDS:</div><div>1 - 4PS&nbsp;&nbsp; 2 - IPs&nbsp;&nbsp; 3 - PWDs&nbsp;&nbsp; 4 - Solo Parent&nbsp;&nbsp; 5 - LGBTQIA+&nbsp;&nbsp; 6. Child of a Solo Parent</div></div>`;
  const pages=[];
-
- // PAGE 1: exactly 7 participant rows.
- {
-   const start=0;
-   const chunk=rows.slice(0,FIRST_PAGE_ROWS);
-   pages.push(`<section class="official-print-page official-first-page">
-      ${headerMarkup}
-      <div class="official-event-block">
-        <div class="official-event-name">${esc(title)}</div>
-        <div class="official-details">
-          <div><span class="official-detail-label">Title of Activity:</span><span class="official-detail-line">${esc(title)}</span></div>
-          <div><span class="official-detail-label">Venue:</span><span class="official-detail-line">${esc(activeEvent.venue||"")}</span></div>
-          <div><span class="official-detail-label">Date:</span><span class="official-detail-line">${esc(dateLabel(date))}</span></div>
-        </div>
-      </div>
-      ${tableMarkup(chunk,start+1,FIRST_PAGE_ROWS)}
-      ${legendMarkup}
-   </section>`);
- }
-
- // CONTINUATION PAGES: exactly 13 participant rows per page.
- for(let start=FIRST_PAGE_ROWS;start<rows.length;start+=CONTINUATION_PAGE_ROWS){
-   const chunk=rows.slice(start,start+CONTINUATION_PAGE_ROWS);
-   pages.push(`<section class="official-print-page official-continuation-page">
-      ${headerMarkup}
-      ${tableMarkup(chunk,start+1,CONTINUATION_PAGE_ROWS)}
-      ${legendMarkup}
-   </section>`);
- }
-
- const summary=[
-   ["4Ps",counts["4PS"]],
-   ["IPs",counts["IPs"]],
-   ["PWDs",counts["PWD"]],
-   ["Solo Parent",counts["Solo Parent"]],
-   ["LGBTQIA+",counts["LGBTQIA+"]],
-   ["Child of a Solo Parent",counts["Child of a Solo Parent"]]
- ];
- pages.push(`<section class="official-print-page official-summary-page">
-    ${headerMarkup}
-    <div class="official-summary-wrap">
-      <div class="official-summary-title">MINORITY CLASSIFICATION</div>
-      <table class="official-minority-table">
-        <thead><tr><th>Minority Classification</th><th>Number of Students</th></tr></thead>
-        <tbody>${summary.map(x=>`<tr><td>${esc(x[0])}</td><td>${x[1]}</td></tr>`).join("")}</tbody>
-      </table>
-    </div>
- </section>`);
-
- el("attendancePrintDocument").innerHTML=pages.join("");
- closeAttendancePrintModal();
- document.body.classList.add("psabe-attendance-printing");
- window.print();
- setTimeout(()=>document.body.classList.remove("psabe-attendance-printing"),700);
+ pages.push(`<section class="official-print-page official-first-page">${headerMarkup}<div class="official-event-name">${esc(title)}</div><div class="official-details"><div><span>Title of Activity:</span><span class="detail-line">${esc(title)}</span></div><div><span>Venue:</span><span class="detail-line">${esc(activeEvent.venue||"")}</span></div><div><span>Date:</span><span class="detail-line">${esc(dateLabel(date))}</span></div></div>${tableMarkup(rows.slice(0,FIRST_PAGE_ROWS),1,FIRST_PAGE_ROWS)}${legendMarkup}</section>`);
+ for(let start=FIRST_PAGE_ROWS;start<rows.length;start+=CONTINUATION_PAGE_ROWS){const chunk=rows.slice(start,start+CONTINUATION_PAGE_ROWS);pages.push(`<section class="official-print-page official-continuation-page">${headerMarkup}${tableMarkup(chunk,start+1,CONTINUATION_PAGE_ROWS)}${legendMarkup}</section>`)}
+ const summary=[["4Ps",counts["4PS"]],["IPs",counts["IPs"]],["PWDs",counts["PWD"]],["Solo Parent",counts["Solo Parent"]],["LGBTQIA+",counts["LGBTQIA+"]],["Child of a Solo Parent",counts["Child of a Solo Parent"]]];
+ pages.push(`<section class="official-print-page official-summary-page">${headerMarkup}<div class="official-summary-title">SUMMARY</div><table class="official-minority-table"><thead><tr><th>Minority Classification</th><th>Number of Students</th></tr></thead><tbody>${summary.map(x=>`<tr><td>${esc(x[0])}</td><td>${x[1]}</td></tr>`).join("")}</tbody></table>${legendMarkup}</section>`);
+ el("attendancePrintDocument").innerHTML=pages.join("");closeAttendancePrintModal();document.body.classList.add("psabe-attendance-printing");window.print();setTimeout(()=>document.body.classList.remove("psabe-attendance-printing"),700);
 }
 
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&document.activeElement?.id==="attendanceStudentId"){e.preventDefault();submitAttendanceManual()}});
 
-Object.assign(window,{loadAttendanceData,openAttendanceEventModal,closeAttendanceEventModal,openAttendanceEvents,closeAttendanceEvents,selectAttendanceEvent,createAttendanceEvent,setAttendanceRecordMode,submitAttendanceManual,startAttendanceScanner,openAttendanceSectorModal,closeAttendanceSectorModal,toggleAttendanceSectorNA,confirmAttendanceSector,openAllAttendanceRecords,closeAllAttendanceRecords,openActiveAttendanceBackup,openAttendancePrintModal,closeAttendancePrintModal,printAttendanceYearLevel});
+Object.assign(window,{loadAttendanceData,openAttendanceEventModal,closeAttendanceEventModal,openAttendanceEvents,closeAttendanceEvents,selectAttendanceEvent,createAttendanceEvent,setAttendanceRecordMode,submitAttendanceManual,startAttendanceScanner,openAttendanceSectorModal,closeAttendanceSectorModal,toggleAttendanceSectorNA,confirmAttendanceSector,openAllAttendanceRecords,closeAllAttendanceRecords,openActiveAttendanceBackup,openAttendancePrintModal,closeAttendancePrintModal,printAttendanceYearLevel,deleteAttendanceEvent});
 })();
