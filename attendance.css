@@ -491,7 +491,13 @@
     display:none!important;
   }
 
-  body.psabe-attendance-printing .attendance-print-document,
+  /* Keep only the generated print document visible.
+     This selector must also override the direct-child display:none above. */
+  body.psabe-attendance-printing .attendance-print-document{
+    display:block!important;
+    visibility:visible!important;
+  }
+
   body.psabe-attendance-printing .attendance-print-document *{
     visibility:visible!important;
   }
