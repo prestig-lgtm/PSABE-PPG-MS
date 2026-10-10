@@ -673,7 +673,7 @@ body.dashboard-data-loading .dashboard-content {
 
 
 
-            <div class="profile-area">
+            <div class="profile-area" id="openOfficerProfile" role="button" tabindex="0" aria-label="Edit your personal profile" title="Edit personal profile">
 
                 <div class="profile-text">
 
@@ -3644,8 +3644,9 @@ body.dashboard-data-loading .dashboard-content {
         SUPABASE_PUBLISHABLE_KEY,
         {
             auth: {
-                persistSession: false,
-                autoRefreshToken: false,
+                // Reuse the persistent Supabase session created by index.html.
+                persistSession: true,
+                autoRefreshToken: true,
                 detectSessionInUrl: false
             }
         }
@@ -5210,6 +5211,7 @@ body.dashboard-data-loading .dashboard-content {
     function updateOfficerProfile() {
 
         const name =
+            normalize(sessionStorage.getItem("psabeDisplayName")) ||
             normalize(currentOfficer.Name) ||
             "Officer";
 
@@ -6691,6 +6693,222 @@ body.dashboard-data-loading .dashboard-content {
         }, 15000);
     }
 
+
+    /* =====================================================
+       OFFICER PERSONAL PROFILE EDITOR
+       Reuses the persistent Supabase session created by index.html.
+       Personal fields live in public.officer_profiles.
+       Position and access level remain sourced from officers and read-only.
+    ===================================================== */
+    (function initializeOfficerProfileEditor() {
+        const profileTrigger = document.getElementById("openOfficerProfile");
+        if (!profileTrigger) return;
+
+        const style = document.createElement("style");
+        style.textContent = `
+          .officer-profile-overlay{position:fixed;inset:0;z-index:12000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(3,20,16,.78);backdrop-filter:blur(6px)}
+          .officer-profile-overlay.show{display:flex}
+          .officer-profile-modal{width:min(760px,100%);max-height:calc(100vh - 36px);overflow:auto;background:#123f35;color:#fff;border:1px solid rgba(202,166,84,.4);border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.42)}
+          .officer-profile-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:22px 24px;border-bottom:1px solid rgba(255,255,255,.12)}
+          .officer-profile-eyebrow{font-size:10px;letter-spacing:.16em;font-weight:900;color:#caa654;text-transform:uppercase;margin:0 0 6px}
+          .officer-profile-head h2{margin:0;font-size:22px;color:#fff}.officer-profile-head p{margin:7px 0 0;color:rgba(255,255,255,.7);font-size:13px;line-height:1.5}
+          .officer-profile-close{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;border-radius:9px;width:38px;height:38px;font-size:22px;cursor:pointer;flex:0 0 auto}
+          .officer-profile-form{padding:22px 24px}.officer-profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+          .officer-profile-field{display:flex;flex-direction:column;gap:7px;min-width:0}.officer-profile-field.full{grid-column:1/-1}
+          .officer-profile-field label{font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:800;color:rgba(255,255,255,.8)}
+          .officer-profile-field input,.officer-profile-field textarea{width:100%;box-sizing:border-box;border:1px solid rgba(202,166,84,.3);border-radius:9px;background:#0b3028;color:#fff;padding:11px 12px;font:inherit;font-size:13px;outline:none}
+          .officer-profile-field input:focus,.officer-profile-field textarea:focus{border-color:#caa654;box-shadow:0 0 0 3px rgba(202,166,84,.12)}
+          .officer-profile-field input[readonly]{background:rgba(255,255,255,.05);color:rgba(255,255,255,.65);cursor:not-allowed}
+          .officer-profile-field textarea{min-height:88px;resize:vertical}.officer-profile-help{font-size:11px;color:rgba(255,255,255,.65);line-height:1.5}
+          .officer-profile-status{margin:15px 0 0;font-size:12px;line-height:1.5;min-height:18px}.officer-profile-status.error{color:#ffb4a9}.officer-profile-status.success{color:#9ce6b0}.officer-profile-status.info{color:#e9d18d}
+          .officer-profile-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:18px;border-top:1px solid rgba(255,255,255,.12)}
+          .officer-profile-btn{border-radius:9px;padding:11px 16px;font-size:11px;font-weight:900;letter-spacing:.06em;cursor:pointer;border:1px solid rgba(255,255,255,.18);background:transparent;color:#fff}
+          .officer-profile-btn.primary{background:#caa654;border-color:#caa654;color:#17382f}.officer-profile-btn:disabled{opacity:.55;cursor:wait}
+          @media(max-width:560px){.officer-profile-overlay{padding:8px}.officer-profile-modal{max-height:calc(100vh - 16px);border-radius:13px}.officer-profile-head,.officer-profile-form{padding:17px}.officer-profile-grid{grid-template-columns:1fr;gap:13px}.officer-profile-field.full{grid-column:auto}.officer-profile-head h2{font-size:19px}.officer-profile-actions{flex-wrap:wrap}.officer-profile-btn{flex:1}}
+          .profile-area[role="button"]{cursor:pointer}.profile-area[role="button"]:focus-visible{outline:2px solid #caa654;outline-offset:5px;border-radius:8px}
+        `;
+        document.head.appendChild(style);
+
+        const overlay = document.createElement("div");
+        overlay.className = "officer-profile-overlay";
+        overlay.id = "officerProfileOverlay";
+        overlay.innerHTML = `
+          <section class="officer-profile-modal" role="dialog" aria-modal="true" aria-labelledby="officerProfileTitle">
+            <header class="officer-profile-head"><div><p class="officer-profile-eyebrow">My Account</p><h2 id="officerProfileTitle">Personal Profile</h2><p>Edit your personal information. Your official position and committee designation cannot be changed here.</p></div><button type="button" class="officer-profile-close" id="officerProfileClose" aria-label="Close">&times;</button></header>
+            <form class="officer-profile-form" id="officerProfileForm" autocomplete="on">
+              <div class="officer-profile-grid">
+                <div class="officer-profile-field"><label for="profileNickname">Nickname / Display Name</label><input id="profileNickname" name="nickname" maxlength="80" placeholder="Name shown on dashboard" required><span class="officer-profile-help">This updates the dashboard name and initials.</span></div>
+                <div class="officer-profile-field"><label for="profileFullName">Full Name</label><input id="profileFullName" name="full_name" maxlength="160" placeholder="Your full name" required></div>
+                <div class="officer-profile-field"><label for="profileContact">Contact Number</label><input id="profileContact" name="contact_number" type="tel" maxlength="40" placeholder="e.g. 09XXXXXXXXX"></div>
+                <div class="officer-profile-field"><label for="profileEmail">Email Address</label><input id="profileEmail" name="email" type="email" maxlength="254" placeholder="you@example.com"></div>
+                <div class="officer-profile-field"><label for="profileBirthday">Birthday</label><input id="profileBirthday" name="birthday" type="date"></div>
+                <div class="officer-profile-field"><label for="profilePosition">Official Position (read-only)</label><input id="profilePosition" readonly tabindex="-1"></div>
+                <div class="officer-profile-field full"><label for="profileAddress">Address</label><input id="profileAddress" name="address" maxlength="300" placeholder="Your address"></div>
+                <div class="officer-profile-field full"><label for="profileBio">Short Bio</label><textarea id="profileBio" name="short_bio" maxlength="600" placeholder="A short introduction about yourself"></textarea></div>
+                <div class="officer-profile-field full"><span class="officer-profile-help">Your existing signed-in Supabase account is used. You do not need to enter your password again.</span></div>
+              </div>
+              <p id="officerProfileStatus" class="officer-profile-status" role="status" aria-live="polite"></p>
+              <div class="officer-profile-actions"><button type="button" class="officer-profile-btn" id="officerProfileCancel">CANCEL</button><button type="submit" class="officer-profile-btn primary" id="officerProfileSave">SAVE PROFILE</button></div>
+            </form>
+          </section>`;
+        document.body.appendChild(overlay);
+
+        const form = overlay.querySelector("#officerProfileForm");
+        const status = overlay.querySelector("#officerProfileStatus");
+        const saveButton = overlay.querySelector("#officerProfileSave");
+        let isBusy = false;
+
+        function setStatus(message, type) {
+            status.textContent = message || "";
+            status.className = "officer-profile-status" + (type ? " " + type : "");
+        }
+        function setBusy(busy, label) {
+            isBusy = busy;
+            saveButton.disabled = busy;
+            overlay.querySelector("#officerProfileCancel").disabled = busy;
+            saveButton.textContent = label || "SAVE PROFILE";
+        }
+        function setField(id, value) {
+            overlay.querySelector("#" + id).value = value == null ? "" : String(value);
+        }
+
+        async function getVerifiedSession() {
+            const sessionResult = await supabaseClient.auth.getSession();
+            if (sessionResult.error) throw new Error(sessionResult.error.message);
+            const session = sessionResult.data && sessionResult.data.session;
+            if (!session || !session.user) {
+                throw new Error("Your sign-in session has expired. Please sign in again from index.html.");
+            }
+            const officerResult = await supabaseClient
+                .from("officers")
+                .select("username,name,position,status,access_level,auth_user_id")
+                .eq("auth_user_id", session.user.id)
+                .maybeSingle();
+            if (officerResult.error) throw new Error(officerResult.error.message);
+            if (!officerResult.data) throw new Error("Your signed-in account is not linked to an officer record.");
+            if (officerResult.data.status && String(officerResult.data.status).toLowerCase() !== "active") {
+                throw new Error("Your officer account is inactive. Please contact the system administrator.");
+            }
+            currentOfficer.Name = officerResult.data.name || currentOfficer.Name;
+            currentOfficer.Position = officerResult.data.position || currentOfficer.Position;
+            currentOfficer.Username = officerResult.data.username || CURRENT_USERNAME;
+            return { session: session, officer: officerResult.data };
+        }
+
+        async function loadProfile() {
+            const verified = await getVerifiedSession();
+            const result = await supabaseClient
+                .from("officer_profiles")
+                .select("auth_user_id,nickname,full_name,contact_number,email,address,birthday,short_bio")
+                .eq("auth_user_id", verified.session.user.id)
+                .maybeSingle();
+            if (result.error) {
+                throw new Error(result.error.message + " If the profile table is not set up, run officer_profiles_setup.sql in Supabase SQL Editor.");
+            }
+            const profile = result.data || {};
+            const defaultName = normalize(currentOfficer.Name) || CURRENT_USERNAME;
+            setField("profileNickname", profile.nickname || normalize(sessionStorage.getItem("psabeDisplayName")) || defaultName);
+            setField("profileFullName", profile.full_name || normalize(sessionStorage.getItem("psabeProfileFullName")) || defaultName);
+            setField("profileContact", profile.contact_number);
+            setField("profileEmail", profile.email || verified.session.user.email || "");
+            setField("profileBirthday", profile.birthday);
+            setField("profileAddress", profile.address);
+            setField("profileBio", profile.short_bio);
+            setField("profilePosition", normalize(currentOfficer.Position) || "Officer");
+        }
+
+        async function openModal() {
+            overlay.classList.add("show");
+            document.body.style.overflow = "hidden";
+            form.reset();
+            setField("profilePosition", normalize(currentOfficer.Position) || "Officer");
+            setStatus("Loading your saved profile...", "info");
+            setBusy(true, "LOADING...");
+            try {
+                await loadProfile();
+                setStatus("Your saved profile is ready to edit.", "success");
+                setBusy(false, "SAVE PROFILE");
+                overlay.querySelector("#profileNickname").focus();
+            } catch (error) {
+                console.error("Officer profile load error:", error);
+                setStatus(error && error.message ? error.message : "Unable to load your profile.", "error");
+                setBusy(false, "SAVE PROFILE");
+            }
+        }
+
+        function closeModal() {
+            if (isBusy) return;
+            overlay.classList.remove("show");
+            document.body.style.overflow = "";
+            form.reset();
+            setStatus("", "");
+        }
+
+        profileTrigger.addEventListener("click", openModal);
+        profileTrigger.addEventListener("keydown", function (event) {
+            if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openModal(); }
+        });
+        overlay.querySelector("#officerProfileClose").addEventListener("click", closeModal);
+        overlay.querySelector("#officerProfileCancel").addEventListener("click", closeModal);
+        overlay.addEventListener("click", function (event) { if (event.target === overlay) closeModal(); });
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape" && overlay.classList.contains("show")) closeModal();
+        });
+
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            if (isBusy) return;
+            const nickname = normalize(overlay.querySelector("#profileNickname").value);
+            const fullName = normalize(overlay.querySelector("#profileFullName").value);
+            if (!nickname || !fullName) {
+                setStatus("Nickname and full name are required.", "error");
+                return;
+            }
+            setBusy(true, "SAVING...");
+            setStatus("Checking your signed-in account and saving your profile...", "info");
+            try {
+                const verified = await getVerifiedSession();
+                const payload = {
+                    auth_user_id: verified.session.user.id,
+                    nickname: nickname,
+                    full_name: fullName,
+                    contact_number: normalize(overlay.querySelector("#profileContact").value) || null,
+                    email: normalize(overlay.querySelector("#profileEmail").value) || null,
+                    address: normalize(overlay.querySelector("#profileAddress").value) || null,
+                    birthday: normalize(overlay.querySelector("#profileBirthday").value) || null,
+                    short_bio: normalize(overlay.querySelector("#profileBio").value) || null,
+                    updated_at: new Date().toISOString()
+                };
+                const saveResult = await supabaseClient
+                    .from("officer_profiles")
+                    .upsert(payload, { onConflict: "auth_user_id" })
+                    .select("auth_user_id,nickname,full_name,contact_number,email,address,birthday,short_bio")
+                    .single();
+                if (saveResult.error) throw new Error(saveResult.error.message);
+
+                sessionStorage.setItem("psabeDisplayName", nickname);
+                sessionStorage.setItem("psabeProfileFullName", fullName);
+                currentOfficer.Name = fullName;
+                updateOfficerProfile();
+                updateDashboardGreeting();
+                setStatus("Profile saved successfully. Your dashboard name and initials have been updated.", "success");
+                setBusy(true, "SAVED");
+                window.setTimeout(function () {
+                    if (overlay.classList.contains("show")) {
+                        overlay.classList.remove("show");
+                        document.body.style.overflow = "";
+                        form.reset();
+                        setStatus("", "");
+                    }
+                    setBusy(false, "SAVE PROFILE");
+                }, 900);
+            } catch (error) {
+                console.error("Officer profile save error:", error);
+                setStatus(error && error.message ? error.message : "Unable to save your profile. Please try again.", "error");
+                setBusy(false, "SAVE PROFILE");
+            }
+        });
+    })();
 
     /* =====================================================
        CHANGE PASSWORD
