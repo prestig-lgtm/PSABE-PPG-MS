@@ -206,7 +206,7 @@ body.dashboard-data-loading .dashboard-content {
 <script>
     (function () {
         if (sessionStorage.getItem("psabeLoggedIn") !== "true") {
-            window.location.replace("index.html");
+            window.location.replace("officer-login.html");
         }
     })();
 </script>
@@ -3604,7 +3604,7 @@ body.dashboard-data-loading .dashboard-content {
                                 }
 
                                 /* Force a fresh navigation to the login page. */
-                                window.location.replace("index.html?loggedout=1");
+                                window.location.replace("officer-login.html?loggedout=1");
                             }
 
                         }
@@ -3633,7 +3633,7 @@ body.dashboard-data-loading .dashboard-content {
     ===================================================== */
 
     if (sessionStorage.getItem("psabeLoggedIn") !== "true") {
-        window.location.replace("index.html");
+        window.location.replace("officer-login.html");
         return;
     }
 
@@ -3652,7 +3652,7 @@ body.dashboard-data-loading .dashboard-content {
         SUPABASE_PUBLISHABLE_KEY,
         {
             auth: {
-                // Reuse the persistent Supabase session created by index.html.
+                // Reuse the persistent Supabase session created by officer-login.html.
                 persistSession: true,
                 autoRefreshToken: true,
                 detectSessionInUrl: false
@@ -6704,7 +6704,7 @@ body.dashboard-data-loading .dashboard-content {
 
     /* =====================================================
        OFFICER PERSONAL PROFILE EDITOR
-       Reuses the persistent Supabase session created by index.html.
+       Reuses the persistent Supabase session created by officer-login.html.
        Personal fields live in public.officer_profiles.
        Position and access level remain sourced from officers and read-only.
     ===================================================== */
@@ -6785,7 +6785,7 @@ body.dashboard-data-loading .dashboard-content {
             if (sessionResult.error) throw new Error(sessionResult.error.message);
             const session = sessionResult.data && sessionResult.data.session;
             if (!session || !session.user) {
-                throw new Error("Your sign-in session has expired. Please sign in again from index.html.");
+                throw new Error("Your sign-in session has expired. Please sign in again from officer-login.html.");
             }
             const officerResult = await supabaseClient
                 .from("officers")
