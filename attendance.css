@@ -929,3 +929,12 @@
 .attendance-edit-button:active{transform:translateY(0)}
 .attendance-edit-button:focus-visible{outline:2px solid #fff;outline-offset:2px}
 @media(max-width:720px){.attendance-recent-actions,.attendance-all-actions{gap:5px}.attendance-edit-button{padding:7px 9px;font-size:11px}}
+
+/* Attendance deletion controls */
+.attendance-event-row-manage{cursor:default;align-items:center}
+.attendance-event-select{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:1;min-width:0;padding:0;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer;font:inherit}
+.attendance-event-select>span:first-child{min-width:0}
+.attendance-delete-button{flex-shrink:0;border:1px solid rgba(255,115,115,.35);border-radius:8px;padding:6px 9px;background:rgba(190,45,45,.16);color:#ffb7b7;font:700 12px/1 "Roboto Condensed",sans-serif;cursor:pointer}
+.attendance-delete-button:hover{background:rgba(190,45,45,.3);color:#fff}
+.attendance-delete-button:focus-visible,.attendance-event-select:focus-visible{outline:2px solid #e6bd57;outline-offset:3px}
+@media(max-width:520px){.attendance-event-row-manage{align-items:stretch;flex-wrap:wrap}.attendance-event-select{width:100%;flex-basis:100%}.attendance-delete-button{margin-left:auto}}
