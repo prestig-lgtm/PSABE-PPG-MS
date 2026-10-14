@@ -1892,3 +1892,16 @@ body.loading-active {
     }
 
 }
+
+
+/* =========================================================
+   DEVICE-SPECIFIC BACKGROUNDS
+   Portrait image remains the default for mobile devices.
+   Desktop uses the landscape variant. Applies to both the
+   login page background layer and its loading screen.
+========================================================= */
+@media (min-width: 768px) {
+    .background-layer.background-loaded {
+        background-image: url("assets/management-background-desktop.png");
+    }
+}
