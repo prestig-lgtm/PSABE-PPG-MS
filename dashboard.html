@@ -573,6 +573,15 @@ body.dashboard-data-loading .dashboard-content {
 
             <div class="sidebar-bottom">
 
+                <button class="nav-item" data-page="homepage-editor">
+                    <span class="nav-icon"><i data-lucide="panels-top-left"></i></span>
+                    <span>Homepage Content</span>
+                </button>
+                <button class="nav-item" data-page="site-pages-editor">
+                    <span class="nav-icon"><i data-lucide="files"></i></span>
+                    <span>Public Pages & Media</span>
+                </button>
+
                 <button
                     class="nav-item"
                     data-page="settings"
@@ -1871,6 +1880,69 @@ body.dashboard-data-loading .dashboard-content {
 
 
             <!-- =================================================
+                 PUBLIC HOMEPAGE CONTENT EDITOR
+            ================================================== -->
+            <div id="homepageEditorPage" class="page-section homepage-editor-page">
+                <div class="homepage-editor-header">
+                    <div><p class="eyebrow">PUBLIC WEBSITE</p><h1>Homepage Content</h1><p>Edit the public homepage. Changes are saved to Supabase and appear on the website.</p></div>
+                    <div class="homepage-editor-actions"><span id="homepageEditorStatus" role="status">Loading content…</span><button type="button" id="homepageReloadButton" class="homepage-secondary-button">Reload</button><button type="submit" form="homepageContentForm" id="homepageSaveButton" class="homepage-save-button">Save Changes</button></div>
+                </div>
+                <div class="homepage-editor-note"><i data-lucide="shield-check"></i><span>Available to active, authenticated officers. Database policies enforce editing permissions.</span></div>
+                <form id="homepageContentForm" class="homepage-editor-form">
+                    <section class="homepage-editor-card"><div class="homepage-editor-card-title"><span>01</span><div><h2>Hero Banner</h2><p>Main headline and introduction at the top of the homepage.</p></div></div>
+                        <label>Eyebrow text<input name="heroEyebrow" maxlength="160" required></label><label>Headline (use plain text)<input name="heroTitle" maxlength="180" required></label><label>Short description<textarea name="heroCopy" maxlength="700" rows="3" required></textarea></label><label>Button label<input name="heroButton" maxlength="80" required></label>
+                    </section>
+                    <section class="homepage-editor-card"><div class="homepage-editor-card-title"><span>02</span><div><h2>Who We Are</h2><p>Chapter introduction and mission, vision, and values.</p></div></div>
+                        <label>Section eyebrow<input name="introEyebrow" maxlength="100" required></label><label>Section heading<input name="introTitle" maxlength="180" required></label><label>Introduction<textarea name="introCopy" maxlength="800" rows="3" required></textarea></label>
+                        <div class="homepage-editor-grid"><div><label>Mission title<input name="missionTitle" maxlength="80" required></label><label>Mission description<textarea name="missionCopy" maxlength="700" rows="4" required></textarea></label></div><div><label>Vision title<input name="visionTitle" maxlength="80" required></label><label>Vision description<textarea name="visionCopy" maxlength="700" rows="4" required></textarea></label></div><div><label>Values title<input name="valuesTitle" maxlength="80" required></label><label>Values description<textarea name="valuesCopy" maxlength="700" rows="4" required></textarea></label></div></div>
+                    </section>
+                    <section class="homepage-editor-card"><div class="homepage-editor-card-title"><span>03</span><div><h2>Featured Events</h2><p>Three event cards displayed on the homepage.</p></div></div>
+                        <div class="homepage-editor-grid"><div><h3>Event 1</h3><label>Date / number<input name="event1Date" maxlength="20" required></label><label>Category tag<input name="event1Tag" maxlength="80" required></label><label>Title<input name="event1Title" maxlength="140" required></label><label>Description<textarea name="event1Copy" maxlength="500" rows="3" required></textarea></label></div><div><h3>Event 2</h3><label>Date / number<input name="event2Date" maxlength="20" required></label><label>Category tag<input name="event2Tag" maxlength="80" required></label><label>Title<input name="event2Title" maxlength="140" required></label><label>Description<textarea name="event2Copy" maxlength="500" rows="3" required></textarea></label></div><div><h3>Event 3</h3><label>Date / number<input name="event3Date" maxlength="20" required></label><label>Category tag<input name="event3Tag" maxlength="80" required></label><label>Title<input name="event3Title" maxlength="140" required></label><label>Description<textarea name="event3Copy" maxlength="500" rows="3" required></textarea></label></div></div>
+                    </section>
+                    <section class="homepage-editor-card"><div class="homepage-editor-card-title"><span>04</span><div><h2>Latest Announcements</h2><p>Three announcement cards displayed on the homepage.</p></div></div>
+                        <div class="homepage-editor-grid"><div><h3>Announcement 1</h3><label>Category tag<input name="announcement1Tag" maxlength="80" required></label><label>Title<input name="announcement1Title" maxlength="160" required></label><label>Description<textarea name="announcement1Copy" maxlength="700" rows="3" required></textarea></label><label>Label<input name="announcement1Label" maxlength="40" required></label></div><div><h3>Announcement 2</h3><label>Category tag<input name="announcement2Tag" maxlength="80" required></label><label>Title<input name="announcement2Title" maxlength="160" required></label><label>Description<textarea name="announcement2Copy" maxlength="700" rows="3" required></textarea></label><label>Label<input name="announcement2Label" maxlength="40" required></label></div><div><h3>Announcement 3</h3><label>Category tag<input name="announcement3Tag" maxlength="80" required></label><label>Title<input name="announcement3Title" maxlength="160" required></label><label>Description<textarea name="announcement3Copy" maxlength="700" rows="3" required></textarea></label><label>Label<input name="announcement3Label" maxlength="40" required></label></div></div>
+                    </section>
+                    <section class="homepage-editor-card"><div class="homepage-editor-card-title"><span>05</span><div><h2>Chapter Highlights</h2><p>Impact statement shown below announcements.</p></div></div><label>Heading<input name="achievementTitle" maxlength="180" required></label><label>Description<textarea name="achievementCopy" maxlength="700" rows="3" required></textarea></label></section>
+                    <section class="homepage-editor-card"><div class="homepage-editor-card-title"><span>06</span><div><h2>Faculty Section</h2><p>Introductory copy and three faculty cards.</p></div></div><label>Section introduction<textarea name="facultyIntro" maxlength="700" rows="3" required></textarea></label>
+                        <div class="homepage-editor-grid"><div><h3>Faculty card 1</h3><label>Initials / icon<input name="faculty1Initials" maxlength="8" required></label><label>Title<input name="faculty1Title" maxlength="120" required></label><label>Description<textarea name="faculty1Copy" maxlength="500" rows="3" required></textarea></label></div><div><h3>Faculty card 2</h3><label>Initials / icon<input name="faculty2Initials" maxlength="8" required></label><label>Title<input name="faculty2Title" maxlength="120" required></label><label>Description<textarea name="faculty2Copy" maxlength="500" rows="3" required></textarea></label></div><div><h3>Faculty card 3</h3><label>Initials / icon<input name="faculty3Initials" maxlength="8" required></label><label>Title<input name="faculty3Title" maxlength="120" required></label><label>Description<textarea name="faculty3Copy" maxlength="500" rows="3" required></textarea></label></div></div>
+                    </section>
+                    <div class="homepage-editor-bottom"><p>Save your changes to publish them on the public homepage.</p><button type="submit" class="homepage-save-button">Save and Publish</button></div>
+                </form>
+            </div>
+
+            <!-- =================================================
+                 PUBLIC PAGES + MEDIA CONTENT EDITOR
+            ================================================== -->
+            <div id="sitePagesEditorPage" class="page-section site-pages-editor">
+              <div class="site-pages-head"><div><p class="eyebrow">PUBLIC WEBSITE MANAGEMENT</p><h1>Public Pages & Media</h1><p>Edit banner details and add content blocks to any public page. Upload as many images as your Supabase storage capacity allows.</p></div><div class="site-page-editor-actions"><span id="sitePagesEditorStatus" role="status">Loading…</span><button id="sitePageReload" type="button" class="homepage-secondary-button">Reload</button></div></div>
+              <form id="sitePagesEditorForm">
+                <section class="site-page-card"><h2>Choose a page</h2><label>Public page<select id="sitePageSelect"><option value="about">About Us</option><option value="officers">Officers</option><option value="faculty">Faculty</option><option value="events">Events</option><option value="announcements">Announcements</option><option value="research">Research</option><option value="gallery">Gallery</option><option value="memorandums">Memorandums</option><option value="resources">Resources</option><option value="achievements">Achievements</option><option value="home">Homepage additional sections</option></select></label><label>Page heading / banner title<input id="sitePageTitle" maxlength="240" placeholder="Leave blank to keep the existing title"></label><label>Eyebrow / small heading<input id="sitePageEyebrow" maxlength="240" placeholder="Leave blank to keep the existing label"></label><label>Introductory text<textarea id="sitePageIntro" rows="3" maxlength="12000" placeholder="Leave blank to keep the existing introduction"></textarea></label></section>
+                <section class="site-page-card"><div class="site-page-block-head"><div><h2>Editable content blocks</h2><p>Add as many text/image blocks as needed. These appear on the selected public page.</p></div><button type="button" id="sitePageAddBlock" class="homepage-secondary-button">+ Add content block</button></div><div id="sitePageBlocks"></div></section>
+                <section class="site-page-card"><h2>Image uploads</h2><p>Choose multiple images at once, or upload more images in later batches. No application-level count limit is imposed. Actual storage capacity and provider file-size limits still apply.</p><label>Select images<input type="file" id="sitePageUpload" accept="image/*" multiple></label><button type="button" id="sitePageUploadButton" class="homepage-secondary-button" onclick="document.getElementById('sitePageUpload').click()">Upload selected images</button><div id="sitePageMediaList" class="site-page-media-list" style="margin-top:16px"></div></section>
+                <div class="site-page-editor-actions"><button type="submit" id="sitePageSave" class="homepage-save-button">Save and Publish Page</button></div>
+              </form>
+            <div class="cms-manager-shell" id="cmsManager">
+              <section class="cms-manager-head"><div><p class="eyebrow">CONTENT STUDIO</p><h2>Posts, Profiles & Media</h2><p>Create individual entries for the homepage carousel, officers, faculty, research, gallery, memorandums, resources, events, announcements, and achievements.</p></div><div class="cms-toolbar"><select id="cmsFilter" aria-label="Filter content"><option value="">All content</option><option value="carousel">Homepage carousel</option><option value="officers">Officers</option><option value="faculty">Faculty</option><option value="research">Research</option><option value="gallery">Gallery</option><option value="memorandums">Memorandums</option><option value="resources">Resources</option><option value="events">Events</option><option value="announcements">Announcements</option><option value="achievements">Achievements</option></select><button id="cmsReload" type="button" class="homepage-secondary-button">Reload</button><button id="cmsNew" type="button" class="homepage-save-button">+ Create entry</button></div></section>
+              <p id="cmsStatus" role="status" class="cms-status">Loading…</p>
+              <div class="cms-layout"><section class="site-page-card"><h3>Content entries</h3><div id="cmsItems" class="cms-items"></div></section>
+              <section class="site-page-card cms-form-card"><h3>Create / Edit entry</h3><form id="cmsForm">
+                <label>Content type<select id="cmsType"><option value="carousel">Homepage hero slide</option><option value="officers">Officer profile</option><option value="faculty">Faculty profile</option><option value="research">Research</option><option value="gallery">Gallery post</option><option value="memorandums">Memorandum</option><option value="resources">Resource</option><option value="events">Event</option><option value="announcements">Announcement</option><option value="achievements">Achievement</option></select></label>
+                <label>Title / full name<input id="cmsTitle" maxlength="240" required placeholder="Enter a title or name"></label>
+                <label>Subtitle / short designation<input id="cmsSubtitle" maxlength="500" placeholder="Optional subtitle"></label>
+                <div data-cms-fields="officers faculty" class="cms-fields"><label>Person's name<input id="cmsPersonName" maxlength="240" placeholder="Full name"></label><label>Position / academic title<input id="cmsPosition" maxlength="240" placeholder="President, Professor, etc."></label><label>Committee / designation<input id="cmsCommittee" maxlength="240" placeholder="Optional"></label><label>Course / department<input id="cmsCourse" maxlength="240" placeholder="Optional"></label><label>Email<input id="cmsEmail" type="email" maxlength="240"></label><label>Phone number<input id="cmsPhone" maxlength="80"></label><label>Profile / social link<input id="cmsSocial" type="url" placeholder="https://..."></label></div>
+                <label>Description / body<textarea id="cmsBody" rows="5" maxlength="20000" placeholder="Write the content or biography"></textarea></label>
+                <div data-cms-fields="carousel" class="cms-fields"><label>Slide button / short call to action can be included in the description</label></div>
+                <label>Featured image URL<input id="cmsImageUrl" type="url" placeholder="Upload an image below or paste a public URL"></label><label>Image description (alt text)<input id="cmsImageAlt" maxlength="300" placeholder="Describe the image"></label><label>Upload image<input id="cmsImageUpload" type="file" accept="image/*"></label>
+                <div data-cms-fields="resources memorandums research" class="cms-fields"><label>Attachment URL<input id="cmsFileUrl" type="url" placeholder="Optional public file URL"></label><label>Attachment display name<input id="cmsFileName" maxlength="300" placeholder="e.g. Memorandum No. 01.pdf"></label><label>Upload file<input id="cmsFileUpload" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></label></div>
+                <div data-cms-fields="events announcements" class="cms-fields"><label>Date<input id="cmsDate" type="date"></label><label>Location<input id="cmsLocation" maxlength="300" placeholder="Optional location"></label></div>
+                <label>Display order (smaller numbers appear first)<input id="cmsSort" type="number" value="0" min="0" step="1"></label><label class="cms-publish-toggle"><input id="cmsPublish" type="checkbox" checked> Publish this entry</label>
+                <div class="cms-form-actions"><button type="button" id="cmsDelete" class="homepage-secondary-button" hidden>Use Delete in the entry list</button><button type="reset" class="homepage-secondary-button" onclick="setTimeout(()=>document.getElementById('cmsNew').click(),0)">Clear form</button><button type="submit" id="cmsSave" class="homepage-save-button">Save entry</button></div>
+              </form></section></div>
+            </div>
+
+            </div>
+
+            <!-- =================================================
                  PLACEHOLDER PAGE FOR OTHER SECTIONS
             ================================================== -->
             <div id="placeholderPage" class="page-section">
@@ -2531,6 +2603,18 @@ body.dashboard-data-loading .dashboard-content {
                             window.loadAnnouncements();
                         }
 
+                    }
+
+
+                    else if (page === "homepage-editor") {
+                        if (homepageEditorPage) homepageEditorPage.classList.add("active-page");
+                        setActiveNavigation("homepage-editor");
+                        if (typeof window.loadHomepageEditor === "function") window.loadHomepageEditor();
+                    }
+                    else if (page === "site-pages-editor") {
+                        const editorPage = document.getElementById("sitePagesEditorPage");
+                        if (editorPage) editorPage.classList.add("active-page");
+                        setActiveNavigation("site-pages-editor");
                     }
 
 
@@ -7096,6 +7180,12 @@ body.dashboard-data-loading .dashboard-content {
 <link rel="stylesheet" href="attendance.css?v=20261004-PRINT-2">
 <script src="attendance.js?v=20261004-PRINT-2"></script>
 
+<link rel="stylesheet" href="homepage-editor.css?v=20261014-1">
+<link rel="stylesheet" href="site-pages-editor.css?v=20261014-3">
+<link rel="stylesheet" href="content-manager.css?v=20261014-1">
+<script src="homepage-editor.js?v=20261014-1"></script>
+<script src="site-pages-editor.js?v=20261014-3"></script>
+<script src="content-manager.js?v=20261014-1"></script>
 </body>
 
 </html>
