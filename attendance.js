@@ -744,6 +744,7 @@ function renderRecent(){
               ${esc(r.attendance_status||"")}
             </span>
             <button type="button" class="attendance-edit-button" data-attendance-id="${esc(r.attendance_id||"")}" onclick="openAttendanceEdit(this.dataset.attendanceId)">EDIT</button>
+            <button type="button" class="attendance-delete-button" data-attendance-id="${esc(r.attendance_id||"")}" onclick="deleteAttendanceEntry(this.dataset.attendanceId)">DELETE</button>
           </div>
 
         </div>
@@ -933,41 +934,67 @@ function renderEventList(){
     events
       .map(e=>`
 
-        <button
-          class="attendance-event-row"
-          onclick="selectAttendanceEvent('${String(e.event_id).replace(/'/g,"\\'")}')">
+        <div class="attendance-event-row attendance-event-row-manage">
 
-          <span style="text-align:left">
-
-            <strong>
-              ${esc(e.event_name)}
-            </strong>
-
-            <small>
-              ${esc(dateLabel(e.event_date))}
-              ·
-              ${esc(e.venue||"No venue")}
-            </small>
-
-          </span>
-
-          <span
-            class="attendance-badge ${
-              e.status==="OPEN"
-                ?"present"
-                :"pending"
-            }">
-
-            ${esc(e.status||"OPEN")}
-
-          </span>
-
-        </button>
+          <button type="button" class="attendance-event-select" data-event-id="${esc(e.event_id)}" onclick="selectAttendanceEvent(this.dataset.eventId)">
+            <span style="text-align:left">
+              <strong>${esc(e.event_name)}</strong>
+              <small>${esc(dateLabel(e.event_date))} · ${esc(e.venue||"No venue")}</small>
+            </span>
+            <span class="attendance-badge ${e.status==="OPEN"?"present":"pending"}">${esc(e.status||"OPEN")}</span>
+          </button>
+          <button type="button" class="attendance-delete-button" data-event-id="${esc(e.event_id)}" onclick="deleteAttendanceSheet(this.dataset.eventId)">DELETE SHEET</button>
+        </div>
 
       `)
       .join("");
 }
 
+
+async function deleteAttendanceEntry(attendanceId){
+  const record = records.find(r => String(r.attendance_id) === String(attendanceId));
+  if(!record){ alert("Attendance entry not found. Refresh the records and try again."); return; }
+  const confirmed = window.confirm(`Delete the attendance entry for ${record.student_name || record.student_id}? This cannot be undone.`);
+  if(!confirmed) return;
+  if(!supabase){ alert("Supabase is not available. No records were deleted."); return; }
+  try{
+    const result = await supabase.from("attendance_records").delete().eq("attendance_id", record.attendance_id).select("attendance_id");
+    if(result.error) throw result.error;
+    if(!result.data || result.data.length === 0) throw new Error("No row was deleted. Check the Supabase delete permissions (RLS policies).");
+    records = records.filter(r => String(r.attendance_id) !== String(record.attendance_id));
+    renderStats(); renderRecent();
+    if(el("attendanceAllModal")?.classList.contains("show")) renderAll();
+  }catch(error){
+    console.error("Delete attendance entry failed:", error);
+    alert("Unable to delete this attendance entry. " + (error.message || "Please check Supabase permissions and try again."));
+  }
+}
+
+async function deleteAttendanceSheet(eventId){
+  const event = events.find(e => String(e.event_id) === String(eventId));
+  if(!event){ alert("Attendance sheet not found. Refresh the list and try again."); return; }
+  const confirmed = window.confirm(`Delete the entire attendance sheet for “${event.event_name}” and all attendee records saved under this event in Supabase? This cannot be undone. The Google Sheets backup workbook is not deleted by this action.`);
+  if(!confirmed) return;
+  if(!supabase){ alert("Supabase is not available. No records were deleted."); return; }
+  try{
+    // Delete attendee rows first so this works even when the database has no cascading foreign key.
+    const rows = await supabase.from("attendance_records").delete().eq("event_id", event.event_id).select("attendance_id");
+    if(rows.error) throw rows.error;
+    const removedEvent = await supabase.from("attendance_events").delete().eq("event_id", event.event_id).select("event_id");
+    if(removedEvent.error) throw removedEvent.error;
+    if(!removedEvent.data || removedEvent.data.length === 0) throw new Error("The event was not deleted. Check Supabase delete permissions (RLS policies).");
+    events = events.filter(e => String(e.event_id) !== String(event.event_id));
+    if(activeEvent && String(activeEvent.event_id) === String(event.event_id)) activeEvent = events[0] || null;
+    if(activeEvent) await loadRecords();
+    else { records=[]; renderStats(); renderRecent(); }
+    renderEvent(); renderEventList();
+    alert("Attendance sheet and its Supabase attendance entries were deleted. The Google Sheets backup workbook was left unchanged.");
+  }catch(error){
+    console.error("Delete attendance sheet failed:", error);
+    alert("Unable to completely delete this attendance sheet. " + (error.message || "Please check Supabase permissions and try again."));
+    await loadAttendanceData();
+  }
+}
 
 async function selectAttendanceEvent(eventId){
 
@@ -2047,6 +2074,7 @@ function renderAll(){
               ${esc(r.attendance_status)}
             </span>
             <button type="button" class="attendance-edit-button" data-attendance-id="${esc(r.attendance_id||"")}" onclick="openAttendanceEdit(this.dataset.attendanceId)">EDIT</button>
+            <button type="button" class="attendance-delete-button" data-attendance-id="${esc(r.attendance_id||"")}" onclick="deleteAttendanceEntry(this.dataset.attendanceId)">DELETE</button>
           </span>
 
         </div>
@@ -2814,6 +2842,8 @@ Object.assign(
     closeAttendanceEvents,
 
     selectAttendanceEvent,
+    deleteAttendanceSheet,
+    deleteAttendanceEntry,
     createAttendanceEvent,
 
     setAttendanceRecordMode,
