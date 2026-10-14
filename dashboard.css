@@ -6608,3 +6608,14 @@ body.availability-modal-open {
         min-width: 0;
     }
 }
+
+
+/* =========================================================
+   DEVICE-SPECIFIC DASHBOARD BACKGROUND
+   Portrait on mobile, landscape on desktop.
+========================================================= */
+@media (min-width: 768px) {
+    .dashboard-background {
+        background-image: url("assets/management-background-desktop.png");
+    }
+}
