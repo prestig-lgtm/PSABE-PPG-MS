@@ -3,9 +3,11 @@ const slides=[
  {eyebrow:"LEARN · LEAD · SERVE",title:"ENGINEERING A<br><em>SUSTAINABLE FUTURE.</em>",copy:"Building knowledge and practical skills for resilient agriculture, responsible resource use, and stronger communities."},
  {eyebrow:"ONE CHAPTER · SHARED PURPOSE",title:"ROOTED IN PURPOSE.<br><em>READY FOR TOMORROW.</em>",copy:"Connecting aspiring professionals through collaboration, meaningful activities, and a commitment to service."}
 ];
+window.psabeHomeSlides=slides;
 let activeSlide=0;
 const title=document.getElementById('heroTitle'),copy=document.getElementById('heroCopy'),dots=[...document.querySelectorAll('.dot')];
 function showSlide(index){activeSlide=(index+slides.length)%slides.length;title.innerHTML=slides[activeSlide].title;copy.textContent=slides[activeSlide].copy;dots.forEach((dot,i)=>{dot.classList.toggle('selected',i===activeSlide);dot.setAttribute('aria-pressed',String(i===activeSlide));});}
+window.psabeShowHomeSlide=showSlide;
 document.getElementById('prevSlide').addEventListener('click',()=>showSlide(activeSlide-1));
 document.getElementById('nextSlide').addEventListener('click',()=>showSlide(activeSlide+1));
 dots.forEach(dot=>dot.addEventListener('click',()=>showSlide(Number(dot.dataset.slide))));
