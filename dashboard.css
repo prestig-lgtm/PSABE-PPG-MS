@@ -14,6 +14,10 @@ html {
     width: 100%;
     min-height: 100%;
 
+    /* Keep the viewport width consistent when switching between short and
+       long dashboard sections (especially Content Studio). */
+    scrollbar-gutter: stable;
+
     background:
         #002d24;
 
@@ -569,17 +573,13 @@ body {
 
 .dashboard-main {
 
-    position:
-        relative;
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    margin-left: 270px;
 
-    z-index:
-        10;
-
-    min-height:
-        100vh;
-
-    margin-left:
-        270px;
+    /* The fixed top bar is removed from normal flow, so offset page content. */
+    padding-top: 78px;
 
 }
 
@@ -590,11 +590,15 @@ body {
 
 .top-bar {
 
-    position:
-        sticky;
+    /* Keep the shared dashboard header fixed while the page content scrolls. */
+    position: fixed;
 
-    top:
-        0;
+    top: 0;
+    left: 270px;
+    right: 0;
+
+    width: auto;
+    box-sizing: border-box;
 
     z-index:
         50;
@@ -3777,19 +3781,18 @@ body {
 
     .dashboard-main {
 
-        margin-left:
-            0;
+        margin-left: 0;
+        padding-top: 68px;
 
     }
 
 
     .top-bar {
 
-        height:
-            68px;
-
-        padding:
-            0 15px;
+        left: 0;
+        right: 0;
+        height: 68px;
+        padding: 0 15px;
 
     }
 
