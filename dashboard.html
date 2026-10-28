@@ -1885,6 +1885,7 @@ body.dashboard-data-loading .dashboard-content {
               <section class="site-page-card cms-form-card" id="cmsEditorCard" hidden><div class="cms-editor-title"><h3 id="cmsEditorHeading">Create / Edit entry</h3><button type="button" id="cmsCancel" class="homepage-secondary-button">Cancel</button></div><form id="cmsForm">
                 <div id="cmsEntryFields">
                 <label id="cmsTypeField">Content type<select id="cmsType"><option value="carousel">Homepage hero slide</option><option value="abe">What ABE Is All About homepage content</option><option value="officers">Officer profile</option><option value="faculty">Faculty profile</option><option value="research">Research</option><option value="gallery">Gallery post</option><option value="memorandums">Memorandum</option><option value="resources">Resource</option><option value="events">Event</option><option value="announcements">Announcement</option><option value="achievements">Achievement</option></select></label>
+                <label>Content template<select id="cmsTemplate" aria-label="Choose a content template"></select><small class="cms-template-note" id="cmsTemplateNote">Choose a template to insert a ready-to-edit outline into the description.</small></label>
                 <label>Title / full name<input id="cmsTitle" maxlength="240" required placeholder="Enter a title or name"></label>
                 <label>Subtitle / short designation<input id="cmsSubtitle" maxlength="500" placeholder="Optional subtitle"></label>
                 <div data-cms-fields="officers faculty" class="cms-fields"><label>Person's name<input id="cmsPersonName" maxlength="240" placeholder="Full name"></label><label>Position / academic title<input id="cmsPosition" maxlength="240" placeholder="President, Professor, etc."></label><label>Committee / designation<input id="cmsCommittee" maxlength="240" placeholder="Optional"></label><label>Course / department<input id="cmsCourse" maxlength="240" placeholder="Optional"></label><label>Email<input id="cmsEmail" type="email" maxlength="240"></label><label>Phone number<input id="cmsPhone" maxlength="80"></label><label>Profile / social link<input id="cmsSocial" type="url" placeholder="https://..."></label></div>
@@ -2384,6 +2385,7 @@ body.dashboard-data-loading .dashboard-content {
                 function showPage(
                     page
                 ) {
+                    const sitePagesEditorPage = document.getElementById("sitePagesEditorPage");
 
                     dashboardPage.classList.remove(
                         "active-page"
@@ -2430,6 +2432,12 @@ body.dashboard-data-loading .dashboard-content {
                     placeholderPage.classList.remove(
                         "active-page"
                     );
+
+                    // Content Studio is a dashboard page, not a persistent overlay.
+                    // Always hide it before activating the requested dashboard section.
+                    if (sitePagesEditorPage) {
+                        sitePagesEditorPage.classList.remove("active-page");
+                    }
 
 
                     if (
@@ -7140,10 +7148,10 @@ body.dashboard-data-loading .dashboard-content {
 
 
 
-<link rel="stylesheet" href="content-manager.css?v=20261015-7">
+<link rel="stylesheet" href="content-manager.css?v=20261020-4">
 
 
-<script src="content-manager.js?v=20261015-7"></script>
+<script src="content-manager.js?v=20261020-4"></script>
 </body>
 
 </html>
