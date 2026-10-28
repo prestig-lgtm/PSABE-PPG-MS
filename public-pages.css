@@ -63,3 +63,18 @@
  .site-header>.main-nav{top:calc(100% + 6px);right:10px;width:min(360px,calc(100vw - 20px));max-height:calc(100dvh - 150px)}
 }
 @media(prefers-reduced-motion:reduce){.site-header>.main-nav.open{animation:none}}
+
+/* CMS-managed page content: structured typography and responsive image galleries. */
+.site-managed-content{width:min(1120px,calc(100% - 40px));margin:0 auto;padding:clamp(34px,5vw,72px) 0;display:grid;gap:24px}
+.site-managed-block{min-width:0;padding:clamp(22px,3.5vw,38px);border:1px solid rgba(7,61,43,.12);border-radius:18px;background:#fff;box-shadow:0 12px 32px rgba(7,61,43,.055)}
+.site-managed-block h2{margin:0 0 18px;color:#07543a;font-size:clamp(1.35rem,2.2vw,2rem);line-height:1.25}
+.site-managed-block .managed-copy{color:#34443d;font-size:1rem;line-height:1.85;overflow-wrap:anywhere}
+.site-managed-block .managed-copy p{margin:0 0 1em}
+.site-managed-block .managed-copy p:last-child{margin-bottom:0}
+.site-managed-block .managed-copy ul{margin:.5em 0 1em;padding-left:1.5rem}
+.site-managed-block .managed-copy li{margin:.35em 0}
+.site-managed-image-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:18px;margin-top:22px}
+.site-managed-image-figure{margin:0;min-width:0;overflow:hidden;border-radius:12px;background:#f3f7f4;border:1px solid rgba(7,61,43,.1)}
+.site-managed-image-figure img{display:block;width:100%;height:auto;max-height:440px;object-fit:cover}
+.site-managed-image-figure figcaption{padding:12px 14px;color:#34443d;font-size:.92rem;line-height:1.55;background:#f5f8f6}
+@media(max-width:640px){.site-managed-content{width:calc(100% - 28px);gap:16px;padding:28px 0}.site-managed-block{padding:20px 17px;border-radius:14px}.site-managed-image-gallery{grid-template-columns:1fr}}
