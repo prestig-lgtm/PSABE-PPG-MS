@@ -4,16 +4,12 @@
 const $=id=>document.getElementById(id);
 const root=$('cmsPageSelect'); if(!root)return;
 const db=()=>window.psabeSupabase||null;
-const sections={
- about:['About the Organization','Our Mission','Our Vision','Our Core Values','What We Do','Chapter in Action'],
- 'what-abe-is-all-about':['What Is Agricultural and Biosystems Engineering?','What ABE Professionals Do','Areas of Specialization','Why ABE Matters','ABE in the Philippines','A Future in ABE']
-};
+const sections={about:[],'what-abe-is-all-about':[]};
 let current={blocks:[]};
 function status(t,bad=false){const e=$('cmsPageStatus');e.textContent=t;e.classList.toggle('is-error',bad)}
 function renderBlocks(blocks){
- const names=sections[root.value]||[];
  const data=Array.isArray(blocks)?blocks:[];
- $('cmsPageBlocks').innerHTML=names.map((name,i)=>`<div class="cms-page-block-field"><h4>${name}</h4><label>Section heading<input data-block-title="${i}" value="${esc(data[i]?.title||name)}"></label><label>Content<textarea data-block-body="${i}" rows="4" placeholder="Write the content for ${name}">${esc(data[i]?.body||'')}</textarea></label></div>`).join('');
+ $('cmsPageBlocks').innerHTML=data.map((block,i)=>`<div class="cms-page-block-field"><h4>Section ${i+1}</h4><label>Section heading<input data-block-title="${i}" value="${esc(block?.title||'')}" placeholder="Enter your own section heading"></label><label>Content<textarea data-block-body="${i}" rows="4" placeholder="Write your section content">${esc(block?.body||block?.text||'')}</textarea></label></div>`).join('')||'<p>No preset sections. Add your own content using the page editor.</p>';
 }
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 async function auth(){
@@ -39,7 +35,7 @@ async function save(){
  status('Saving page…');
  try{
   const {c,u}=await auth();
-  const blocks=(sections[root.value]||[]).map((name,i)=>({title:$(`[data-block-title="${i}"]`).value.trim(),body:$(`[data-block-body="${i}"]`).value.trim()}));
+  const blocks=Array.from($('cmsPageBlocks').querySelectorAll('[data-block-title]')).map((el)=>{const i=el.dataset.blockTitle;return {title:el.value.trim(),body:$(`[data-block-body="${i}"]`).value.trim()}}).filter(block=>block.title||block.body);
   const row={page_key:root.value,title:$('cmsPageTitle').value.trim(),eyebrow:$('cmsPageEyebrow').value.trim(),intro:$('cmsPageIntro').value.trim(),blocks,updated_by:u.id,updated_at:new Date().toISOString()};
   const {error}=await c.from('site_page_content').upsert(row,{onConflict:'page_key'});if(error)throw error;
   current=row;status('Page saved successfully.');
