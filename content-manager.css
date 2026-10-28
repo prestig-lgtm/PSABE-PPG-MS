@@ -1,6 +1,8 @@
 
 /* PSABE-PPG Content Studio only. No global dashboard styling is changed. */
+.site-pages-editor{width:100%;max-width:100%;min-width:0;box-sizing:border-box;overflow-x:clip}
 .cms-manager-shell{
+  width:100%;max-width:100%;min-width:0;box-sizing:border-box;
   --cms-forest:#073f30;
   --cms-forest-deep:#032e24;
   --cms-green:#0c684b;
@@ -198,3 +200,22 @@
 
 /* Caption fields for each uploaded public-page image */
 #cmsPageBlocksEmbedded .cms-multi-image-item label{display:block!important;color:var(--cms-text,#172b22)!important;font-weight:600;margin:12px 0!important}#cmsPageBlocksEmbedded .cms-multi-image-item input[data-image-caption],#cmsPageBlocksEmbedded .cms-multi-image-item input[data-image-alt],#cmsPageBlocksEmbedded .cms-multi-image-item input[data-image-url]{display:block!important;width:100%!important;min-height:42px!important;padding:10px 12px!important;box-sizing:border-box!important;color:var(--cms-text,#172b22)!important;background:var(--cms-input-bg,#fff)!important;border:1px solid var(--cms-border,#9ab9a9)!important;border-radius:8px!important;opacity:1!important}#cmsPageBlocksEmbedded .cms-multi-image-item input::placeholder{opacity:.7}
+
+
+/* Ready-to-use content templates in the existing Content Studio form */
+.cms-template-note{display:block;color:#527365;font-size:12px;font-weight:400;line-height:1.5;margin-top:2px}
+#cmsTemplate{border-color:#83b99b!important;background:#f2f8ee!important;color:#064b36!important;font-weight:650!important}
+
+/* Flexible About Us / What ABE page block editor */
+.cms-page-block-toolbar{display:grid;gap:12px;margin-bottom:18px;padding:14px;border:1px solid rgba(25,105,66,.22);border-radius:12px;background:rgba(25,105,66,.06)}
+.cms-page-block-toolbar label{display:grid;gap:7px;font-weight:600}
+.cms-page-block-toolbar small{font-weight:400;color:var(--cms-muted,#52665b);line-height:1.5}
+.cms-page-block-actions{display:flex;flex-wrap:wrap;gap:8px}
+.cms-page-block-actions button,.cms-page-block-toolbar>button{border:1px solid rgba(25,105,66,.25);border-radius:8px;padding:9px 12px;background:#fff;color:#185b3c;font-weight:600;cursor:pointer}
+.cms-page-block-actions button:disabled{opacity:.45;cursor:not-allowed}
+.cms-page-block-actions .cms-danger{color:#a52c2c;border-color:rgba(165,44,44,.25)}
+.cms-page-section-summary{cursor:pointer}
+.cms-page-section-summary.is-selected{border-color:#218653;box-shadow:0 0 0 2px rgba(33,134,83,.13)}
+.cms-embedded-page-block>h4{margin-top:0}
+.cms-embedded-page-block textarea{min-height:180px;line-height:1.6}
+@media(max-width:700px){.cms-page-block-actions{display:grid;grid-template-columns:1fr 1fr}.cms-page-block-actions button{width:100%}}
