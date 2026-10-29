@@ -18,17 +18,22 @@
     const token = data?.session?.access_token;
     if (error || !token) throw new Error('Your session has expired. Please sign in again.');
 
-    const base64 = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = () => reject(new Error('Could not read the selected file.'));
-      reader.onload = () => {
-        const result = String(reader.result || '');
-        const comma = result.indexOf(',');
-        if (comma < 0) return reject(new Error('Could not encode the selected file.'));
-        resolve(result.slice(comma + 1));
-      };
-      reader.readAsDataURL(file);
-    });
+    // Encode the original bytes directly. No resizing, recompression, or image
+    // transformation occurs here; the exact file bytes are sent to Drive.
+    // Chunking avoids spreading a large byte array into a single String.fromCharCode call.
+    const base64 = await (async () => {
+      let buffer;
+      try { buffer = await file.arrayBuffer(); }
+      catch (_) { throw new Error('Could not read the selected file.'); }
+      const bytes = new Uint8Array(buffer);
+      const chunkSize = 0x8000;
+      let binary = '';
+      for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+        binary += String.fromCharCode(...bytes.subarray(offset, Math.min(offset + chunkSize, bytes.length)));
+      }
+      try { return btoa(binary); }
+      catch (_) { throw new Error('Could not encode the selected file.'); }
+    })();
 
     const payload = {
       action: 'upload',
@@ -66,7 +71,7 @@
       mimeType: result.file.mimeType || file.type || 'application/octet-stream',
       size: result.file.size || file.size,
       // Direct view URL is suitable for public image src attributes.
-      url: isImage ? `https://drive.google.com/uc?export=view&id=${encodeURIComponent(id)}` : (result.file.url || result.file.downloadUrl),
+      url: isImage ? `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w1600` : (result.file.url || result.file.downloadUrl),
       viewUrl: result.file.url || `https://drive.google.com/file/d/${encodeURIComponent(id)}/view`,
       downloadUrl: result.file.downloadUrl || `https://drive.google.com/uc?export=download&id=${encodeURIComponent(id)}`
     };
