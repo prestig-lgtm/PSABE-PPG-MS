@@ -22,6 +22,12 @@
     try { const u = new window.URL(String(value || ''), location.href); return ['http:', 'https:', 'mailto:', 'tel:'].includes(u.protocol) ? u.href : ''; }
     catch (_) { return ''; }
   };
+  // Convert legacy Google Drive image links to the thumbnail endpoint used for public image rendering.
+  const safeImageUrl = value => {
+    const url = safeUrl(value); if (!url) return '';
+    try { const u = new URL(url); if (u.hostname === 'drive.google.com') { let id = u.searchParams.get('id'); if (!id) { const m = u.pathname.match(/\/file\/d\/([^/]+)/); if (m) id = m[1]; } if (id && (u.pathname.includes('/uc') || u.pathname.includes('/file/d/') || u.pathname.includes('/thumbnail'))) return `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w1600`; } } catch (_) {}
+    return url;
+  };
   function inline(text) {
     let out = esc(text);
     out = out.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, label, url) => `<a href="${esc(safeUrl(url))}" target="_blank" rel="noopener noreferrer">${label}</a>`);
@@ -87,7 +93,7 @@
   }
   function card(row, type) {
     const title = row.person_name || row.title || 'PSABE-PPG CSU Chapter';
-    const imageUrl = safeUrl(row.image_url);
+    const imageUrl = safeImageUrl(row.image_url);
     const fileUrl = safeUrl(row.file_url);
     const image = imageUrl ? `<img src="${esc(imageUrl)}" alt="${esc(row.image_alt || title)}" loading="lazy">${type === 'gallery' && row.subtitle ? `<span class="cms-public-caption">${esc(row.subtitle)}</span>` : ''}` : '';
     const meta = [row.position, row.committee, row.course].filter(Boolean).map(v => `<div class="cms-public-meta">${esc(v)}</div>`).join('');
@@ -123,7 +129,7 @@
     dots.innerHTML = rows.map((_, i) => `<button type="button" data-slide="${i}" class="${i === 0 ? 'active' : ''}" aria-label="Slide ${i + 1}"></button>`).join('');
     function paint(next) {
       index = (next + rows.length) % rows.length; const row = rows[index];
-      const imageUrl = safeUrl(row.image_url);
+      const imageUrl = safeImageUrl(row.image_url);
       hero.style.backgroundImage = imageUrl ? `url("${imageUrl.replace(/"/g, '%22')}")` : '';
       hero.querySelector('#cmsHeroEyebrow').textContent = row.subtitle || 'PSABE-PPG CSU CHAPTER';
       hero.querySelector('#cmsHeroTitle').textContent = row.title || '';
