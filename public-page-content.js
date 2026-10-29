@@ -11,6 +11,7 @@
   if (!pageKey) return;
   const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[ch]);
   const safeUrl = value => { try { const u = new window.URL(String(value || ''), location.href); return ['http:', 'https:'].includes(u.protocol) ? u.href : ''; } catch (_) { return ''; } };
+  const safeImageUrl = value => { const url = safeUrl(value); if (!url) return ''; try { const u = new URL(url); if (u.hostname === 'drive.google.com') { let id = u.searchParams.get('id'); if (!id) { const m = u.pathname.match(/\/file\/d\/([^/]+)/); if (m) id = m[1]; } if (id && (u.pathname.includes('/uc') || u.pathname.includes('/file/d/') || u.pathname.includes('/thumbnail'))) return `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w1600`; } } catch (_) {} return url; };
   function inline(text) {
     let out = esc(text);
     out = out.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, label, url) => `<a href="${esc(safeUrl(url))}" target="_blank" rel="noopener noreferrer">${label}</a>`);
@@ -66,7 +67,7 @@
       const images = Array.isArray(block.images) ? block.images : (block.image || block.image_url ? [{ url: block.image || block.image_url, caption: block.caption || '', alt: block.alt || block.image_alt || '' }] : []);
       if (images.length) {
         const gallery = document.createElement('div'); gallery.className = 'site-managed-image-gallery';
-        images.forEach(item => { const url = safeUrl(item?.url || item?.image_url); if (!url) return; const figure = document.createElement('figure'); figure.className = 'site-managed-image-figure'; const image = document.createElement('img'); image.src = url; image.alt = item.alt || block.title || 'PSABE-PPG CSU Chapter image'; image.loading = 'lazy'; figure.appendChild(image); if (item.caption) { const caption = document.createElement('figcaption'); caption.textContent = item.caption; figure.appendChild(caption); } gallery.appendChild(figure); });
+        images.forEach(item => { const url = safeImageUrl(item?.url || item?.image_url); if (!url) return; const figure = document.createElement('figure'); figure.className = 'site-managed-image-figure'; const image = document.createElement('img'); image.src = url; image.alt = item.alt || block.title || 'PSABE-PPG CSU Chapter image'; image.loading = 'lazy'; figure.appendChild(image); if (item.caption) { const caption = document.createElement('figcaption'); caption.textContent = item.caption; figure.appendChild(caption); } gallery.appendChild(figure); });
         if (gallery.children.length) article.appendChild(gallery);
       }
       const link = safeUrl(block.link); if (link) { const a = document.createElement('a'); a.href = link; a.textContent = block.link_label || 'Learn more'; a.target = '_blank'; a.rel = 'noopener noreferrer'; article.appendChild(a); }
