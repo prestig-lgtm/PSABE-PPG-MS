@@ -27,11 +27,12 @@
       catch (_) { throw new Error('Could not read the selected file.'); }
       const bytes = new Uint8Array(buffer);
       const chunkSize = 0x8000;
-      let binary = '';
+      const binaryChunks = [];
       for (let offset = 0; offset < bytes.length; offset += chunkSize) {
-        binary += String.fromCharCode(...bytes.subarray(offset, Math.min(offset + chunkSize, bytes.length)));
+        binaryChunks.push(String.fromCharCode(...bytes.subarray(offset, Math.min(offset + chunkSize, bytes.length))));
       }
-      try { return btoa(binary); }
+      // Join once instead of repeatedly rebuilding a growing string.
+      try { return btoa(binaryChunks.join('')); }
       catch (_) { throw new Error('Could not encode the selected file.'); }
     })();
 
