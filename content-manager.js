@@ -60,9 +60,32 @@ $('cmsPageBlocksEmbedded').addEventListener('change',e=>{const sel=e.target.clos
 $('cmsItems').addEventListener('keydown',e=>{if(!pageMode||!['Enter',' '].includes(e.key))return;const card=e.target.closest('[data-page-section]');if(!card)return;e.preventDefault();readSelectedPageBlock();selectedSectionIndex=Number(card.dataset.pageSection);renderPageSectionList();renderPageBlocks()});
 $('cmsItems').addEventListener('click',async e=>{if(pageMode){const card=e.target.closest('[data-page-section]');if(card){e.preventDefault();readSelectedPageBlock();selectedSectionIndex=Number(card.dataset.pageSection);renderPageSectionList();renderPageBlocks()}return}const edit=e.target.closest('[data-edit]');if(edit){const x=items.find(x=>String(x.id)===edit.dataset.edit);if(x)fill(x);return}const del=e.target.closest('[data-del]');if(del&&confirm('Delete this entry? This removes the database record, not its uploaded file.')){try{const {c}=await auth();const {error}=await c.from('site_content_items').delete().eq('id',del.dataset.del);if(error)throw error;await load();msg('Entry deleted.')}catch(err){msg(err.message,true)}}});
 $('cmsForm').addEventListener('submit',async e=>{e.preventDefault();if(pageMode){await savePage();return}const save=$('cmsSave');if(save.disabled)return;save.disabled=true;msg('Saving…');try{
-// If a new file was selected, never publish an older URL while its upload is running.
-if(selectedEntryImageFile){if(!pendingEntryImageUpload){const file=selectedEntryImageFile;pendingEntryImageUpload=(async()=>{try{await auth();if(!file.type.startsWith('image/'))throw Error('Choose an image file.');msg('Uploading original image to Google Drive… please keep this page open.');const uploaded=await window.psabeDriveStorage.upload(file,'public');if(selectedEntryImageFile===file){$('cmsImageUrl').value=uploaded.url;if(!$('cmsImageAlt').value)$('cmsImageAlt').value=file.name.replace(/\.[^.]+$/,'');}return {ok:true};}catch(err){return {ok:false,error:err.message||'Upload failed.'};}})();}
-msg('Waiting for the selected image to finish uploading before saving…');const uploadResult=await pendingEntryImageUpload;if(!uploadResult?.ok)throw new Error(uploadResult?.error||'Image upload failed. The entry was not saved. Please select the image and try again.');}
+// A selected image uploads in the background. Save and Publish waits for that
+// same upload only when its URL has not arrived yet. Once populated, reuse it;
+// never upload the same selected file a second time.
+if(selectedEntryImageFile && !$('cmsImageUrl').value.trim()){
+  if(!pendingEntryImageUpload){
+    const file=selectedEntryImageFile;
+    const task=(async()=>{
+      try{
+        await auth();
+        if(!file.type.startsWith('image/'))throw Error('Choose an image file.');
+        msg('Uploading original image to Google Drive…');
+        const uploaded=await window.psabeDriveStorage.upload(file,'public');
+        if(selectedEntryImageFile===file){
+          $('cmsImageUrl').value=uploaded.url;
+          if(!$('cmsImageAlt').value)$('cmsImageAlt').value=file.name.replace(/\.[^.]+$/,'');
+        }
+        return {ok:true};
+      }catch(err){return {ok:false,error:err.message||'Upload failed.'};}
+    })();
+    pendingEntryImageUpload=task;
+    task.finally(()=>{if(pendingEntryImageUpload===task)pendingEntryImageUpload=null;});
+  }
+  msg('Finishing image upload, then publishing…');
+  const uploadResult=await pendingEntryImageUpload;
+  if(!uploadResult?.ok)throw new Error(uploadResult?.error||'Image upload failed. The entry was not saved. Please select the image and try again.');
+}
 const {c,u}=await auth();const payload={...fields(),updated_by:u.id,updated_at:new Date().toISOString()};if(selectedEntryImageFile&&!payload.image_url)throw new Error('The image URL is missing. The entry was not saved. Please retry the upload.');let result;if(editing)result=await c.from('site_content_items').update(payload).eq('id',editing);else result=await c.from('site_content_items').insert({...payload,created_by:u.id});if(result.error)throw result.error;await load();fill({content_type:payload.content_type,status:'draft'});msg('Saved successfully. Published entries now appear on the public page.')}catch(err){msg(err.message||'Save failed.',true)}finally{save.disabled=false}});
 $('cmsImageUpload').addEventListener('change',e=>{const file=e.target.files?.[0];if(!file)return;selectedEntryImageFile=file;
 // Clear any previous image URL immediately so the new file cannot accidentally use it.
